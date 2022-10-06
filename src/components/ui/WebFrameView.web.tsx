@@ -19,7 +19,7 @@ function WebFrameView(props: WebFrameViewProps): JSX.Element {
                     setHeight(e.nativeEvent.layout.height - 10);
                 }}
             >
-                <iframe title={title} src={uri} sandbox="" height={height} />
+                <iframe title={title} src={uri} height={height} />
             </View>
         </SafeAreaView>
     );
