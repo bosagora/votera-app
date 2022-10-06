@@ -1,0 +1,65 @@
+fragment ProposalItem on Proposal {
+    id
+    proposalId
+    name
+    description
+    type
+    status
+    createdAt
+    memberCount
+    creator {
+        id
+        username
+        address
+    }
+    activities {
+        id
+        name
+        type
+        status
+        survey {
+            id
+        }
+        poll {
+            id
+            questions {
+                id
+            }
+        }
+    }
+    assessPeriod {
+        begin
+        end
+    }
+    votePeriod {
+        begin
+        end
+    }
+    vote_start
+    vote_end
+    fundingAmount
+    logo {
+        id
+        url
+        mime
+        width
+        height
+    }
+    attachment {
+        id
+        url
+        mime
+        name
+        width
+        height
+    }
+    assessStart
+    assessEnd
+    voteraVoteAddress
+}
+
+fragment NewProposalStatus on ProposalStatus {
+    id
+    isJoined
+    isLike
+}

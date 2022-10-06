@@ -1,0 +1,546 @@
+/* eslint-disable import/extensions */
+/* eslint-disable global-require */
+import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { View, Image, StyleSheet, TouchableOpacity, ImageURISource, ActivityIndicator } from 'react-native';
+import { useAssets } from 'expo-asset';
+import { MaterialIcons, Octicons } from '@expo/vector-icons';
+import { setStringAsync } from 'expo-clipboard';
+import { Icon, Text } from 'react-native-elements';
+import { ThemeContext } from 'styled-components/native';
+import { Enum_Proposal_Status as EnumProposalStatus, Proposal, Validator } from '~/graphql/generated/generated';
+import globalStyle from '~/styles/global';
+import ShortButton from '~/components/button/ShortButton';
+import getString from '~/utils/locales/STRINGS';
+import { getValidatorDateString } from '~/utils/time';
+import { VOTE_SELECT } from '~/utils/votera/voterautil';
+
+const styles = StyleSheet.create({
+    header: {
+        alignItems: 'center',
+        height: 35,
+    },
+    headerFirstLine: {
+        alignItems: 'center',
+        flexDirection: 'row',
+    },
+    headerNextLine: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        marginTop: 5,
+    },
+    headerText: {
+        marginRight: 5,
+    },
+    headerValue: {
+        marginLeft: 5,
+    },
+    itemBallotAgree: {
+        borderRadius: 9,
+        borderWidth: 2,
+        height: 17,
+        marginHorizontal: 7,
+        width: 17,
+    },
+    itemBallotContainer: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+    },
+    itemDate: {
+        color: 'gray',
+        fontSize: 8,
+        left: 0,
+        position: 'absolute',
+        textAlign: 'right',
+        top: 60,
+        width: '100%',
+    },
+    itemStatus: {
+        textAlign: 'right',
+    },
+    listHeader: {
+        backgroundColor: 'white',
+        height: 66,
+        width: '100%',
+    },
+    listHeaderText: {
+        marginHorizontal: 19,
+        marginVertical: 23,
+    },
+    moreText: {
+        textAlign: 'center',
+    },
+    name: {
+        flex: 1,
+        marginHorizontal: 10,
+        textDecorationLine: 'underline',
+    },
+    nameColumn: {
+        flex: 1,
+        flexDirection: 'column',
+        height: '100%',
+        justifyContent: 'space-between',
+    },
+    nameGlobeRow: {
+        flexDirection: 'row',
+    },
+    nameKeyRow: {
+        flexDirection: 'row',
+    },
+    rowContainer: {
+        backgroundColor: 'white',
+        flexDirection: 'row',
+        height: 52,
+        width: '100%',
+    },
+    statusColumn: {
+        justifyContent: 'center',
+        width: 140,
+    },
+});
+
+const ELLIPSIS_TAIL_SIZE = -10;
+
+function LineComponent(): JSX.Element {
+    return <View style={globalStyle.lineComponent} />;
+}
+
+interface HeaderProps {
+    onRefresh: () => void;
+}
+
+function AssessListHeaderComponent(props: HeaderProps): JSX.Element {
+    const { onRefresh } = props;
+
+    return (
+        <View style={[globalStyle.flexRowBetween, styles.listHeader]}>
+            <Text style={[globalStyle.ltext, styles.listHeaderText]}>{getString('검증자 평가 현황')}</Text>
+            <ShortButton
+                title={getString('새로고침')}
+                buttonStyle={globalStyle.shortSmall}
+                titleStyle={{ fontSize: 10 }}
+                onPress={onRefresh}
+            />
+        </View>
+    );
+}
+
+function VoteListHeaderComponent(props: HeaderProps): JSX.Element {
+    const { onRefresh } = props;
+
+    return (
+        <View style={[globalStyle.flexRowAlignCenter, styles.listHeader]}>
+            <Text style={[globalStyle.ltext, styles.listHeaderText]}>{getString('검증자 투표 현황')}</Text>
+            <ShortButton
+                title={getString('새로고침')}
+                buttonStyle={globalStyle.shortSmall}
+                titleStyle={{ fontSize: 10 }}
+                onPress={onRefresh}
+            />
+        </View>
+    );
+}
+
+function ClosedListHeaderComponent(): JSX.Element {
+    return (
+        <View style={[globalStyle.flexRowBetween, styles.listHeader]}>
+            <Text style={[globalStyle.ltext, styles.listHeaderText]}>{getString('검증자 투표 결과')}</Text>
+        </View>
+    );
+}
+
+enum EnumIconAsset {
+    PublicKey = 0,
+    Copy,
+    Address,
+    Abstain,
+}
+
+const iconAssets = [
+    require('@assets/icons/key.png'),
+    require('@assets/icons/copySimple.png'),
+    require('@assets/icons/globe.png'),
+    require('@assets/icons/prohibit.png'),
+];
+
+interface SubProps {
+    onLayout: (h: number) => void;
+    proposal: Proposal | undefined;
+}
+
+function PendingValidatorScreen(props: SubProps): JSX.Element {
+    const { proposal, onLayout } = props;
+    const themeContext = useContext(ThemeContext);
+
+    return (
+        <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)}>
+            <View style={styles.header}>
+                <Text style={{ color: themeContext.color.primary }}>{getString('제안 생성 준비')}</Text>
+            </View>
+        </View>
+    );
+}
+
+interface ValidatorProps {
+    onLayout: (h: number) => void;
+    onRefresh: () => void;
+    total: number;
+    participated: number;
+    validators: Validator[];
+    loading: boolean;
+}
+
+function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
+    const { total, participated, validators, onLayout, onRefresh, loading } = props;
+    const themeContext = useContext(ThemeContext);
+
+    const renderItem = useCallback(
+        (item: Validator) => {
+            const publicKey = item.publicKey || '';
+            const address = item.address || '';
+            return (
+                <View style={styles.rowContainer}>
+                    <View style={styles.nameColumn}>
+                        <View style={styles.nameKeyRow}>
+                            <Octicons name="key" size={18} />
+                            <View style={[styles.name, { flexDirection: 'row' }]}>
+                                <Text numberOfLines={1}>{publicKey.slice(0, ELLIPSIS_TAIL_SIZE)}</Text>
+                                <Text>{publicKey.slice(ELLIPSIS_TAIL_SIZE)}</Text>
+                            </View>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setStringAsync(publicKey).catch(console.log);
+                                }}
+                            >
+                                <MaterialIcons name="content-copy" size={22} color={themeContext.color.primary} />
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.nameGlobeRow}>
+                            <Octicons name="globe" size={18} />
+                            <View style={[styles.name, { flexDirection: 'row' }]}>
+                                <Text numberOfLines={1}>{address.slice(0, ELLIPSIS_TAIL_SIZE)}</Text>
+                                <Text>{address.slice(ELLIPSIS_TAIL_SIZE)}</Text>
+                            </View>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setStringAsync(address).catch(console.log);
+                                }}
+                            >
+                                <MaterialIcons name="content-copy" size={22} color={themeContext.color.primary} />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                    <View style={styles.statusColumn}>
+                        <Text style={styles.itemStatus}>
+                            {item.assessUpdate ? getString('평가완료') : getString('미평가')}
+                        </Text>
+                        {item.assessUpdate && (
+                            <Text style={styles.itemDate}>{getValidatorDateString(item.assessUpdate)}</Text>
+                        )}
+                    </View>
+                </View>
+            );
+        },
+        [themeContext.color.primary],
+    );
+
+    return (
+        <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)}>
+            <View style={styles.header}>
+                <View style={styles.headerFirstLine}>
+                    <Text style={[styles.headerText, { color: themeContext.color.primary }]}>
+                        {getString('평가에 참여한 검증자 수')}
+                    </Text>
+                    <Text style={[styles.headerValue, { color: themeContext.color.primary }]}>{participated}</Text>
+                </View>
+
+                <View style={styles.headerNextLine}>
+                    <Text style={[styles.headerText, { color: themeContext.color.primary }]}>
+                        {getString('총 검증자 수')}
+                    </Text>
+                    <Text style={[styles.headerValue, { color: themeContext.color.primary }]}>{total}</Text>
+                </View>
+            </View>
+            <LineComponent />
+            <AssessListHeaderComponent onRefresh={onRefresh} />
+            {validators.map((validator) => (
+                <View key={`assess.${validator.id}`}>
+                    {renderItem(validator)}
+                    <LineComponent />
+                </View>
+            ))}
+            {loading && <ActivityIndicator />}
+            {!loading && total > validators.length && <Text style={styles.moreText}>......</Text>}
+        </View>
+    );
+}
+
+function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
+    const { total, participated, validators, onLayout, onRefresh, loading } = props;
+    const themeContext = useContext(ThemeContext);
+
+    const renderItem = useCallback(
+        (item: Validator) => {
+            const publicKey = item.publicKey || '';
+            const address = item.address || '';
+            return (
+                <View style={styles.rowContainer}>
+                    <View style={styles.nameColumn}>
+                        <View style={styles.nameKeyRow}>
+                            <Octicons name="key" size={18} />
+                            <View style={[styles.name, { flexDirection: 'row' }]}>
+                                <Text numberOfLines={1}>{publicKey.slice(0, ELLIPSIS_TAIL_SIZE)}</Text>
+                                <Text>{publicKey.slice(ELLIPSIS_TAIL_SIZE)}</Text>
+                            </View>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setStringAsync(publicKey).catch(console.log);
+                                }}
+                            >
+                                <MaterialIcons name="content-copy" size={22} color={themeContext.color.primary} />
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.nameGlobeRow}>
+                            <Octicons name="globe" size={18} />
+                            <View style={[styles.name, { flexDirection: 'row' }]}>
+                                <Text numberOfLines={1}>{address.slice(0, ELLIPSIS_TAIL_SIZE)}</Text>
+                                <Text>{address.slice(ELLIPSIS_TAIL_SIZE)}</Text>
+                            </View>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setStringAsync(address).catch(console.log);
+                                }}
+                            >
+                                <MaterialIcons name="content-copy" size={22} color={themeContext.color.primary} />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                    <View style={styles.statusColumn}>
+                        <Text style={styles.itemStatus}>
+                            {item.ballotUpdate ? getString('투표완료') : getString('미투표')}
+                        </Text>
+                        {item.ballotUpdate && (
+                            <Text style={styles.itemDate}>{getValidatorDateString(item.ballotUpdate)}</Text>
+                        )}
+                    </View>
+                </View>
+            );
+        },
+        [themeContext.color.primary],
+    );
+
+    return (
+        <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)}>
+            <View style={styles.header}>
+                <View style={styles.headerFirstLine}>
+                    <Text style={[styles.headerText, { color: themeContext.color.primary }]}>
+                        {getString('투표에 참여한 검증자 수')}
+                    </Text>
+                    <Text style={[styles.headerValue, { color: themeContext.color.primary }]}>{participated}</Text>
+                </View>
+
+                <View style={styles.headerNextLine}>
+                    <Text style={[styles.headerText, { color: themeContext.color.primary }]}>
+                        {getString('총 검증자 수')}
+                    </Text>
+                    <Text style={[styles.headerValue, { color: themeContext.color.primary }]}>{total}</Text>
+                </View>
+            </View>
+            <LineComponent />
+            <VoteListHeaderComponent onRefresh={onRefresh} />
+            {validators.map((validator) => (
+                <View key={`vote.${validator.id}`}>
+                    {renderItem(validator)}
+                    <LineComponent />
+                </View>
+            ))}
+            {loading && <ActivityIndicator />}
+            {!loading && total > validators.length && <Text style={styles.moreText}>......</Text>}
+        </View>
+    );
+}
+
+function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
+    const { total, participated, validators, onLayout, onRefresh, loading } = props;
+    const themeContext = useContext(ThemeContext);
+    const [assets] = useAssets(iconAssets);
+
+    const showBallotResult = useCallback(
+        (choice?: number | null): JSX.Element => {
+            if (choice === VOTE_SELECT.YES) {
+                return (
+                    <View style={styles.itemBallotContainer}>
+                        <View style={[styles.itemBallotAgree, { borderColor: themeContext.color.agree }]} />
+                        <Text style={{ color: themeContext.color.agree }}>{getString('찬성')}</Text>
+                    </View>
+                );
+            }
+            if (choice === VOTE_SELECT.NO) {
+                return (
+                    <View style={styles.itemBallotContainer}>
+                        <Icon name="close" color={themeContext.color.disagree} tvParallaxProperties={undefined} />
+                        <Text style={{ color: themeContext.color.disagree }}>{getString('반대')}</Text>
+                    </View>
+                );
+            }
+            return (
+                <View style={styles.itemBallotContainer}>
+                    {assets && <Image source={assets[EnumIconAsset.Abstain] as ImageURISource} />}
+                    <Text style={{ color: themeContext.color.abstain }}>{getString('기권')}</Text>
+                </View>
+            );
+        },
+        [assets, themeContext.color.abstain, themeContext.color.agree, themeContext.color.disagree],
+    );
+
+    const renderItem = useCallback(
+        (item: Validator) => {
+            const publicKey = item.publicKey || '';
+            const address = item.address || '';
+            return (
+                <View style={styles.rowContainer}>
+                    <View style={styles.nameColumn}>
+                        <View style={styles.nameKeyRow}>
+                            <Octicons name="key" size={18} />
+                            <View style={[styles.name, { flexDirection: 'row' }]}>
+                                <Text numberOfLines={1}>{publicKey.slice(0, ELLIPSIS_TAIL_SIZE)}</Text>
+                                <Text>{publicKey.slice(ELLIPSIS_TAIL_SIZE)}</Text>
+                            </View>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setStringAsync(publicKey).catch(console.log);
+                                }}
+                            >
+                                <MaterialIcons name="content-copy" size={22} color={themeContext.color.primary} />
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.nameGlobeRow}>
+                            <Octicons name="globe" size={18} />
+                            <View style={[styles.name, { flexDirection: 'row' }]}>
+                                <Text numberOfLines={1}>{address.slice(0, ELLIPSIS_TAIL_SIZE)}</Text>
+                                <Text>{address.slice(ELLIPSIS_TAIL_SIZE)}</Text>
+                            </View>
+                            <TouchableOpacity
+                                onPress={() => {
+                                    setStringAsync(address).catch(console.log);
+                                }}
+                            >
+                                <MaterialIcons name="content-copy" size={22} color={themeContext.color.primary} />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                    <View style={styles.statusColumn}>
+                        {item.ballotUpdate ? (
+                            showBallotResult(item.choice)
+                        ) : (
+                            <Text style={styles.itemStatus}>{getString('미투표')}</Text>
+                        )}
+                        {item.ballotUpdate && (
+                            <Text style={styles.itemDate}>{getValidatorDateString(item.ballotUpdate)}</Text>
+                        )}
+                    </View>
+                </View>
+            );
+        },
+        [showBallotResult, themeContext.color.primary],
+    );
+
+    return (
+        <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)}>
+            <View style={styles.header}>
+                <View style={styles.headerFirstLine}>
+                    <Text style={[styles.headerText, { color: themeContext.color.primary }]}>
+                        {getString('투표에 참여한 검증자 수')}
+                    </Text>
+                    <Text style={[styles.headerValue, { color: themeContext.color.primary }]}>{participated}</Text>
+                </View>
+
+                <View style={styles.headerNextLine}>
+                    <Text style={[styles.headerText, { color: themeContext.color.primary }]}>
+                        {getString('총 검증자 수')}
+                    </Text>
+                    <Text style={[styles.headerValue, { color: themeContext.color.primary }]}>{total}</Text>
+                </View>
+            </View>
+            <LineComponent />
+            <ClosedListHeaderComponent />
+            {validators.map((validator) => (
+                <View key={`closed.${validator.id}`}>
+                    {renderItem(validator)}
+                    <LineComponent />
+                </View>
+            ))}
+            {loading && <ActivityIndicator />}
+            {!loading && total > validators.length && <Text style={styles.moreText}>......</Text>}
+        </View>
+    );
+}
+
+interface Props {
+    onLayout: (h: number) => void;
+    onRefresh: () => void;
+    proposal: Proposal | undefined;
+    total: number;
+    participated: number;
+    validators: Validator[];
+    loading: boolean;
+}
+
+function ValidatorScreen(props: Props): JSX.Element {
+    const { onLayout, onRefresh, proposal, total, participated, validators, loading } = props;
+
+    if (!proposal || proposal?.status === EnumProposalStatus.Created) {
+        return <PendingValidatorScreen proposal={proposal} onLayout={onLayout} />;
+    }
+
+    switch (proposal.status) {
+        case EnumProposalStatus.PendingAssess:
+        case EnumProposalStatus.Assess:
+        case EnumProposalStatus.PendingVote:
+        case EnumProposalStatus.Reject:
+            return (
+                <AssessValidatorScreen
+                    total={total}
+                    participated={participated}
+                    validators={validators}
+                    onLayout={onLayout}
+                    onRefresh={onRefresh}
+                    loading={loading}
+                />
+            );
+        case EnumProposalStatus.Vote:
+            return (
+                <VoteValidatorScreen
+                    total={total}
+                    participated={participated}
+                    validators={validators}
+                    onLayout={onLayout}
+                    onRefresh={onRefresh}
+                    loading={loading}
+                />
+            );
+        case EnumProposalStatus.Closed:
+            return (
+                <ClosedValidatorScreen
+                    total={total}
+                    participated={participated}
+                    validators={validators}
+                    onLayout={onLayout}
+                    onRefresh={onRefresh}
+                    loading={loading}
+                />
+            );
+        default:
+            return (
+                <VoteValidatorScreen
+                    total={total}
+                    participated={participated}
+                    validators={validators}
+                    onLayout={onLayout}
+                    onRefresh={onRefresh}
+                    loading={loading}
+                />
+            );
+    }
+}
+
+export default ValidatorScreen;

@@ -1,0 +1,144 @@
+mutation createPost($input: createPostInput) {
+    createPost(input: $input) {
+        post {
+            ...PostItem
+        }
+    }
+}
+
+mutation updatePost($input: updatePostInput) {
+    updatePost(input: $input) {
+        post {
+            ...PostItem
+        }
+    }
+}
+
+query activityPosts($id: ID!, $type: String!, $sort: String, $limit: Int, $start: Int) {
+    activityPosts(id: $id, type: $type, sort: $sort, limit: $limit, start: $start) {
+        count
+        values {
+            ...PostItem
+        }
+        statuses {
+            id
+            isLike
+            isReported
+            isRead
+        }
+    }
+}
+
+query postComments($id: ID!, $sort: String, $limit: Int, $start: Int) {
+    postComments(id: $id, sort: $sort, limit: $limit, start: $start) {
+        count
+        values {
+            ...PostItem
+        }
+        statuses {
+            id
+            isLike
+            isReported
+            isRead
+        }
+    }
+}
+
+mutation readArticle($id: ID!) {
+    readArticle(id: $id) {
+        post {
+            id
+            readCount
+        }
+        interaction {
+            ...InteractionItem
+        }
+    }
+}
+
+mutation reportPost($input: ReportPostInput) {
+    reportPost(input: $input) {
+        interaction {
+            id
+        }
+        post {
+            id
+            status
+            likeCount
+            readCount
+            commentCount
+            reportCount
+        }
+        status {
+            id
+            isLike
+            isReported
+            isRead
+        }
+    }
+}
+
+mutation restorePost($input: ReportPostInput) {
+    restorePost(input: $input) {
+        interaction {
+            id
+        }
+        post {
+            id
+            status
+            likeCount
+            readCount
+            commentCount
+            reportCount
+        }
+        status {
+            id
+            isLike
+            isReported
+            isRead
+        }
+    }
+}
+
+mutation togglePostLike($input: TogglePostLikeInput) {
+    togglePostLike(input: $input) {
+        isLike
+        post {
+            id
+            status
+            likeCount
+            readCount
+            commentCount
+            reportCount
+        }
+        status {
+            id
+            isLike
+            isReported
+            isRead
+        }
+    }
+}
+
+mutation submitAssess($input: SubmitAssessInput!) {
+    submitAssess(input: $input) {
+        post {
+            ...PostItem
+        }
+    }
+}
+
+mutation submitBallot($input: SubmitBallotInput!) {
+    submitBallot(input: $input) {
+        commitment
+        signature
+    }
+}
+
+mutation recordBallot($input: RecordBallotInput!) {
+    recordBallot(input: $input) {
+        ballot {
+            id
+        }
+    }
+}

@@ -1,0 +1,57 @@
+fragment ValidatorItem on Validator {
+  id
+  address
+  publicKey
+  assessUpdate
+  ballotUpdate
+  choice
+}
+
+query getSignInDomain {
+  getSignInDomain {
+    name
+    version
+    chainId
+    verifyingContract
+  }
+}
+
+query getSignUpDomain {
+  getSignUpDomain {
+    name
+    version
+    chainId
+    verifyingContract
+  }
+}
+
+query isValidator($address: String!) {
+  isValidator(address: $address) {
+    valid
+    publicKey
+  }
+}
+
+query listAssessValidators($proposalId: String!, $limit: Int, $start: Int) {
+  listAssessValidators(proposalId: $proposalId, limit: $limit, start: $start) {
+    ...ValidatorItem
+  }
+  voteCount(proposalId: $proposalId) {
+    id
+    validatorCount
+    assessCount
+    ballotCount
+  }
+}
+
+query listBallotValidators($proposalId: String!, $limit: Int, $start: Int) {
+  listBallotValidators(proposalId: $proposalId, limit: $limit, start: $start) {
+    ...ValidatorItem
+  }
+  voteCount(proposalId: $proposalId) {
+    id
+    validatorCount
+    assessCount
+    ballotCount
+  }
+}

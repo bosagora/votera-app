@@ -1,0 +1,109 @@
+query GetMemberRoles($sort: String, $limit: Int, $start: Int, $where: JSON) {
+    memberRolesConnection(sort: $sort, limit: $limit, start: $start, where: $where) {
+        aggregate {
+            count
+        }
+        values {
+            proposal {
+                ...ProposalItem
+            }
+        }
+    }
+}
+
+query CheckUsername($username: String!) {
+    checkDupUserName(username: $username) {
+        username
+        duplicated
+    }
+}
+
+mutation SignInMember($input: signInMemberInput!) {
+    signInMember(input: $input) {
+        jwt
+        user {
+            id
+            member {
+                id
+                address
+                username
+            }
+            user_feed {
+                id
+                locale
+                myProposalsNews
+                likeProposalsNews
+                newProposalsNews
+                myCommentsNews
+                etcNews
+            }
+        }
+        push {
+            id
+            isActive
+        }
+    }
+}
+
+mutation SignUpMember($input: signUpMemberInput!) {
+    signUpMember(input: $input) {
+        jwt
+        user {
+            id
+            member {
+                id
+                address
+                username
+            }
+            user_feed {
+                id
+                locale
+                myProposalsNews
+                likeProposalsNews
+                newProposalsNews
+                myCommentsNews
+                etcNews
+            }
+        }
+        push {
+            id
+            isActive
+        }
+    }
+}
+
+mutation CreateMember($input: createMemberInput) {
+    createMember(input: $input) {
+        member {
+            id
+        }
+    }
+}
+
+mutation UpdateMember($input: updateMemberInput) {
+    updateMember(input: $input) {
+        member {
+            id
+        }
+    }
+}
+
+mutation DeleteMember($input: deleteMemberInput) {
+    deleteMember(input: $input) {
+        member {
+            id
+        }
+    }
+}
+
+query MyMembers {
+    myMembers {
+        id
+        username
+        address
+    }
+}
+
+query isMember($address: String!) {
+    isMember(address: $address)
+}

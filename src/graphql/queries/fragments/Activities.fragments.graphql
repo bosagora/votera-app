@@ -1,0 +1,29 @@
+fragment SurveyItem on Survey {
+    id
+    questions {
+        ...QuestionItem
+    }
+}
+
+fragment QuestionItem on Question {
+    id
+    title
+    description
+    type
+    sequence
+    content {
+        ... on ComponentActivityScaleOption {
+            id
+            min
+            max
+        }
+        ... on ComponentActivityChoiceOptionList {
+            id
+            item {
+                id
+                sequence
+                text
+            }
+        }
+    }
+}

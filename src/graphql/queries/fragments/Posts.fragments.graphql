@@ -1,0 +1,96 @@
+fragment InteractionItem on Interaction {
+    id
+    type
+    action {
+        ... on ComponentInteractionLike {
+            type
+        }
+        ... on ComponentInteractionRead {
+            count
+        }
+    }
+    post {
+        id
+    }
+    actor {
+        id
+        username
+    }
+}
+
+fragment PostItem on Post {
+    id
+    type
+    status
+    writer {
+        id
+        username
+    }
+    activity {
+        id
+        name
+        type
+        board {
+            id
+        }
+        proposal {
+            id
+        }
+    }
+    parentPost {
+        id
+        type
+        status
+        likeCount
+        commentCount
+    }
+    updatedAt
+    createdAt
+    attachment {
+        id
+        url
+        mime
+        name
+        width
+        height
+    }
+    content {
+        ... on ComponentPostCommentOnActivity {
+            text
+        }
+        ... on ComponentPostReply {
+            text
+        }
+        ... on ComponentPostScaleAnswer {
+            key
+            sequence
+            value
+        }
+        ... on ComponentPostSingleChoiceAnswer {
+            key
+            sequence
+            single: selection {
+                sequence
+                value
+            }
+        }
+        ... on ComponentPostArticle {
+            id
+            title
+            text
+        }
+        ... on ComponentPostCommentOnPost {
+            id
+            text
+        }
+    }
+    likeCount
+    commentCount
+}
+
+fragment NewPostStatus on PostStatus {
+    id
+    isLike
+    isReported
+    isRead
+}

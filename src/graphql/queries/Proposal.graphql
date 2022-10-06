@@ -1,0 +1,98 @@
+directive @connection(key: String!, filter: [String]) on FIELD
+
+mutation CreateProposal($input: createProposalInput) {
+    createProposal(input: $input) {
+        proposal {
+            ...ProposalItem
+        }
+    }
+}
+query getProposal($id: ID!) {
+    proposal(id: $id) {
+        ...ProposalItem
+    }
+}
+query getProposalById($proposalId: String!) {
+    proposalById(proposalId: $proposalId) {
+        ...ProposalItem
+    }
+    proposalStatusById(proposalId: $proposalId) {
+        id
+        isLike
+        isJoined
+    }
+}
+
+query getProposals($sort: String, $limit: Int, $start: Int, $where: JSON) {
+    listProposal(sort: $sort, limit: $limit, start: $start, where: $where) {
+        count
+        values {
+            ...ProposalItem
+        }
+        statuses {
+            id
+            isLike
+            isJoined
+        }
+    }
+}
+
+query getProposalFee($proposalId: String!) {
+    proposalFee(proposalId: $proposalId) {
+        status
+        type
+        destination
+        start
+        end
+        startAssess
+        endAssess
+        amount
+        docHash
+        title
+        signature
+        feeAmount
+    }
+}
+
+query checkProposalFee($proposalId: String!, $transactionHash: String!) {
+    checkProposalFee(proposalId: $proposalId, transactionHash: $transactionHash) {
+        proposal {
+            ...ProposalItem
+        }
+        status
+    }
+}
+
+mutation joinProposal($input: JoinProposalInput!) {
+    joinProposal(input: $input) {
+        invalidValidator
+        proposal {
+            id
+        }
+    }
+}
+
+query assessResult($proposalId: String!, $actor: String!) {
+    assessResult(proposalId: $proposalId, actor: $actor) {
+        isValidVoter
+        isProposer
+        needEvaluation
+        proposalState
+        assessParticipantSize
+        assessData
+    }
+}
+
+query voteStatus($proposalId: String!, $actor: String!) {
+    voteStatus(proposalId: $proposalId, actor: $actor) {
+        isValidVoter
+        isProposer
+        needVote
+        voteProposalState
+        validatorSize
+        voteResult
+        destination
+        countingFinishTime
+        canWithdrawAt
+    }
+}

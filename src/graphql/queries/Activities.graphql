@@ -1,0 +1,17 @@
+query getActivity($id: ID!) {
+    activity(id: $id) {
+        id
+        name
+        type
+        status
+        survey {
+            ...SurveyItem
+        }
+        poll {
+            id
+            questions {
+                ...QuestionItem
+            }
+        }
+    }
+}
