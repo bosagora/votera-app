@@ -2,11 +2,12 @@
 import React from 'react';
 import { View, StyleSheet, StyleProp, TextStyle } from 'react-native';
 import { Text } from 'react-native-elements';
+import globalStyle from '~/styles/global';
 import { getPeriodText } from '~/utils/time';
 
 const styles = StyleSheet.create({
-    periods: { fontFamily: 'RobotoRegular', fontSize: 12 },
-    types: { fontFamily: 'NotoSansCJKkrMedium', fontSize: 11, paddingRight: 13 },
+    periods: { fontSize: 12 },
+    types: { fontSize: 11, paddingRight: 13 },
 });
 
 interface PeriodProps {
@@ -23,8 +24,10 @@ function Period(props: PeriodProps): JSX.Element {
 
     return (
         <View style={{ alignItems: 'center', flexDirection: 'row' }}>
-            <Text style={[styles.types, { color }, typeStyle]}>{type}</Text>
-            <Text style={[styles.periods, { color }, periodStyle]}>{getPeriodText(created, deadline)}</Text>
+            <Text style={[globalStyle.mtext, styles.types, { color }, typeStyle]}>{type}</Text>
+            <Text style={[globalStyle.rrtext, styles.periods, { color }, periodStyle]}>
+                {getPeriodText(created, deadline)}
+            </Text>
         </View>
     );
 }

@@ -28,9 +28,7 @@ const styles = StyleSheet.create({
     },
     input: {
         color: 'rgb(112, 58, 222)',
-        fontFamily: 'NotoSansCJKkrBold',
         fontSize: 14,
-        fontWeight: 'bold',
         outlineStyle: 'none',
     },
     inputContainerStyle: {
@@ -100,11 +98,12 @@ function TextInputComponent(props: TextInputComponentProps): JSX.Element {
                     allowFontScaling={false}
                     autoCorrect={false}
                     autoCapitalize="none"
-                    inputStyle={[styles.input, inputStyle]}
+                    inputStyle={[globalStyle.btext, styles.input, inputStyle]}
                     inputContainerStyle={[styles.inputContainerStyle]}
                     placeholderTextColor={themeContext.color.placeholder}
                     placeholder={placeholderText}
                     rightIcon={changed ? subComponent : undefined}
+                    autoCompleteType={undefined}
                 />
             </View>
         );
@@ -121,12 +120,13 @@ function TextInputComponent(props: TextInputComponentProps): JSX.Element {
                 allowFontScaling={false}
                 autoCorrect={false}
                 autoCapitalize="none"
-                inputStyle={[styles.input, inputStyle]}
+                inputStyle={[globalStyle.btext, styles.input, inputStyle]}
                 inputContainerStyle={[styles.inputContainerStyle]}
                 placeholder={placeholderText}
                 placeholderTextColor={themeContext.color.placeholder}
                 selectionColor={themeContext.color.primary}
                 rightIcon={subComponent}
+                autoCompleteType={undefined}
             />
         </View>
     );

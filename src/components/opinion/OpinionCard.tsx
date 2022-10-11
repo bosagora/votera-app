@@ -154,7 +154,7 @@ function Reply(props: ReplyProps): JSX.Element {
     return (
         <>
             <View style={globalStyle.flexRowBetween}>
-                <Text style={{ fontFamily: 'RobotoRegular', fontSize: 13 }}>
+                <Text style={[globalStyle.rrtext, { fontSize: 13 }]}>
                     {getString('#N개 답글').replace('#N', replyCount.toString() || '0')}
                 </Text>
                 <ShortButton

@@ -222,12 +222,13 @@ function SignupScreen({ navigation }: AccessScreenProps<'Signup'>): JSX.Element 
                                 ]}
                             >
                                 <Text
-                                    style={{
-                                        fontSize: 14,
-                                        color: isActive ? themeContext.color.primary : themeContext.color.disabled,
-                                        fontFamily: isActive ? 'NotoSansCJKkrBold' : 'NotoSansCJKkrLight',
-                                        fontWeight: isActive ? 'bold' : '300',
-                                    }}
+                                    style={[
+                                        isActive ? globalStyle.btext : globalStyle.ltext,
+                                        {
+                                            fontSize: 14,
+                                            color: isActive ? themeContext.color.primary : themeContext.color.disabled,
+                                        },
+                                    ]}
                                 >
                                     {route.title}
                                 </Text>

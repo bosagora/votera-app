@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState, useCallback, PropsWithChildren } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Platform } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { CalendarList, DateData, LocaleConfig } from 'react-native-calendars';
 import { DayProps } from 'react-native-calendars/src/calendar/day';
@@ -305,16 +305,18 @@ function CalendarScreen({ navigation, route }: MainScreenProps<'Calendar'>): JSX
                     onDayPress={(day) => onPressDay(day)}
                     theme={{
                         'stylesheet.calendar.header': {
-                            monthText: {
-                                fontSize: 56,
-                                fontFamily: 'GmarketSansTTFBold',
-                                color: themeContext.color.primary,
-                            },
+                            monthText: [
+                                globalStyle.gbtext,
+                                {
+                                    fontSize: 56,
+                                    color: themeContext.color.primary,
+                                },
+                            ],
                         },
-                        textDayFontFamily: 'RobotoRegular',
+                        textDayFontFamily: Platform.OS === 'web' ? 'Robot' : 'RobotoRegular',
                         textDayFontSize: 14,
                         textDayStyle: {
-                            fontFamily: 'RobotoRegular',
+                            fontFamily: Platform.OS === 'web' ? 'Robot' : 'RobotoRegular',
                             fontSize: 14,
                             color: themeContext.color.textBlack,
                         },

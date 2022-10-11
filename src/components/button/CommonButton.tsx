@@ -3,6 +3,7 @@ import { Button, ButtonProps } from 'react-native-elements';
 import { Image, View, ImageURISource } from 'react-native';
 import { ThemeContext } from 'styled-components/native';
 import { useAssets } from 'expo-asset';
+import globalStyle from '~/styles/global';
 
 enum EnumIconAsset {
     RightArrow = 0,
@@ -43,10 +44,9 @@ function CommonButton(props: CommonButtonProps): JSX.Element {
                 buttonStyle,
             ]}
             titleStyle={[
+                globalStyle.btext,
                 {
                     fontSize: 14,
-                    fontFamily: 'NotoSansCJKkrBold',
-                    fontWeight: 'bold',
                     color: filled ? 'white' : themeContext.color.primary,
                 },
                 titleStyle,

@@ -1,11 +1,17 @@
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { theme } from '~/theme/theme';
 
 const globalStyle = StyleSheet.create({
-    btext: {
-        fontFamily: 'NotoSansCJKkrBold',
-        fontWeight: 'bold',
-    },
+    btext: Platform.select({
+        web: {
+            fontFamily: `'Noto Sans KR', sans-serif`,
+            fontWeight: '700',
+        },
+        default: {
+            fontFamily: 'NotoSansCJKkrBold',
+            fontWeight: 'bold',
+        },
+    }),
     center: {
         alignItems: 'center',
         justifyContent: 'center',
@@ -36,27 +42,49 @@ const globalStyle = StyleSheet.create({
         borderBottomColor: '#E0E0E0',
         borderBottomWidth: 1,
     },
-    headerTitle: {
-        fontFamily: 'NotoSansCJKkrBold',
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    inputLabel: {
-        fontFamily: 'NotoSansCJKkrMedium',
-        fontSize: 10,
-        letterSpacing: 1.3,
-        marginBottom: 6,
-    },
+    headerTitle: Platform.select({
+        web: {
+            fontFamily: `'Noto Sans KR', sans-serif`,
+            fontSize: 16,
+            fontWeight: '700',
+        },
+        default: {
+            fontFamily: 'NotoSansCJKkrBold',
+            fontSize: 16,
+            fontWeight: 'bold',
+        },
+    }),
+    inputLabel: Platform.select({
+        web: {
+            fontFamily: `'Noto Sans KR', sans-serif`,
+            fontSize: 10,
+            fontWeight: '500',
+            letterSpacing: 1.3,
+            marginBottom: 6,
+        },
+        default: {
+            fontFamily: 'NotoSansCJKkrMedium',
+            fontSize: 10,
+            letterSpacing: 1.3,
+            marginBottom: 6,
+        },
+    }),
     lineComponent: {
         backgroundColor: 'rgb(235,234,239)',
         height: 1,
         marginVertical: 30,
         width: '100%',
     },
-    ltext: {
-        fontFamily: 'NotoSansCJKkrLight',
-        fontWeight: '300',
-    },
+    ltext: Platform.select({
+        web: {
+            fontFamily: `'Noto Sans KR', sans-serif`,
+            fontWeight: '300',
+        },
+        default: {
+            fontFamily: 'NotoSansCJKkrLight',
+            fontWeight: '300',
+        },
+    }),
     metaButton: {
         alignItems: 'center',
         borderRadius: 20,
@@ -68,22 +96,62 @@ const globalStyle = StyleSheet.create({
         shadowRadius: 4,
         width: 114,
     },
-    metaTitle: {
-        fontFamily: 'NotoSansCJKkrRegular',
-        fontSize: 14,
-    },
-    mtext: {
-        fontFamily: 'NotoSansCJKkrMedium',
-    },
-    rltext: {
-        fontFamily: 'RobotoLight',
-    },
-    rmtext: {
-        fontFamily: 'RobotoMedium',
-    },
-    rtext: {
-        fontFamily: 'NotoSansCJKkrRegular',
-    },
+    metaTitle: Platform.select({
+        web: {
+            fontFamily: `'Noto Sans KR', sans-serif`,
+            fontSize: 14,
+            fontWeight: '400',
+        },
+        default: {
+            fontFamily: 'NotoSansCJKkrRegular',
+            fontSize: 14,
+        },
+    }),
+    mtext: Platform.select({
+        web: {
+            fontFamily: `'Noto Sans KR', sans-serif`,
+            fontWeight: '500',
+        },
+        default: {
+            fontFamily: 'NotoSansCJKkrMedium',
+        },
+    }),
+    rltext: Platform.select({
+        web: {
+            fontFamily: 'Roboto',
+            fontWeight: '300',
+        },
+        default: {
+            fontFamily: 'RobotoLight',
+        },
+    }),
+    rmtext: Platform.select({
+        web: {
+            fontFamily: 'Roboto',
+            fontWeight: '500',
+        },
+        default: {
+            fontFamily: 'RobotoMedium',
+        },
+    }),
+    rrtext: Platform.select({
+        web: {
+            fontFamily: 'Roboto',
+            fontWeight: '400',
+        },
+        default: {
+            fontFamily: 'RobotoRegular',
+        },
+    }),
+    rtext: Platform.select({
+        web: {
+            fontFamily: `'Noto Sans KR', sans-serif`,
+            fontWeight: '400',
+        },
+        default: {
+            fontFamily: 'NotoSansCJKkrRegular',
+        },
+    }),
     shortSmall: {
         backgroundColor: 'transparent',
         borderRadius: 6,

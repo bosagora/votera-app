@@ -78,10 +78,6 @@ const styles = StyleSheet.create({
         borderRadius: 5,
         borderWidth: 2,
     },
-    descriptionInput: {
-        fontFamily: 'NotoSansCJKkrRegular',
-        fontSize: 14,
-    },
     descriptionText: {
         height: 255,
         lineHeight: 23,
@@ -632,7 +628,7 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
                             />
                             <View style={{ alignSelf: 'flex-end', marginTop: 10 }}>
                                 {IsValidAmountString(amount) ? (
-                                    <Text style={{ fontFamily: 'RobotoRegular' }}>
+                                    <Text style={globalStyle.rrtext}>
                                         {`${getString('수수료')} `}
                                         <Text style={{ color: themeContext.color.primary }}>
                                             {WeiAmountToString(calculateProposalFee(amount), true)}
@@ -640,7 +636,7 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
                                         {` ${getString('BOA')}`}
                                     </Text>
                                 ) : (
-                                    <Text style={{ fontFamily: 'RobotoRegular', color: themeContext.color.error }}>
+                                    <Text style={[globalStyle.rrtext, { color: themeContext.color.error }]}>
                                         {getString('숫자를 입력해주세요&#46;')}
                                     </Text>
                                 )}
@@ -658,8 +654,9 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
                             style={styles.descriptionText}
                             inputContainerStyle={{ borderBottomWidth: 0 }}
                             inputStyle={[
-                                styles.descriptionInput,
+                                globalStyle.rtext,
                                 {
+                                    fontSize: 14,
                                     color: themeContext.color.textBlack,
                                     outlineStyle: 'none',
                                 },

@@ -3,6 +3,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { Icon, Button } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
+import globalStyle from '~/styles/global';
 import getString from '~/utils/locales/STRINGS';
 
 interface CommentButtonProps {
@@ -27,7 +28,7 @@ function CommentButton(props: CommentButtonProps): JSX.Element {
     return (
         <Button
             title={title}
-            titleStyle={{ fontSize: 10, fontFamily: 'NotoSansCJKkrBold', fontWeight: 'bold' }}
+            titleStyle={[globalStyle.btext, { fontSize: 10 }]}
             buttonStyle={{
                 paddingHorizontal: 10,
                 paddingVertical: 4,

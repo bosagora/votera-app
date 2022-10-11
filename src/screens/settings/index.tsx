@@ -18,9 +18,7 @@ import { showSnackBar } from '~/state/features/snackBar';
 
 const styles = StyleSheet.create({
     sectionLabel: {
-        fontFamily: 'NotoSansCJKkrBold',
         fontSize: 14,
-        fontWeight: 'bold',
         marginBottom: 15,
     },
     sectionSeparator: {
@@ -125,19 +123,20 @@ function Settings({ navigation, route }: MainScreenProps<'Settings'>): JSX.Eleme
                 <View>
                     <Text style={{ fontSize: 13, color: themeContext.color.textBlack }}>{getAppUpdate()}</Text>
                     <Text
-                        style={{
-                            fontSize: 14,
-                            marginTop: 8.5,
-                            fontFamily: 'GmarketSansTTFBold',
-                            fontWeight: 'bold',
-                            color: themeContext.color.primary,
-                        }}
+                        style={[
+                            globalStyle.gbtext,
+                            {
+                                fontSize: 14,
+                                marginTop: 8.5,
+                                color: themeContext.color.primary,
+                            },
+                        ]}
                     >
                         Ver {getCurrentVersion()}
                     </Text>
                 </View>
                 <View style={{ marginTop: 60 }}>
-                    <Text style={styles.sectionLabel}>{getString('알림')}</Text>
+                    <Text style={[globalStyle.btext, styles.sectionLabel]}>{getString('알림')}</Text>
                     {Platform.OS !== 'web' && (
                         <View style={[globalStyle.flexRowBetween, { height: 40 }]}>
                             <Text style={{ fontSize: 13 }}>{getString('푸시 알림 받기')}</Text>
@@ -169,7 +168,7 @@ function Settings({ navigation, route }: MainScreenProps<'Settings'>): JSX.Eleme
                 <View style={styles.sectionSeparator} />
 
                 <View>
-                    <Text style={styles.sectionLabel}>{getString('계정 설정')}</Text>
+                    <Text style={[globalStyle.btext, styles.sectionLabel]}>{getString('계정 설정')}</Text>
                     <TouchableOpacity
                         style={[globalStyle.flexRowBetween, { height: 40 }]}
                         onPress={() => linkTo('/accountinfo')}
@@ -181,7 +180,7 @@ function Settings({ navigation, route }: MainScreenProps<'Settings'>): JSX.Eleme
 
                 <View style={styles.sectionSeparator} />
 
-                <Text style={styles.sectionLabel}>{getString('기타')}</Text>
+                <Text style={[globalStyle.btext, styles.sectionLabel]}>{getString('기타')}</Text>
 
                 <TouchableOpacity
                     style={[globalStyle.flexRowBetween, { height: 40 }]}

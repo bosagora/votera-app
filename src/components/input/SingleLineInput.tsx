@@ -17,7 +17,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     input: {
-        fontFamily: Platform.OS === 'android' ? 'sans-serif' : 'NotoSansCJKkrRegular',
         fontSize: 14,
         lineHeight: 18,
         outlineStyle: 'none',
@@ -62,7 +61,7 @@ function TextInputComponent(props: TextInputComponentProps): JSX.Element {
                     autoCorrect={false}
                     autoCapitalize="none"
                     style={{ paddingHorizontal: 5 }}
-                    inputStyle={styles.input}
+                    inputStyle={[globalStyle.rtext, styles.input]}
                     inputContainerStyle={{ borderBottomWidth: 0 }}
                     placeholderTextColor={placeholderTextColor}
                     rightIcon={subComponent && subComponent}
@@ -82,7 +81,11 @@ function TextInputComponent(props: TextInputComponentProps): JSX.Element {
                 autoCorrect={false}
                 autoCapitalize="none"
                 // style={Platform.OS === 'web' ? { outlineStyle: 'none' } : {}} // 이 부분 때문에 빨간줄이 뜨는데, 작동은 됨 // 웹에서 Input 클릭했을때 border 안생기는 기능
-                inputStyle={[styles.input, inputStyle]}
+                inputStyle={[
+                    Platform.OS === 'android' ? { fontFamily: 'sans-serif' } : globalStyle.rtext,
+                    styles.input,
+                    inputStyle,
+                ]}
                 inputContainerStyle={[{ borderBottomWidth: 0 }, inputContainerStyle]}
                 labelStyle={[globalStyle.inputLabel, labelStyle]}
                 placeholderTextColor={placeholderTextColor || themeContext.color.textGray}

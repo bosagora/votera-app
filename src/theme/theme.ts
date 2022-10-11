@@ -1,3 +1,5 @@
+import { Platform } from 'react-native';
+
 const theme = {
     Header: {
         containerStyle: {
@@ -7,11 +9,19 @@ const theme = {
         },
     },
     Text: {
-        style: {
-            fontSize: 14,
-            color: 'rgb(71,71,75)',
-            fontFamily: 'NotoSansCJKkrRegular',
-        },
+        style: Platform.select({
+            web: {
+                fontSize: 14,
+                color: 'rgb(71,71,75)',
+                fontFamily: `'Noto Sans KR', sans-serif`,
+                fontWeight: '400',
+            },
+            default: {
+                fontSize: 14,
+                color: 'rgb(71,71,75)',
+                fontFamily: 'NotoSansCJKkrRegular',
+            },
+        }),
     },
     colors: {
         primary: 'rgb(112,58,222)',

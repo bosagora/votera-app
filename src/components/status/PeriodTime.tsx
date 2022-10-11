@@ -3,6 +3,7 @@ import React from 'react';
 import { View, StyleSheet, StyleProp, TextStyle } from 'react-native';
 import { Text } from 'react-native-elements';
 import moment from 'moment';
+import globalStyle from '~/styles/global';
 
 interface PeriodProps {
     type: string;
@@ -14,8 +15,8 @@ interface PeriodProps {
 }
 
 const styles = StyleSheet.create({
-    periods: { fontFamily: 'RobotoRegular', fontSize: 12 },
-    types: { fontFamily: 'NotoSansCJKkrMedium', fontSize: 11, paddingRight: 13 },
+    periods: { fontSize: 12 },
+    types: { fontSize: 11, paddingRight: 13 },
 });
 
 function PeriodTime(props: PeriodProps): JSX.Element {
@@ -31,8 +32,10 @@ function PeriodTime(props: PeriodProps): JSX.Element {
 
     return (
         <View style={{ alignItems: 'center', flexDirection: 'row' }}>
-            <Text style={[styles.types, { color }, typeStyle]}>{type}</Text>
-            <Text style={[styles.periods, { color }, periodStyle]}>{convertPeriod(created, deadline)}</Text>
+            <Text style={[globalStyle.mtext, styles.types, { color }, typeStyle]}>{type}</Text>
+            <Text style={[globalStyle.rrtext, styles.periods, { color }, periodStyle]}>
+                {convertPeriod(created, deadline)}
+            </Text>
         </View>
     );
 }

@@ -36,8 +36,8 @@ const styles = StyleSheet.create({
         top: 0,
     },
     headerTitle: { color: 'white', fontSize: 16, paddingLeft: 7 },
-    listHeaderTitle: { fontFamily: 'NotoSansCJKkrLight', fontSize: 13 },
-    listHeaderValue: { fontFamily: 'NotoSansCJKkrLight', fontSize: 13, paddingLeft: 10 },
+    listHeaderTitle: { fontSize: 13 },
+    listHeaderValue: { fontSize: 13, paddingLeft: 10 },
 });
 
 const FETCH_INIT_LIMIT = 10;
@@ -179,8 +179,8 @@ function Feed({ route, navigation }: MainScreenProps<'Feed'>): JSX.Element {
             ListHeaderComponent={
                 <View style={[globalStyle.flexRowBetween, { paddingBottom: 2, zIndex: 1 }]}>
                     <View style={globalStyle.flexRowAlignCenter}>
-                        <Text style={styles.listHeaderTitle}>{getString('새알림')}</Text>
-                        <Text style={styles.listHeaderValue}>
+                        <Text style={[globalStyle.ltext, styles.listHeaderTitle]}>{getString('새알림')}</Text>
+                        <Text style={[globalStyle.ltext, styles.listHeaderValue]}>
                             {feedCount || 0}/{feedTotalCount || 0}
                         </Text>
                     </View>

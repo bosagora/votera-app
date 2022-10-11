@@ -222,12 +222,14 @@ function CreateNoticeScreen({ navigation, route }: MainScreenProps<'CreateNotice
                             multiline
                             style={{ textAlignVertical: 'top', height: 255, paddingTop: 15, lineHeight: 23 }}
                             inputContainerStyle={{ borderBottomWidth: 0 }}
-                            inputStyle={{
-                                color: themeContext.color.textBlack,
-                                fontSize: 14,
-                                fontFamily: 'NotoSansCJKkrRegular',
-                                outlineStyle: 'none',
-                            }}
+                            inputStyle={[
+                                globalStyle.rtext,
+                                {
+                                    color: themeContext.color.textBlack,
+                                    fontSize: 14,
+                                    outlineStyle: 'none',
+                                },
+                            ]}
                             containerStyle={{
                                 borderWidth: 2,
                                 borderColor: 'rgb(235,234,239)',

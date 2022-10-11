@@ -15,6 +15,7 @@ import SnackBar from '~/components/shared/snackbar';
 import BottomSheetComponent from '~/components/shared/BottomSheet';
 import { MAX_WIDTH } from '~/styles/global';
 import { RootStackParams } from './types/RootStackParams';
+import useVoteraFonts from '~/styles/VoteraFonts';
 
 enum ScreenType {
     AuthScreens,
@@ -98,6 +99,7 @@ function Routes(): JSX.Element {
     const [isLoading, setIsLoading] = useState(true);
     const [screenType, setScreenType] = useState(ScreenType.AuthScreens);
     const { width } = useWindowDimensions();
+    const [fontLoaded, error] = useVoteraFonts();
 
     const selectStyle = () => {
         return width > MAX_WIDTH
@@ -125,7 +127,7 @@ function Routes(): JSX.Element {
         }
     }, [user, isGuest, setRouteLoaded]);
 
-    if (isLoading) return <Loading onComplete={() => setIsLoading(false)} />;
+    if (isLoading || !fontLoaded) return <Loading onComplete={() => setIsLoading(false)} />;
     return (
         <>
             <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}>

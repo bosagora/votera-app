@@ -63,11 +63,6 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         width: '50%',
     },
-    tabText: {
-        fontFamily: 'NotoSansCJKkrBold',
-        fontSize: 13,
-        fontWeight: '700',
-    },
     tabWrapper: {
         alignItems: 'center',
         backgroundColor: 'white',
@@ -181,7 +176,14 @@ function HomeScreen({ navigation, route }: MainScreenProps<'Home'>): JSX.Element
                                 onPress={onPress}
                                 key={`tab_${tabRoute.key}`}
                             >
-                                <Text style={[styles.tabText, { color: isFocused ? 'rgb(112,58,222)' : '#000000' }]}>{tabRoute.title}</Text>
+                                <Text
+                                    style={[
+                                        globalStyle.btext,
+                                        { fontSize: 13, color: isFocused ? 'rgb(112,58,222)' : '#000000' },
+                                    ]}
+                                >
+                                    {tabRoute.title}
+                                </Text>
                             </TouchableOpacity>
                         );
                     })}

@@ -151,7 +151,7 @@ function AccountInfo({ navigation, route }: MainScreenProps<'AccountInfo'>): JSX
                                 debounceNameCheck(text);
                             }
                         }}
-                        inputStyle={{ fontFamily: 'GmarketSansTTFBold' }}
+                        inputStyle={globalStyle.gbtext}
                         searchValue={newName}
                         value={newName}
                         koreanInput
@@ -161,12 +161,13 @@ function AccountInfo({ navigation, route }: MainScreenProps<'AccountInfo'>): JSX
                                 <Button
                                     disabled={isEqual || isGuest}
                                     title={getString('이름변경')}
-                                    titleStyle={{
-                                        fontFamily: 'NotoSansCJKkrBold',
-                                        fontWeight: 'bold',
-                                        fontSize: 14,
-                                        color: themeContext.color.primary,
-                                    }}
+                                    titleStyle={[
+                                        globalStyle.btext,
+                                        {
+                                            fontSize: 14,
+                                            color: themeContext.color.primary,
+                                        },
+                                    ]}
                                     type="clear"
                                     onPress={() => {
                                         changeNodeName(newName).catch(console.log);

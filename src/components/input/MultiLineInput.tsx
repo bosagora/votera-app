@@ -12,6 +12,7 @@ import {
 import { Input, InputProps, Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import { useAssets } from 'expo-asset';
+import globalStyle from '~/styles/global';
 
 enum EnumIconAssets {
     PenIcon = 0,
@@ -47,7 +48,6 @@ const styles = StyleSheet.create({
         paddingVertical: 20, // onlyRead:false
     },
     inputStyle: {
-        fontFamily: Platform.OS === 'android' ? 'sans-serif' : 'NotoSansCJKkrRegular',
         fontSize: 13,
         lineHeight: 21,
         outlineStyle: 'none',
@@ -129,7 +129,11 @@ function MultilineInput(props: TextInputComponentProps): JSX.Element {
                     autoCapitalize="none"
                     // style={{ minHeight: 0, paddingTop: 0 }}
                     // containerStyle={{ paddingHorizontal: 0, paddingVertical: 0 }}
-                    inputStyle={[styles.inputStyle, inputStyle]}
+                    inputStyle={[
+                        Platform.OS === 'android' ? { fontFamily: 'sans-serif' } : globalStyle.rtext,
+                        styles.inputStyle,
+                        inputStyle,
+                    ]}
                     inputContainerStyle={[{ borderBottomWidth: 0 }, inputContainerStyle]}
                     placeholderTextColor={placeholderTextColor || themeContext.color.primary}
                     selectionColor={themeContext.color.primary}

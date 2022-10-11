@@ -1,6 +1,7 @@
 import React, { useContext } from 'react';
 import { Button, ButtonProps } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
+import globalStyle from '~/styles/global';
 
 interface Props extends ButtonProps {
     filled?: boolean;
@@ -24,10 +25,9 @@ function ShortButton(props: Props): JSX.Element {
                 buttonStyle,
             ]}
             titleStyle={[
+                globalStyle.btext,
                 {
                     fontSize: 15,
-                    fontFamily: 'NotoSansCJKkrBold',
-                    fontWeight: 'bold',
                     color: filled ? 'white' : themeContext.color.primary,
                 },
                 titleStyle,

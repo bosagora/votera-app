@@ -38,7 +38,7 @@ const styles = StyleSheet.create({
         marginLeft: 9,
         width: 11,
     },
-    writer: { color: 'black', fontFamily: 'GmarketSansTTFMedium', fontSize: 10 },
+    writer: { color: 'black', fontSize: 10 },
 });
 
 interface CommentCardProps {
@@ -211,7 +211,7 @@ function CommentCard(props: CommentCardProps): JSX.Element {
     return (
         <View style={styles.contents}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 11 }}>
-                <Text style={styles.writer}>{post.writer?.username || ''}</Text>
+                <Text style={[globalStyle.gmtext, styles.writer]}>{post.writer?.username || ''}</Text>
                 {commentCardInfo()}
             </View>
             <View style={{ paddingBottom: 18 }}>
