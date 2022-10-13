@@ -4,6 +4,7 @@ import { Button, Text, Icon } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAssets } from 'expo-asset';
+import { useLinkTo } from '@react-navigation/native';
 import FilterButton from '~/components/button/FilterButton';
 import ProposalCard from '~/components/proposal/ProposalCard';
 import { Proposal, useGetMemberRolesLazyQuery } from '~/graphql/generated/generated';
@@ -47,6 +48,7 @@ function JoinProposalListScreen({ navigation, route }: MainScreenProps<'JoinProp
     const { user } = useContext(AuthContext);
     const [pullRefresh, setPullRefresh] = useState(false);
     const [assets] = useAssets(iconAssets);
+    const linkTo = useLinkTo();
 
     const [getJoinProposals, { data: resMemberRolesData, fetchMore: joinFetchMore, loading: joinLoading, client }] =
         useGetMemberRolesLazyQuery({
@@ -60,12 +62,18 @@ function JoinProposalListScreen({ navigation, route }: MainScreenProps<'JoinProp
     const headerLeft = useCallback(() => {
         return (
             <Button
-                onPress={() => navigation.goBack()}
+                onPress={() => {
+                    if (navigation.canGoBack()) {
+                        navigation.goBack();
+                    } else {
+                        linkTo('/home');
+                    }
+                }}
                 icon={<Icon name="chevron-left" color="white" tvParallaxProperties={undefined} />}
                 type="clear"
             />
         );
-    }, [navigation]);
+    }, [navigation, linkTo]);
 
     const headerBackground = useCallback(() => {
         return (
@@ -147,7 +155,7 @@ function JoinProposalListScreen({ navigation, route }: MainScreenProps<'JoinProp
                     onPress={() => {
                         if (item.proposalId) {
                             fetchProposal(item.proposalId);
-                            navigation.navigate('ProposalDetail', { id: item.proposalId });
+                            linkTo(`/detail/${item.proposalId}`);
                         } else {
                             dispatch(showSnackBar(getString('제안서 정보가 올바르지 않습니다')));
                         }

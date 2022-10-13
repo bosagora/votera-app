@@ -16,7 +16,6 @@ import { getCommonPeriodText } from '~/utils/time';
 import CommonButton from '~/components/button/CommonButton';
 
 const styles = StyleSheet.create({
-    metaButton: { justifyContent: 'space-between', paddingHorizontal: 21, width: 271 },
     metaContainer: { alignSelf: 'center', borderRadius: 25 },
 });
 
@@ -55,7 +54,7 @@ function PaymentInfo(props: PaymentInfoProps): JSX.Element {
                             <CommonButton
                                 title={getString('메타마스크 호출')}
                                 containerStyle={styles.metaContainer}
-                                buttonStyle={styles.metaButton}
+                                buttonStyle={globalStyle.metaButton}
                                 filled
                                 onPress={onCallBudget}
                                 raised

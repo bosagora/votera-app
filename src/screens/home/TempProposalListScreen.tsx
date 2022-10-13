@@ -2,7 +2,7 @@ import React, { useContext, useState, useCallback } from 'react';
 import { View, Image, FlatList, Alert, ListRenderItemInfo, ImageURISource, Platform } from 'react-native';
 import { Button, Text, Icon } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useLinkTo } from '@react-navigation/native';
 import { useAssets } from 'expo-asset';
 import ProposalCard from '~/components/proposal/ProposalCard';
 import {
@@ -31,16 +31,23 @@ function TempProposalListScreen({ navigation, route }: MainScreenProps<'TempProp
     const [proposals, setProposals] = useState<Proposal[]>();
     const [proposalCount, setProposalCount] = useState<number>();
     const [assets] = useAssets(iconAssets);
+    const linkTo = useLinkTo();
 
     const headerLeft = useCallback(() => {
         return (
             <Button
-                onPress={() => navigation.goBack()}
+                onPress={() => {
+                    if (navigation.canGoBack()) {
+                        navigation.goBack();
+                    } else {
+                        linkTo('/home');
+                    }
+                }}
                 icon={<Icon name="chevron-left" color="white" tvParallaxProperties={undefined} />}
                 type="clear"
             />
         );
-    }, [navigation]);
+    }, [navigation, linkTo]);
 
     const headerBackground = useCallback(() => {
         return (
@@ -123,7 +130,7 @@ function TempProposalListScreen({ navigation, route }: MainScreenProps<'TempProp
                     temp
                     savedTime={item.createdAt as number}
                     onPress={() => {
-                        navigation.navigate('CreateProposal', { tempId: item.id });
+                        linkTo(`/createproposal/${item.id}`);
                     }}
                     onDelete={() => {
                         console.log(`onDelete id=${item.id}`);

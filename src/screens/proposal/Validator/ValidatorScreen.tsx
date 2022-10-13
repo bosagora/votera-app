@@ -1,18 +1,25 @@
 /* eslint-disable import/extensions */
 /* eslint-disable global-require */
-import React, { useCallback, useContext, useEffect, useState } from 'react';
+import React, { useCallback, useContext } from 'react';
 import { View, Image, StyleSheet, TouchableOpacity, ImageURISource, ActivityIndicator } from 'react-native';
 import { useAssets } from 'expo-asset';
 import { MaterialIcons, Octicons } from '@expo/vector-icons';
 import { setStringAsync } from 'expo-clipboard';
 import { Icon, Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
-import { Enum_Proposal_Status as EnumProposalStatus, Proposal, Validator } from '~/graphql/generated/generated';
+import {
+    Enum_Proposal_Status as EnumProposalStatus,
+    Enum_Proposal_Type as EnumProposalType,
+    Proposal,
+    Validator,
+} from '~/graphql/generated/generated';
 import globalStyle from '~/styles/global';
 import ShortButton from '~/components/button/ShortButton';
 import getString from '~/utils/locales/STRINGS';
 import { getValidatorDateString } from '~/utils/time';
 import { VOTE_SELECT } from '~/utils/votera/voterautil';
+import { useAppDispatch } from '~/state/hooks';
+import { showSnackBar } from '~/state/features/snackBar';
 
 const styles = StyleSheet.create({
     header: {
@@ -192,6 +199,7 @@ interface ValidatorProps {
 function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
     const { total, participated, validators, onLayout, onRefresh, loading } = props;
     const themeContext = useContext(ThemeContext);
+    const dispatch = useAppDispatch();
 
     const renderItem = useCallback(
         (item: Validator) => {
@@ -208,10 +216,14 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
                             </View>
                             <TouchableOpacity
                                 onPress={() => {
-                                    setStringAsync(publicKey).catch(console.log);
+                                    setStringAsync(publicKey)
+                                        .then(() => {
+                                            dispatch(showSnackBar(getString('클립보드에 복사되었습니다')));
+                                        })
+                                        .catch(console.log);
                                 }}
                             >
-                                <MaterialIcons name="content-copy" size={22} color={themeContext.color.primary} />
+                                <MaterialIcons name="content-copy" size={20} color={themeContext.color.primary} />
                             </TouchableOpacity>
                         </View>
                         <View style={styles.nameGlobeRow}>
@@ -222,10 +234,14 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
                             </View>
                             <TouchableOpacity
                                 onPress={() => {
-                                    setStringAsync(address).catch(console.log);
+                                    setStringAsync(address)
+                                        .then(() => {
+                                            dispatch(showSnackBar(getString('클립보드에 복사되었습니다')));
+                                        })
+                                        .catch(console.log);
                                 }}
                             >
-                                <MaterialIcons name="content-copy" size={22} color={themeContext.color.primary} />
+                                <MaterialIcons name="content-copy" size={20} color={themeContext.color.primary} />
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -240,7 +256,7 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
                 </View>
             );
         },
-        [themeContext.color.primary],
+        [themeContext.color.primary, dispatch],
     );
 
     return (
@@ -277,6 +293,7 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
 function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
     const { total, participated, validators, onLayout, onRefresh, loading } = props;
     const themeContext = useContext(ThemeContext);
+    const dispatch = useAppDispatch();
 
     const renderItem = useCallback(
         (item: Validator) => {
@@ -293,10 +310,14 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
                             </View>
                             <TouchableOpacity
                                 onPress={() => {
-                                    setStringAsync(publicKey).catch(console.log);
+                                    setStringAsync(publicKey)
+                                        .then(() => {
+                                            dispatch(showSnackBar(getString('클립보드에 복사되었습니다')));
+                                        })
+                                        .catch(console.log);
                                 }}
                             >
-                                <MaterialIcons name="content-copy" size={22} color={themeContext.color.primary} />
+                                <MaterialIcons name="content-copy" size={20} color={themeContext.color.primary} />
                             </TouchableOpacity>
                         </View>
                         <View style={styles.nameGlobeRow}>
@@ -307,10 +328,14 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
                             </View>
                             <TouchableOpacity
                                 onPress={() => {
-                                    setStringAsync(address).catch(console.log);
+                                    setStringAsync(address)
+                                        .then(() => {
+                                            dispatch(showSnackBar(getString('클립보드에 복사되었습니다')));
+                                        })
+                                        .catch(console.log);
                                 }}
                             >
-                                <MaterialIcons name="content-copy" size={22} color={themeContext.color.primary} />
+                                <MaterialIcons name="content-copy" size={20} color={themeContext.color.primary} />
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -325,7 +350,7 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
                 </View>
             );
         },
-        [themeContext.color.primary],
+        [themeContext.color.primary, dispatch],
     );
 
     return (
@@ -363,6 +388,7 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
     const { total, participated, validators, onLayout, onRefresh, loading } = props;
     const themeContext = useContext(ThemeContext);
     const [assets] = useAssets(iconAssets);
+    const dispatch = useAppDispatch();
 
     const showBallotResult = useCallback(
         (choice?: number | null): JSX.Element => {
@@ -407,10 +433,14 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                             </View>
                             <TouchableOpacity
                                 onPress={() => {
-                                    setStringAsync(publicKey).catch(console.log);
+                                    setStringAsync(publicKey)
+                                        .then(() => {
+                                            dispatch(showSnackBar(getString('클립보드에 복사되었습니다')));
+                                        })
+                                        .catch(console.log);
                                 }}
                             >
-                                <MaterialIcons name="content-copy" size={22} color={themeContext.color.primary} />
+                                <MaterialIcons name="content-copy" size={20} color={themeContext.color.primary} />
                             </TouchableOpacity>
                         </View>
                         <View style={styles.nameGlobeRow}>
@@ -421,10 +451,14 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                             </View>
                             <TouchableOpacity
                                 onPress={() => {
-                                    setStringAsync(address).catch(console.log);
+                                    setStringAsync(address)
+                                        .then(() => {
+                                            dispatch(showSnackBar(getString('클립보드에 복사되었습니다')));
+                                        })
+                                        .catch(console.log);
                                 }}
                             >
-                                <MaterialIcons name="content-copy" size={22} color={themeContext.color.primary} />
+                                <MaterialIcons name="content-copy" size={20} color={themeContext.color.primary} />
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -441,7 +475,7 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                 </View>
             );
         },
-        [showBallotResult, themeContext.color.primary],
+        [showBallotResult, themeContext.color.primary, dispatch],
     );
 
     return (
@@ -495,10 +529,32 @@ function ValidatorScreen(props: Props): JSX.Element {
     switch (proposal.status) {
         case EnumProposalStatus.PendingAssess:
         case EnumProposalStatus.Assess:
-        case EnumProposalStatus.PendingVote:
         case EnumProposalStatus.Reject:
             return (
                 <AssessValidatorScreen
+                    total={total}
+                    participated={participated}
+                    validators={validators}
+                    onLayout={onLayout}
+                    onRefresh={onRefresh}
+                    loading={loading}
+                />
+            );
+        case EnumProposalStatus.PendingVote:
+            if (proposal.type === EnumProposalType.Business) {
+                return (
+                    <AssessValidatorScreen
+                        total={total}
+                        participated={participated}
+                        validators={validators}
+                        onLayout={onLayout}
+                        onRefresh={onRefresh}
+                        loading={loading}
+                    />
+                );
+            }
+            return (
+                <VoteValidatorScreen
                     total={total}
                     participated={participated}
                     validators={validators}

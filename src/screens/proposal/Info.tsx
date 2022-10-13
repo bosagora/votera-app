@@ -207,7 +207,7 @@ function Info(props: Props): JSX.Element {
             <LineComponent />
 
             <View style={styles.title}>
-                <Text>{getString('사업목표 및 설명')}</Text>
+                <Text>{getString('목표 및 설명')}</Text>
             </View>
 
             <Text style={globalStyle.ltext}>{description}</Text>

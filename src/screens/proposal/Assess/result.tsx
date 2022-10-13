@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { View } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useLinkTo } from '@react-navigation/native';
 import { Text } from 'react-native-elements';
 import globalStyle from '~/styles/global';
 import AssessAvg from '~/components/proposal/AssessAvg';
@@ -12,7 +12,6 @@ import {
 } from '~/graphql/generated/generated';
 import { ProposalContext } from '~/contexts/ProposalContext';
 import getString from '~/utils/locales/STRINGS';
-import { MainNavigationProps } from '~/navigation/main/MainParams';
 
 function LineComponent(): JSX.Element {
     return <View style={globalStyle.lineComponent} />;
@@ -38,7 +37,7 @@ function EvaluationResult(props: Props): JSX.Element {
     const { assessResultData } = props;
     const [proposals, setProposals] = useState([]);
     const { fetchProposal } = useContext(ProposalContext);
-    const navigation = useNavigation<MainNavigationProps<'ProposalDetail'>>();
+    const linkTo = useLinkTo();
 
     return (
         <View>
@@ -59,7 +58,7 @@ function EvaluationResult(props: Props): JSX.Element {
                                 item={item}
                                 onPress={() => {
                                     fetchProposal(item.proposalId || '');
-                                    navigation.navigate('ProposalDetail', { id: item.proposalId || '' });
+                                    linkTo(`/detail/${item.proposalId || ''}`);
                                 }}
                             />
                         ))}

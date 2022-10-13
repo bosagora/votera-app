@@ -42,6 +42,28 @@ const globalStyle = StyleSheet.create({
         borderBottomColor: '#E0E0E0',
         borderBottomWidth: 1,
     },
+    headerMetaButton: {
+        alignItems: 'center',
+        borderRadius: 20,
+        height: 31,
+        justifyContent: 'center',
+        shadowColor: 'rgba(0, 0, 0, 0.25)',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 1,
+        shadowRadius: 4,
+        width: 114,
+    },
+    headerMetaTitle: Platform.select({
+        web: {
+            fontFamily: `'Noto Sans KR', sans-serif`,
+            fontSize: 14,
+            fontWeight: '400',
+        },
+        default: {
+            fontFamily: 'NotoSansCJKkrRegular',
+            fontSize: 14,
+        },
+    }),
     headerTitle: Platform.select({
         web: {
             fontFamily: `'Noto Sans KR', sans-serif`,
@@ -86,27 +108,10 @@ const globalStyle = StyleSheet.create({
         },
     }),
     metaButton: {
-        alignItems: 'center',
-        borderRadius: 20,
-        height: 31,
-        justifyContent: 'center',
-        shadowColor: 'rgba(0, 0, 0, 0.25)',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 1,
-        shadowRadius: 4,
-        width: 114,
+        justifyContent: 'space-between',
+        paddingHorizontal: 21,
+        width: 271,
     },
-    metaTitle: Platform.select({
-        web: {
-            fontFamily: `'Noto Sans KR', sans-serif`,
-            fontSize: 14,
-            fontWeight: '400',
-        },
-        default: {
-            fontFamily: 'NotoSansCJKkrRegular',
-            fontSize: 14,
-        },
-    }),
     mtext: Platform.select({
         web: {
             fontFamily: `'Noto Sans KR', sans-serif`,

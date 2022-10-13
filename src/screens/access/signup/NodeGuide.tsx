@@ -28,15 +28,15 @@ function NodeGuide(props: AuthProps): JSX.Element {
                 </Text>
                 <Text style={{ lineHeight: 23, marginTop: 63 }}>{getString(`유효한 노드 정보가 없습니다&#46;`)}</Text>
                 <Text style={{ lineHeight: 23, marginTop: 13 }}>
-                    {`- ${getString('각각의 노드는')} `}
+                    {`- ${getString('각각의 노드는')}`}
                     <Text style={[globalStyle.btext, { color: themeContext.color.primary }]}>
-                        {`40,000 ${getString('보아')}`}
+                        {` 40,000 ${getString('보아')} `}
                     </Text>
                     {getString(
                         `이상 보유하고 있어야 합니다&#46;\n- 이미 인증된 노드라도, 해당 노드가 보유하고 있는 보아가`,
                     )}
-                    <Text style={globalStyle.btext}>{`40,000 ${getString('보아')}`}</Text>
-                    {` ${getString(`이하일 경우 재인증하여야 합니다&#46;`)} `}
+                    <Text style={globalStyle.btext}>{` 40,000 ${getString('보아')} `}</Text>
+                    {getString(`이하일 경우 재인증하여야 합니다&#46;`)}
                 </Text>
             </View>
         </View>

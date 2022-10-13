@@ -102,7 +102,13 @@ function Feed({ route, navigation }: MainScreenProps<'Feed'>): JSX.Element {
     const headerLeft = useCallback(() => {
         return (
             <Button
-                onPress={() => navigation.goBack()}
+                onPress={() => {
+                    if (navigation.canGoBack()) {
+                        navigation.goBack();
+                    } else {
+                        linkTo('/home');
+                    }
+                }}
                 icon={<Icon name="chevron-left" color="white" tvParallaxProperties={undefined} />}
                 type="clear"
             />

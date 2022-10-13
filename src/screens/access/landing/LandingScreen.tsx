@@ -6,6 +6,7 @@ import { Button, Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import MetaMaskOnboarding from '@metamask/onboarding';
 import { useAssets } from 'expo-asset';
+import { useLinkTo } from '@react-navigation/native';
 import CommonButton from '~/components/button/CommonButton';
 import { AuthContext, MetamaskStatus } from '~/contexts/AuthContext';
 import { AccessScreenProps } from '~/navigation/access/AccessParams';
@@ -39,6 +40,7 @@ function LandingScreen({ navigation }: AccessScreenProps<'Landing'>): JSX.Elemen
     const [showLanding, setShowLanding] = useState(false);
     const onboarding = useRef<MetaMaskOnboarding>();
     const [assets] = useAssets(iconAssets);
+    const linkTo = useLinkTo();
 
     useEffect(() => {
         if (!onboarding.current) {
@@ -95,7 +97,7 @@ function LandingScreen({ navigation }: AccessScreenProps<'Landing'>): JSX.Elemen
                 {metamaskStatus === MetamaskStatus.UNAVAILABLE && (
                     <CommonButton
                         title={getString('메타마스크 설치하기')}
-                        buttonStyle={{ justifyContent: 'space-between', paddingHorizontal: 21, width: 271 }}
+                        buttonStyle={globalStyle.metaButton}
                         filled
                         onPress={() => {
                             onboarding.current?.startOnboarding();
@@ -106,7 +108,7 @@ function LandingScreen({ navigation }: AccessScreenProps<'Landing'>): JSX.Elemen
                 {metamaskStatus === MetamaskStatus.NOT_CONNECTED && (
                     <CommonButton
                         title={getString('메타마스크 연결하기')}
-                        buttonStyle={{ justifyContent: 'space-between', paddingHorizontal: 21, width: 271 }}
+                        buttonStyle={globalStyle.metaButton}
                         filled
                         onPress={metamaskConnect}
                         raised
@@ -116,7 +118,7 @@ function LandingScreen({ navigation }: AccessScreenProps<'Landing'>): JSX.Elemen
                 {metamaskStatus === MetamaskStatus.OTHER_CHAIN && (
                     <CommonButton
                         title={getString('메타마스크 체인 변경')}
-                        buttonStyle={{ justifyContent: 'space-between', paddingHorizontal: 21, width: 271 }}
+                        buttonStyle={globalStyle.metaButton}
                         filled
                         onPress={metamaskSwitch}
                         raised
@@ -125,15 +127,15 @@ function LandingScreen({ navigation }: AccessScreenProps<'Landing'>): JSX.Elemen
                 {metamaskStatus === MetamaskStatus.CONNECTED && (
                     <CommonButton
                         title={getString('계정만들기')}
-                        buttonStyle={{ justifyContent: 'space-between', paddingHorizontal: 21, width: 271 }}
+                        buttonStyle={globalStyle.metaButton}
                         filled
-                        onPress={() => navigation.navigate('Signup')}
+                        onPress={() => linkTo('/signup')}
                         raised
                     />
                 )}
                 <Button
                     title={getString('둘러보기')}
-                    titleStyle={[globalStyle.mtext, { marginRight: 16, fontSize: 16 }]}
+                    titleStyle={[globalStyle.mtext, { marginRight: 16, fontSize: 14 }]}
                     icon={assets ? <Image source={assets[EnumIconAsset.ArrowGrad] as ImageURISource} /> : undefined}
                     iconRight
                     buttonStyle={{ justifyContent: 'flex-end', paddingHorizontal: 21, marginTop: 10 }}
@@ -157,9 +159,7 @@ function LandingScreen({ navigation }: AccessScreenProps<'Landing'>): JSX.Elemen
                                 color: themeContext.color.textGray,
                             }}
                             type="clear"
-                            onPress={() => {
-                                navigation.navigate('Common', { screen: 'UserService' });
-                            }}
+                            onPress={() => linkTo('/userservice')}
                         />
                         <Button
                             title={getString('개인정보보호정책')}
@@ -168,9 +168,7 @@ function LandingScreen({ navigation }: AccessScreenProps<'Landing'>): JSX.Elemen
                                 color: themeContext.color.textGray,
                             }}
                             type="clear"
-                            onPress={() => {
-                                navigation.navigate('Common', { screen: 'Privacy' });
-                            }}
+                            onPress={() => linkTo('/privacy')}
                         />
                     </View>
                 </View>

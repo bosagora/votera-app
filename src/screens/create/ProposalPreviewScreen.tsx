@@ -1,7 +1,7 @@
 import React, { useRef, useState, useContext, useCallback } from 'react';
 import { Animated, View } from 'react-native';
 import { Button, Text, Icon } from 'react-native-elements';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useLinkTo } from '@react-navigation/native';
 import FocusAwareStatusBar from '~/components/statusbar/FocusAwareStatusBar';
 import globalStyle from '~/styles/global';
 import {
@@ -23,6 +23,7 @@ function ProposalPreviewScreen({ navigation, route }: MainScreenProps<'ProposalP
     const scroll = useRef(new Animated.Value(0)).current;
     const [assessPeriod, setAssessPeriod] = useState<ComponentCommonPeriodInput>();
     const [preview, setPreview] = useState<PreviewProposal>();
+    const linkTo = useLinkTo();
 
     useFocusEffect(
         useCallback(() => {
@@ -31,7 +32,11 @@ function ProposalPreviewScreen({ navigation, route }: MainScreenProps<'ProposalP
                 const data = await loadPreviewFromSession();
                 if (mounted) {
                     if (!data) {
-                        navigation.goBack();
+                        if (navigation.canGoBack()) {
+                            navigation.goBack();
+                        } else {
+                            linkTo('/home');
+                        }
                         return;
                     }
                     setPreview(data);
@@ -46,7 +51,7 @@ function ProposalPreviewScreen({ navigation, route }: MainScreenProps<'ProposalP
             return () => {
                 mounted = false;
             };
-        }, [navigation]),
+        }, [navigation, linkTo]),
     );
 
     React.useLayoutEffect(() => {
@@ -119,7 +124,13 @@ function ProposalPreviewScreen({ navigation, route }: MainScreenProps<'ProposalP
                 <View style={styles.statusBar} />
                 <View style={styles.navBar}>
                     <Button
-                        onPress={() => navigation.goBack()}
+                        onPress={() => {
+                            if (navigation.canGoBack()) {
+                                navigation.goBack();
+                            } else {
+                                linkTo('/home');
+                            }
+                        }}
                         icon={<Icon name="chevron-left" color="white" tvParallaxProperties={undefined} />}
                         type="clear"
                     />

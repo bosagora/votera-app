@@ -132,21 +132,21 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
 
                 <View style={{ marginTop: 40 }}>
                     <Text style={{ color: themeContext.color.primary }}>{getString('계정이름')}</Text>
-                    {isValidator && (
-                        <View style={{ flexDirection: 'row', marginTop: Platform.OS === 'android' ? 0 : 10 }}>
-                            <Text
-                                style={[
-                                    globalStyle.gbtext,
-                                    {
-                                        fontSize: 20,
-                                        lineHeight: 30,
-                                        color: themeContext.color.primary,
-                                    },
-                                ]}
-                                numberOfLines={1}
-                            >
-                                {user?.username || (isGuest ? 'Guest' : getString('User 없음'))}
-                            </Text>
+                    <View style={{ flexDirection: 'row', marginTop: Platform.OS === 'android' ? 0 : 10 }}>
+                        <Text
+                            style={[
+                                globalStyle.gbtext,
+                                {
+                                    fontSize: 20,
+                                    lineHeight: 30,
+                                    color: themeContext.color.primary,
+                                },
+                            ]}
+                            numberOfLines={1}
+                        >
+                            {user?.username || (isGuest ? 'Guest' : getString('User 없음'))}
+                        </Text>
+                        {isValidator ? (
                             <View
                                 style={{
                                     width: 48,
@@ -162,62 +162,72 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                                     {getString('검증자')}
                                 </Text>
                             </View>
-                        </View>
-                    )}
-                    {!isValidator && (
-                        <Text
-                            style={[
-                                globalStyle.gbtext,
-                                {
-                                    fontSize: 22,
-                                    lineHeight: 30,
-                                    marginTop: Platform.OS === 'android' ? 0 : 10,
-                                    color: themeContext.color.primary,
-                                },
-                            ]}
-                        >
-                            {user?.username || (isGuest ? 'Guest' : getString('User 없음'))}
-                        </Text>
-                    )}
-                    {publicKey && (
-                        <View style={[globalStyle.flexRowBetween, { marginTop: Platform.OS === 'android' ? 5 : 14 }]}>
-                            <Octicons name="key" size={18} />
-                            <View style={{ flex: 1, marginLeft: 14, flexDirection: 'row' }}>
-                                <Text numberOfLines={1}>{publicKey.slice(0, -6)}</Text>
-                                <Text>{publicKey.slice(-6)}</Text>
-                            </View>
-                            <TouchableOpacity
-                                style={{ marginLeft: 32, marginRight: 5 }}
-                                onPress={() => {
-                                    Clipboard.setStringAsync(publicKey).catch(console.log);
-                                }}
-                            >
-                                <MaterialIcons name="content-copy" size={22} color={themeContext.color.primary} />
-                            </TouchableOpacity>
-                        </View>
-                    )}
-                    {metamaskAccount && (
-                        <View style={[globalStyle.flexRowBetween, { marginTop: 14 }]}>
-                            <Octicons name="globe" size={18} />
-                            <View style={{ flex: 1, marginLeft: 14, flexDirection: 'row' }}>
-                                <Text numberOfLines={1}>{metamaskAccount.slice(0, -6)}</Text>
-                                <Text>{metamaskAccount.slice(-6)}</Text>
-                            </View>
-                            <TouchableOpacity
-                                style={{ marginLeft: 32, marginRight: 5 }}
-                                onPress={() => {
-                                    Clipboard.setStringAsync(metamaskAccount).catch(console.log);
-                                }}
-                            >
-                                <MaterialIcons name="content-copy" size={22} color={themeContext.color.primary} />
-                            </TouchableOpacity>
-                        </View>
-                    )}
-                    {balance && (
-                        <View style={{ flexDirection: 'row', marginTop: 14, justifyContent: 'space-between' }}>
-                            <Text>{getString('BOA 잔액')}</Text>
-                            <Text style={{ marginRight: 10 }}>{balance}</Text>
-                        </View>
+                        ) : null}
+                    </View>
+                    {!isGuest && (
+                        <>
+                            {publicKey && (
+                                <View
+                                    style={[
+                                        globalStyle.flexRowBetween,
+                                        { marginTop: Platform.OS === 'android' ? 5 : 14 },
+                                    ]}
+                                >
+                                    <Octicons name="key" size={18} />
+                                    <View style={{ flex: 1, marginLeft: 14, flexDirection: 'row' }}>
+                                        <Text numberOfLines={1}>{publicKey.slice(0, -6)}</Text>
+                                        <Text>{publicKey.slice(-6)}</Text>
+                                    </View>
+                                    <TouchableOpacity
+                                        style={{ marginLeft: 32, marginRight: 5 }}
+                                        onPress={() => {
+                                            Clipboard.setStringAsync(publicKey)
+                                                .then(() => {
+                                                    dispatch(showSnackBar(getString('클립보드에 복사되었습니다')));
+                                                })
+                                                .catch(console.log);
+                                        }}
+                                    >
+                                        <MaterialIcons
+                                            name="content-copy"
+                                            size={20}
+                                            color={themeContext.color.primary}
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+                            {metamaskAccount && (
+                                <View style={[globalStyle.flexRowBetween, { marginTop: 14 }]}>
+                                    <Octicons name="globe" size={18} />
+                                    <View style={{ flex: 1, marginLeft: 14, flexDirection: 'row' }}>
+                                        <Text numberOfLines={1}>{metamaskAccount.slice(0, -6)}</Text>
+                                        <Text>{metamaskAccount.slice(-6)}</Text>
+                                    </View>
+                                    <TouchableOpacity
+                                        style={{ marginLeft: 32, marginRight: 5 }}
+                                        onPress={() => {
+                                            Clipboard.setStringAsync(metamaskAccount)
+                                                .then(() => {
+                                                    dispatch(showSnackBar(getString('클립보드에 복사되었습니다')));
+                                                })
+                                                .catch(console.log);
+                                        }}
+                                    >
+                                        <MaterialIcons
+                                            name="content-copy"
+                                            size={20}
+                                            color={themeContext.color.primary}
+                                        />
+                                    </TouchableOpacity>
+                                </View>
+                            )}
+                            {balance && (
+                                <View style={{ flexDirection: 'row', marginTop: 14, justifyContent: 'space-between' }}>
+                                    <Text>{getString('BOA 잔액')}</Text>
+                                    <Text style={{ marginRight: 10 }}>{balance}</Text>
+                                </View>
+                            )}
+                        </>
                     )}
                 </View>
 
@@ -228,7 +238,7 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                             // Guest 모드일 때 어떻게 ?
                             dispatch(showSnackBar(getString('둘러보기 중에는 사용할 수 없습니다')));
                         } else {
-                            navigation.navigate('JoinProposalList');
+                            linkTo('/list-join');
                         }
                     }}
                 >
@@ -249,9 +259,7 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                     <Text style={[globalStyle.btext, { fontSize: 16 }]}>{getString('제안 작성')}</Text>
                     <TouchableOpacity
                         style={[globalStyle.flexRowBetween, { marginTop: Platform.OS === 'android' ? 5 : 14 }]}
-                        onPress={() => {
-                            navigation.navigate('CreateProposal', { tempId: Date.now().toString() });
-                        }}
+                        onPress={() => linkTo(`/createproposal/${Date.now().toString()}`)}
                     >
                         <Text>{getString('신규제안 작성')}</Text>
                         <View style={[globalStyle.center, { width: 30, height: 30 }]}>
@@ -260,7 +268,7 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={[globalStyle.flexRowBetween, { marginTop: Platform.OS === 'android' ? 0 : 9 }]}
-                        onPress={() => navigation.navigate('TempProposalList')}
+                        onPress={() => linkTo('/list-temp')}
                     >
                         <Text>{getString('임시저장 제안')}</Text>
                         <View style={[globalStyle.center, { width: 30, height: 30 }]}>
@@ -273,7 +281,7 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                             if (isGuest) {
                                 dispatch(showSnackBar(getString('둘러보기 중에는 사용할 수 없습니다')));
                             } else {
-                                navigation.navigate('MyProposalList');
+                                linkTo('/list-mine');
                             }
                         }}
                     >

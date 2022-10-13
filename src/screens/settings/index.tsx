@@ -96,12 +96,18 @@ function Settings({ navigation, route }: MainScreenProps<'Settings'>): JSX.Eleme
     const headerLeft = useCallback(() => {
         return (
             <Button
-                onPress={() => navigation.goBack()}
+                onPress={() => {
+                    if (navigation.canGoBack()) {
+                        navigation.goBack();
+                    } else {
+                        linkTo('/home');
+                    }
+                }}
                 icon={<Icon name="chevron-left" tvParallaxProperties={undefined} />}
                 type="clear"
             />
         );
-    }, [navigation]);
+    }, [navigation, linkTo]);
 
     React.useLayoutEffect(() => {
         navigation.setOptions({
@@ -173,7 +179,7 @@ function Settings({ navigation, route }: MainScreenProps<'Settings'>): JSX.Eleme
                         style={[globalStyle.flexRowBetween, { height: 40 }]}
                         onPress={() => linkTo('/accountinfo')}
                     >
-                        <Text style={{ fontSize: 13 }}>{getString('계정정보 변경하기')}</Text>
+                        <Text style={{ fontSize: 13 }}>{getString('계정이름 변경하기')}</Text>
                         <Icon name="chevron-right" color="darkgray" tvParallaxProperties={undefined} />
                     </TouchableOpacity>
                 </View>

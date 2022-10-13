@@ -2,6 +2,7 @@ import React, { useContext, useRef, useState, useCallback, useEffect } from 'rea
 import { View, Animated, Dimensions, NativeScrollEvent } from 'react-native';
 import { Button, Text, Icon } from 'react-native-elements';
 import { TabView, SceneRendererProps } from 'react-native-tab-view';
+import { useLinkTo } from '@react-navigation/native';
 import TabBarContainer from '~/components/status/TabBar';
 import { MainScreenProps } from '~/navigation/main/MainParams';
 import FocusAwareStatusBar from '~/components/statusbar/FocusAwareStatusBar';
@@ -132,6 +133,7 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
     const [total, setTotal] = useState(0);
     const [participated, setParticipated] = useState(0);
     const [validators, setValidators] = useState<Validator[]>([]);
+    const linkTo = useLinkTo();
 
     const [sceneHeight, setSceneHeight] = useState<HeightType>('auto');
     const [tab0Height, setTab0Height] = useState<HeightType>('auto');
@@ -378,7 +380,13 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
                 <View style={styles.statusBar} />
                 <View style={styles.navBar}>
                     <Button
-                        onPress={() => navigation.goBack()}
+                        onPress={() => {
+                            if (navigation.canGoBack()) {
+                                navigation.goBack();
+                            } else {
+                                linkTo('/home');
+                            }
+                        }}
                         icon={<Icon name="chevron-left" color="white" tvParallaxProperties={undefined} />}
                         type="clear"
                     />
@@ -439,7 +447,7 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
                             onLayout={(height) => {
                                 setTab1Height(height);
                             }}
-                            moveToNotice={() => navigation.navigate('Notice', { id: noticeAId })}
+                            moveToNotice={() => linkTo(`/notice/${noticeAId}`)}
                         />
                     );
                 }

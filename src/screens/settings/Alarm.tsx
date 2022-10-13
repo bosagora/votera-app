@@ -3,6 +3,7 @@ import { View, ScrollView, Switch } from 'react-native';
 import { Button, Text, Icon } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import { debounce } from 'lodash';
+import { useLinkTo } from '@react-navigation/native';
 import { MainScreenProps } from '~/navigation/main/MainParams';
 import globalStyle from '~/styles/global';
 import { useUpdateAlarmStatusMutation } from '~/graphql/generated/generated';
@@ -26,6 +27,7 @@ function Alarm({ navigation, route }: MainScreenProps<'Alarm'>): JSX.Element {
     const { isGuest, user } = useContext(AuthContext);
     const [feedStatus, setFeedStatus] = useState<FeedProps>();
     const [updateAlarmMutate] = useUpdateAlarmStatusMutation();
+    const linkTo = useLinkTo();
 
     useEffect(() => {
         setFeedStatus(pushService.getUserAlarmStatus());
@@ -68,12 +70,18 @@ function Alarm({ navigation, route }: MainScreenProps<'Alarm'>): JSX.Element {
     const headerLeft = useCallback(() => {
         return (
             <Button
-                onPress={() => navigation.goBack()}
+                onPress={() => {
+                    if (navigation.canGoBack()) {
+                        navigation.goBack();
+                    } else {
+                        linkTo('/home');
+                    }
+                }}
                 icon={<Icon name="chevron-left" tvParallaxProperties={undefined} />}
                 type="clear"
             />
         );
-    }, [navigation]);
+    }, [navigation, linkTo]);
 
     React.useLayoutEffect(() => {
         navigation.setOptions({

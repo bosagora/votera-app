@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { View, Image, ListRenderItemInfo } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useLinkTo } from '@react-navigation/native';
 import { Button, Icon, Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
@@ -33,6 +33,7 @@ function Search({ navigation, route }: MainScreenProps<'Search'>): JSX.Element {
     const [isSearched, setIsSearched] = useState<boolean>(false);
     const [searchHistory, setSearchHistory] = useState<string[]>([]);
     const { fetchProposal } = useContext(ProposalContext);
+    const linkTo = useLinkTo();
 
     useFocusEffect(
         useCallback(() => {
@@ -103,7 +104,7 @@ function Search({ navigation, route }: MainScreenProps<'Search'>): JSX.Element {
                 item={info.item}
                 onPress={() => {
                     fetchProposal(proposalId);
-                    navigation.navigate('ProposalDetail', { id: proposalId });
+                    linkTo(`/detail/${proposalId}`);
                 }}
             />
         );
@@ -216,12 +217,18 @@ function Search({ navigation, route }: MainScreenProps<'Search'>): JSX.Element {
     const headerLeft = useCallback(() => {
         return (
             <Button
-                onPress={() => navigation.goBack()}
+                onPress={() => {
+                    if (navigation.canGoBack()) {
+                        navigation.goBack();
+                    } else {
+                        linkTo('/home');
+                    }
+                }}
                 icon={<Icon name="chevron-left" tvParallaxProperties={undefined} />}
                 type="clear"
             />
         );
-    }, [navigation]);
+    }, [navigation, linkTo]);
 
     React.useLayoutEffect(() => {
         navigation.setOptions({

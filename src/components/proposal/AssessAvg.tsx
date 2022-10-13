@@ -49,7 +49,7 @@ function AssessAvg(props: AssessAvgProps): JSX.Element {
                 </Text>
                 <View style={{ flexDirection: 'row', marginTop: 10 }}>
                     <Text style={[globalStyle.ltext, { color: themeContext.color.primary }]}>
-                        {getString('참여한 노드수')}
+                        {getString('참여한 검증자 수')}
                     </Text>
                     <Text style={[globalStyle.mtext, { marginLeft: 5, color: themeContext.color.primary }]}>
                         {nodeCount}

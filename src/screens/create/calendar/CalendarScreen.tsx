@@ -50,12 +50,14 @@ function getToday() {
 }
 
 function CalendarScreen({ navigation, route }: MainScreenProps<'Calendar'>): JSX.Element | null {
-    const { startDate, endDate, isAssess } = route.params;
+    const isAssess = !!route.params?.isAssess;
+    const startDate = route.params?.startDate;
+    const endDate = route.params?.endDate;
     const themeContext = useContext(ThemeContext);
     const dispatch = useAppDispatch();
     const [assessCaption, setAssessCaption] = useState<string>();
-    const [startSelected, setStartDate] = useState<string>();
-    const [endSelected, setEndDate] = useState<string>();
+    const [startSelected, setStartSelected] = useState<string>();
+    const [endSelected, setEndSelected] = useState<string>();
     const [minDate, setMinDate] = useState<string>();
     const [maxDate, setMaxDate] = useState<string>();
     const [markedDates, setMarkedDates] = useState<Record<string, SelectedCalendarDate>>({});
@@ -64,7 +66,7 @@ function CalendarScreen({ navigation, route }: MainScreenProps<'Calendar'>): JSX
         return (
             <Button
                 onPress={() => {
-                    navigation.goBack();
+                    navigation.pop();
                 }}
                 icon={<Icon name="chevron-left" tvParallaxProperties={undefined} />}
                 type="clear"
@@ -79,8 +81,7 @@ function CalendarScreen({ navigation, route }: MainScreenProps<'Calendar'>): JSX
                 onPress={() => {
                     if (startSelected && endSelected) {
                         dispatch(selectDatePicker({ startDate: startSelected, endDate: endSelected }));
-                        // route.params.returnData({ startDate, endDate });
-                        navigation.goBack();
+                        navigation.pop();
                     }
                 }}
                 disabled={!startSelected || !endSelected}
@@ -101,8 +102,8 @@ function CalendarScreen({ navigation, route }: MainScreenProps<'Calendar'>): JSX
 
     useFocusEffect(
         useCallback(() => {
-            setStartDate(startDate);
-            setEndDate(endDate);
+            setStartSelected(startDate);
+            setEndSelected(endDate);
         }, [startDate, endDate]),
     );
 
@@ -146,7 +147,7 @@ function CalendarScreen({ navigation, route }: MainScreenProps<'Calendar'>): JSX
                 }
             }
             const index = isAssess ? 7 : 0;
-            const maxDeliberation = start ? dayjs(start) : today.add(index + 3, 'd');
+            const maxDeliberation = start ? dayjs(start) : today.add(index + (isAssess ? 2 : 3), 'd');
             const deliberationEnd = maxDeliberation.diff(today, 'd') - 1;
             for (
                 let i = index, indexDate = today.add(index, 'd');
@@ -157,17 +158,21 @@ function CalendarScreen({ navigation, route }: MainScreenProps<'Calendar'>): JSX
                 obj[dateString] = { ...deliberation };
                 if (i === index) {
                     obj[dateString].startingDay = true;
+                    if (!isAssess) {
+                        obj[dateString].marked = true;
+                        obj[dateString].dotColor = 'rgb(29,197,220)';
+                    }
                 } else if (i === deliberationEnd) {
                     obj[dateString].endingDay = true;
                 }
             }
 
-            const minDateTime = today.add(index + 3, 'd');
-            const maxDateTime = start ? dayjs(start).add(14, 'd') : today.add(index + 14, 'd');
+            const minDateTime = today.add(index + 2, 'd');
+            const maxDateTime = start ? dayjs(start).add(13, 'd') : today.add(index + (isAssess ? 13 : 14), 'd');
             setMinDate(minDateTime.format('YYYY-MM-DD'));
             setMaxDate(maxDateTime.format('YYYY-MM-DD'));
             if (start) {
-                for (let i = 0, indexDate = dayjs(start); i < 3; i += 1, indexDate = indexDate.add(1, 'd')) {
+                for (let i = 0, indexDate = dayjs(start); i < 2; i += 1, indexDate = indexDate.add(1, 'd')) {
                     const dateString = indexDate.format('YYYY-MM-DD');
                     if (i === 0) {
                         obj[dateString] = { ...voting, startingDay: true, endingDay: true };
@@ -202,23 +207,23 @@ function CalendarScreen({ navigation, route }: MainScreenProps<'Calendar'>): JSX
         if (endSelected) {
             if (!startSelected) {
                 // invalid input: cannot select end without start
-                setEndDate(undefined);
+                setEndSelected(undefined);
                 return;
             }
             // check end between 3 days and 14 days after start
             const daysBetween = dayjs(endSelected).diff(startSelected, 'd');
-            if (daysBetween < 3 || daysBetween > 14) {
-                setEndDate(undefined);
+            if (daysBetween < 2 || daysBetween > 13) {
+                setEndSelected(undefined);
                 return;
             }
         }
         if (startSelected) {
-            const base = today.add(isAssess ? 7 : 0, 'd');
+            const base = today.add(isAssess ? 7 + 2 : 0 + 3, 'd');
             // check if vote start between 3 days and 14 days after end of assess
             const daysBetween = dayjs(startSelected).diff(base, 'd');
-            if (daysBetween < 3 || daysBetween > 14) {
-                setStartDate(undefined);
-                setEndDate(undefined);
+            if (daysBetween < 0 || daysBetween > 11) {
+                setStartSelected(undefined);
+                setEndSelected(undefined);
                 return;
             }
         }
@@ -228,14 +233,14 @@ function CalendarScreen({ navigation, route }: MainScreenProps<'Calendar'>): JSX
     const onPressDay = (day: DateData) => {
         if (!startSelected) {
             // 맨 처음 눌렀을때
-            setStartDate(day.dateString);
+            setStartSelected(day.dateString);
         } else if (startSelected === day.dateString) {
-            setStartDate(undefined);
-            setEndDate(undefined);
+            setStartSelected(undefined);
+            setEndSelected(undefined);
         } else if (endSelected === day.dateString) {
-            setEndDate(undefined);
+            setEndSelected(undefined);
         } else {
-            setEndDate(day.dateString);
+            setEndSelected(day.dateString);
         }
     };
 
@@ -280,10 +285,10 @@ function CalendarScreen({ navigation, route }: MainScreenProps<'Calendar'>): JSX
                 <Text style={[globalStyle.rtext, { fontSize: 14, lineHeight: 23 }]}>
                     {isAssess
                         ? getString(
-                              '투표를 위한 시작일과 종료일을 아래에서 선택해주세요&#46; 제안 등록일 포함 7일 동안 사전 평가가 진행되며, 사전평가 시점 3일 후, 14일 이내 투표를 시작할 수 있습니다&#46;',
+                              '투표 시작일과 종료일을 아래에서 선택해주세요&#46; 제안 등록일 포함 7일 동안 사전 평가가 진행되며, 사전평가 종료일 기준 3일 후, 14일 이내 투표를 시작할 수 있습니다&#46;',
                           )
                         : getString(
-                              '투표를 위한 시작일과 종료일을 아래에서 선택해주세요&#46; 제안 등록일 포함 3일 후, 14일 이내 투표를 시작할 수 있습니다&#46;',
+                              '투표 시작일과 종료일을 아래에서 선택해주세요&#46; 제안 등록일 기준 3일 후, 14일 이내 투표를 시작할 수 있습니다&#46;',
                           )}
                     {'\n\n'}
                     <Text style={{ color: themeContext.color.primary }}>
@@ -305,13 +310,11 @@ function CalendarScreen({ navigation, route }: MainScreenProps<'Calendar'>): JSX
                     onDayPress={(day) => onPressDay(day)}
                     theme={{
                         'stylesheet.calendar.header': {
-                            monthText: [
-                                globalStyle.gbtext,
-                                {
-                                    fontSize: 56,
-                                    color: themeContext.color.primary,
-                                },
-                            ],
+                            monthText: {
+                                fontFamily: 'GmarketSansTTFBold',
+                                fontSize: 56,
+                                color: themeContext.color.primary,
+                            },
                         },
                         textDayFontFamily: Platform.OS === 'web' ? 'Robot' : 'RobotoRegular',
                         textDayFontSize: 14,

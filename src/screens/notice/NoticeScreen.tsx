@@ -3,6 +3,7 @@ import { View, Image, FlatList, RefreshControl, ImageURISource, ActivityIndicato
 import { Button, Icon, Text } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAssets } from 'expo-asset';
+import { useLinkTo } from '@react-navigation/native';
 import globalStyle from '~/styles/global';
 import { MainScreenProps } from '~/navigation/main/MainParams';
 import { Enum_Post_Type as EnumPostType, Post, PostStatus, useActivityPostsQuery } from '~/graphql/generated/generated';
@@ -47,6 +48,7 @@ function NoticeScreen({ navigation, route }: MainScreenProps<'Notice'>): JSX.Ele
     const [pullRefresh, setPullRefresh] = useState(false);
     const scrollViewRef = useRef<FlatList<any>>(null);
     const [assets] = useAssets(iconAssets);
+    const linkTo = useLinkTo();
 
     const {
         data: noticeQueryData,
@@ -67,22 +69,28 @@ function NoticeScreen({ navigation, route }: MainScreenProps<'Notice'>): JSX.Ele
     const headerLeft = useCallback(() => {
         return (
             <Button
-                onPress={() => navigation.goBack()}
+                onPress={() => {
+                    if (navigation.canGoBack()) {
+                        navigation.goBack();
+                    } else {
+                        linkTo('/home');
+                    }
+                }}
                 icon={<Icon name="chevron-left" color="white" tvParallaxProperties={undefined} />}
                 type="clear"
             />
         );
-    }, [navigation]);
+    }, [navigation, linkTo]);
 
     const headerRight = useCallback(() => {
         return isCreator ? (
             <Button
-                onPress={() => navigation.navigate('CreateNotice', { id: route.params.id })}
+                onPress={() => linkTo(`/createnotice/${route.params.id}`)}
                 icon={<Icon name="add" color="white" tvParallaxProperties={undefined} />}
                 type="clear"
             />
         ) : null;
-    }, [isCreator, navigation, route.params.id]);
+    }, [isCreator, linkTo, route.params.id]);
 
     const headerBackground = useCallback(() => {
         if (!assets) return null;

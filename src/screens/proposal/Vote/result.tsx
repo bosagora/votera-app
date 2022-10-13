@@ -203,12 +203,12 @@ function VoteResult(props: VoteResultProps): JSX.Element {
                 </View>
 
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 40 }}>
-                    <Text style={{ color: themeContext.color.primary }}>{getString('투표에 참여한 노드 수')}</Text>
+                    <Text style={{ color: themeContext.color.primary }}>{getString('투표에 참여한 검증자 수')}</Text>
                     <Text style={{ color: themeContext.color.primary, marginLeft: 9 }}>{participated}</Text>
                 </View>
 
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
-                    <Text style={{ color: themeContext.color.primary }}>{getString('총 노드 수')}</Text>
+                    <Text style={{ color: themeContext.color.primary }}>{getString('총 검증자 수')}</Text>
                     <Text style={{ color: themeContext.color.primary, marginLeft: 9 }}>{total}</Text>
                 </View>
             </>

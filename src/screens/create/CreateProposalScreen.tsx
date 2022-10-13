@@ -8,6 +8,7 @@ import { DocumentResult } from 'expo-document-picker';
 import { useAssets } from 'expo-asset';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BigNumber } from 'ethers';
+import { useLinkTo } from '@react-navigation/native';
 import globalStyle from '~/styles/global';
 import RadioButton from '~/components/button/radio';
 import TextInputComponent from '~/components/input/SingleLineInput';
@@ -64,6 +65,13 @@ const styles = StyleSheet.create({
         padding: 0,
         width: 63,
     },
+    buttonDisabled: {
+        backgroundColor: 'transparent',
+    },
+    buttonTitle: {
+        color: 'white',
+        fontSize: 14,
+    },
     container: {
         backgroundColor: 'white',
         borderTopLeftRadius: 10,
@@ -95,7 +103,7 @@ const styles = StyleSheet.create({
     wrapperText: {
         color: 'black',
         fontSize: 11,
-        marginVertical: Platform.OS === 'android' ? 0 : 15
+        marginVertical: Platform.OS === 'android' ? 0 : 15,
     },
 });
 
@@ -185,6 +193,7 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
     const [createError, setCreateError] = useState<{ errorName: string } | undefined>();
     const [assets] = useAssets(iconAssets);
     const pickedDate = useAppSelector(selectDatePickerState);
+    const linkTo = useLinkTo();
 
     const [uploadAttachment] = useUploadFileMutation();
 
@@ -358,7 +367,11 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
                 }
                 resetData();
                 if (!proposalResponse?.proposalId) {
-                    navigation.goBack();
+                    if (navigation.canGoBack()) {
+                        navigation.goBack();
+                    } else {
+                        linkTo('/home');
+                    }
                     return;
                 }
                 const { proposalId } = proposalResponse;
@@ -370,23 +383,24 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
             }
         },
         [
-            createProposal,
-            date?.endDate,
-            date?.startDate,
-            dispatch,
-            enrolled,
-            fetchProposal,
             isGuest,
+            date.startDate,
+            date.endDate,
+            enrolled,
+            proposalType,
+            dispatch,
             logoImage,
             mainImage,
-            navigation,
-            proposalType,
-            resetData,
-            itemId,
-            uploadAttachment,
             uploadFiles,
             user?.address,
             user?.memberId,
+            createProposal,
+            itemId,
+            resetData,
+            fetchProposal,
+            navigation,
+            uploadAttachment,
+            linkTo,
         ],
     );
 
@@ -395,13 +409,17 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
             <Button
                 onPress={() => {
                     resetData();
-                    navigation.goBack();
+                    if (navigation.canGoBack()) {
+                        navigation.goBack();
+                    } else {
+                        linkTo('/home');
+                    }
                 }}
                 icon={<Icon name="chevron-left" color="white" tvParallaxProperties={undefined} />}
                 type="clear"
             />
         );
-    }, [navigation, resetData]);
+    }, [navigation, linkTo, resetData]);
 
     const headerRight = useCallback(() => {
         if (metamaskStatus === MetamaskStatus.CONNECTING) {
@@ -411,10 +429,10 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
                     <ShortButton
                         style={{ marginLeft: 12 }}
                         title={proposalType === EnumProposalType.System ? getString('등록') : getString('다음')}
-                        titleStyle={{ fontSize: 14, color: 'white' }}
+                        titleStyle={styles.buttonTitle}
                         buttonStyle={styles.button}
                         disabled
-                        disabledStyle={{ backgroundColor: 'transparent' }}
+                        disabledStyle={styles.buttonDisabled}
                     />
                 </View>
             );
@@ -423,9 +441,9 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
             return (
                 <View style={globalStyle.flexRowBetween}>
                     <Button
-                        containerStyle={[globalStyle.metaButton, { backgroundColor: themeContext.color.primary }]}
+                        containerStyle={[globalStyle.headerMetaButton, { backgroundColor: themeContext.color.primary }]}
                         title="CONNECT"
-                        titleStyle={globalStyle.metaTitle}
+                        titleStyle={globalStyle.headerMetaTitle}
                         onPress={() => {
                             metamaskConnect();
                         }}
@@ -433,10 +451,10 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
                     <ShortButton
                         style={{ marginLeft: 12 }}
                         title={proposalType === EnumProposalType.System ? getString('등록') : getString('다음')}
-                        titleStyle={{ fontSize: 14, color: 'white' }}
+                        titleStyle={styles.buttonTitle}
                         buttonStyle={styles.button}
                         disabled
-                        disabledStyle={{ backgroundColor: 'transparent' }}
+                        disabledStyle={styles.buttonDisabled}
                     />
                 </View>
             );
@@ -444,7 +462,7 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
         return (
             <ShortButton
                 title={proposalType === EnumProposalType.System ? getString('등록') : getString('다음')}
-                titleStyle={{ fontSize: 14, color: 'white' }}
+                titleStyle={styles.buttonTitle}
                 buttonStyle={styles.button}
                 onPress={() => {
                     runCreateProposal(title, description, amount).catch(console.log);
@@ -491,10 +509,14 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
         if (!isGuest) {
             if (!user?.memberId) {
                 dispatch(showSnackBar(getString('사용자 정보를 읽어올 수 없습니다')));
-                navigation.goBack();
+                if (navigation.canGoBack()) {
+                    navigation.goBack();
+                } else {
+                    linkTo('/home');
+                }
             }
         }
-    }, [dispatch, isGuest, navigation, user?.memberId]);
+    }, [dispatch, isGuest, navigation, linkTo, user?.memberId]);
 
     useEffect(() => {
         if (pickedDate && pickedDate.startDate && pickedDate.endDate) {
@@ -541,7 +563,7 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
         };
         savePreviewToSession(previewData)
             .then(() => {
-                navigation.navigate('ProposalPreview');
+                linkTo('/preview');
             })
             .catch(console.log);
     };
@@ -605,10 +627,13 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
                         <DatePicker
                             // onChange={(d) => setDate(d)}
                             onNavigate={(param) => {
-                                navigation.navigate('Calendar', {
-                                    isAssess: param.isAssess,
-                                    startDate: param.startDate,
-                                    endDate: param.endDate,
+                                navigation.push('RootUser', {
+                                    screen: 'Calendar',
+                                    params: {
+                                        isAssess: param.isAssess,
+                                        startDate: param.startDate,
+                                        endDate: param.endDate,
+                                    },
                                 });
                             }}
                             value={date}
@@ -643,12 +668,12 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
                             </View>
                         </RowWrapper>
                     )}
-                    <RowWrapper label={getString('사업목표 및 설명')} mandatory>
+                    <RowWrapper label={getString('목표 및 설명')} mandatory>
                         {/* <MultilineInput onlyRead={false} /> */}
                         <Input
                             value={description}
                             textAlignVertical="top"
-                            placeholder={getString('사업목표 및 관련 내용을 입력해주세요')}
+                            placeholder={getString('제안의 목표 및 관련 내용을 입력해주세요')}
                             placeholderTextColor={themeContext.color.placeholder}
                             multiline
                             style={styles.descriptionText}

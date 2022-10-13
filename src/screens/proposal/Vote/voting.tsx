@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { ThemeContext } from 'styled-components/native';
 import { View, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useLinkTo, useNavigation } from '@react-navigation/native';
 import { Button, Text, Icon } from 'react-native-elements';
 import globalStyle from '~/styles/global';
 import ProposalCard from '~/components/proposal/ProposalCard';
@@ -52,6 +52,7 @@ function Voting(props: Props): JSX.Element {
     const navigation = useNavigation<MainNavigationProps<'ProposalDetail'>>();
     const themeContext = useContext(ThemeContext);
     const dispatch = useAppDispatch();
+    const linkTo = useLinkTo();
 
     const [vote, setVote] = useState<VOTE_SELECT | undefined>(undefined);
     const [oldVote, setOldVote] = useState<VOTE_SELECT>();
@@ -80,10 +81,14 @@ function Voting(props: Props): JSX.Element {
                 onPress={() => {
                     if (!proposalId) {
                         dispatch(showSnackBar(getString('제안서 정보에 오류가 있습니다')));
-                        navigation.goBack();
+                        if (navigation.canGoBack()) {
+                            navigation.goBack();
+                        } else {
+                            linkTo('/home');
+                        }
                     } else {
                         fetchProposal(proposalId);
-                        navigation.navigate('ProposalDetail', { id: proposalId });
+                        linkTo(`/detail/${proposalId}`);
                     }
                 }}
             />

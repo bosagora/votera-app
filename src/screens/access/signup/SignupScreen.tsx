@@ -1,12 +1,13 @@
 import React, { useContext, useEffect, useState, useCallback } from 'react';
-import { View, Keyboard, BackHandler } from 'react-native';
+import { View, Keyboard, BackHandler, Image, ImageURISource, ActivityIndicator, StyleSheet } from 'react-native';
 import { Button, Text, Icon } from 'react-native-elements';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TabView, SceneRendererProps, NavigationState } from 'react-native-tab-view';
 import { ThemeContext } from 'styled-components/native';
+import { useAssets } from 'expo-asset';
 import { useIsValidatorLazyQuery } from '~/graphql/generated/generated';
 import { AccessScreenProps } from '~/navigation/access/AccessParams';
-import { AuthContext, currentLocale, MetamaskStatus, User } from '~/contexts/AuthContext';
+import { AuthContext, MetamaskStatus, User } from '~/contexts/AuthContext';
 import globalStyle from '~/styles/global';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
@@ -14,10 +15,37 @@ import FocusAwareStatusBar from '~/components/statusbar/FocusAwareStatusBar';
 import getString from '~/utils/locales/STRINGS';
 import pushService from '~/services/FcmService';
 import { hideLoadingAniModal, showLoadingAniModal } from '~/state/features/loadingAniModal';
+import ShortButton from '~/components/button/ShortButton';
 import Terms from './Terms';
 import NodeGuide from './NodeGuide';
 import NameScreen from './Name';
 import CompleteScreen from './Complete';
+
+const styles = StyleSheet.create({
+    button: {
+        backgroundColor: 'transparent',
+        borderColor: 'white',
+        borderRadius: 47,
+        height: 32,
+        marginRight: 23,
+        padding: 0,
+        width: 63,
+    },
+    buttonDisabled: {
+        backgroundColor: 'transparent',
+    },
+    buttonTitle: {
+        color: 'white',
+        fontSize: 14,
+    },
+});
+
+enum EnumIconAsset {
+    Background = 0,
+}
+
+// eslint-disable-next-line global-require, import/extensions
+const iconAssets = [require('@assets/images/header/bg.png')];
 
 const keys = [
     { key: 'terms', title: getString('약관동의') },
@@ -35,10 +63,13 @@ function SignupScreen({ navigation }: AccessScreenProps<'Signup'>): JSX.Element 
     const themeContext = useContext(ThemeContext);
     const [index, setIndex] = useState(0);
     const [routes] = useState(keys);
-    const { metamaskStatus, metamaskAccount, enrolled, enroll, setEnrolledUser } = useContext(AuthContext);
+    const { metamaskStatus, metamaskAccount, metamaskConnect, enrolled, enroll, setEnrolledUser } =
+        useContext(AuthContext);
     const [stepComplete, setStepComplete] = useState(false);
     const [accountName, setAccountName] = useState('');
     const [newUser, setNewUser] = useState<User>();
+    const [assets] = useAssets(iconAssets);
+    const insets = useSafeAreaInsets();
     const [isValidatorQuery] = useIsValidatorLazyQuery({ fetchPolicy: 'cache-and-network' });
 
     useEffect(() => {
@@ -78,12 +109,49 @@ function SignupScreen({ navigation }: AccessScreenProps<'Signup'>): JSX.Element 
     );
 
     const headerRight = useCallback(() => {
+        if (metamaskStatus === MetamaskStatus.CONNECTING) {
+            return (
+                <View style={globalStyle.flexRowBetween}>
+                    <ActivityIndicator />
+                    <ShortButton
+                        style={{ marginLeft: 12 }}
+                        title={getString('다음')}
+                        titleStyle={styles.buttonTitle}
+                        buttonStyle={styles.button}
+                        disabled
+                        disabledStyle={styles.buttonDisabled}
+                    />
+                </View>
+            );
+        }
+        if (metamaskStatus === MetamaskStatus.NOT_CONNECTED) {
+            return (
+                <View style={globalStyle.flexRowBetween}>
+                    <Button
+                        containerStyle={[globalStyle.headerMetaButton, { backgroundColor: themeContext.color.primary }]}
+                        title="CONNECT"
+                        titleStyle={globalStyle.headerMetaTitle}
+                        onPress={() => {
+                            metamaskConnect();
+                        }}
+                    />
+                    <ShortButton
+                        style={{ marginLeft: 12 }}
+                        title={getString('다음')}
+                        titleStyle={styles.buttonTitle}
+                        buttonStyle={styles.button}
+                        disabled
+                        disabledStyle={styles.buttonDisabled}
+                    />
+                </View>
+            );
+        }
         if (index === 0 || index === 2 || index === 3) {
             return null;
         }
 
         return (
-            <Button
+            <ShortButton
                 disabled={!stepComplete}
                 onPress={() => {
                     Keyboard.dismiss();
@@ -96,20 +164,19 @@ function SignupScreen({ navigation }: AccessScreenProps<'Signup'>): JSX.Element 
                         .catch(console.log);
                 }}
                 title={getString('다음')}
-                titleStyle={[globalStyle.rtext, { fontSize: 17, color: themeContext.color.primary }]}
-                buttonStyle={{ padding: 0 }}
-                hitSlop={{ top: 10, right: 10, bottom: 10, left: 10 }}
-                type="clear"
+                titleStyle={styles.buttonTitle}
+                buttonStyle={styles.button}
+                disabledStyle={styles.buttonDisabled}
             />
         );
-    }, [accountName, enrollAccount, index, stepComplete, themeContext.color.primary]);
+    }, [accountName, enrollAccount, index, metamaskConnect, metamaskStatus, stepComplete, themeContext.color.primary]);
 
     const headerLeft = useCallback(() => {
         return (
             <Button
                 onPress={() => {
                     if (index === 0 || index === findIndex('guide')) {
-                        navigation.pop();
+                        navigation.goBack();
                     } else {
                         setIndex(index - 1);
                     }
@@ -120,19 +187,35 @@ function SignupScreen({ navigation }: AccessScreenProps<'Signup'>): JSX.Element 
         );
     }, [index, navigation]);
 
+    const headerBackground = useCallback(() => {
+        return (
+            <>
+                {assets && (
+                    <Image
+                        style={{ height: 65 + insets.top, width: '100%' }}
+                        source={assets[EnumIconAsset.Background] as ImageURISource}
+                    />
+                )}
+                <View style={globalStyle.headerBackground} />
+            </>
+        );
+    }, [assets, insets.top]);
+
     React.useLayoutEffect(() => {
         navigation.setOptions({
             headerTitle: getString('계정만들기'),
+            headerTitleStyle: [globalStyle.headerTitle, { color: 'white' }],
             headerLeft,
             headerRight,
+            headerBackground,
             headerStyle: { shadowOffset: { height: 0, width: 0 }, elevation: 0 },
         });
-    }, [navigation, headerLeft, headerRight]);
+    }, [navigation, headerLeft, headerRight, headerBackground]);
 
     useEffect(() => {
         const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
             if (index === 0 || index === findIndex('guide')) {
-                navigation.pop();
+                navigation.goBack();
             } else {
                 setIndex(index - 1);
             }

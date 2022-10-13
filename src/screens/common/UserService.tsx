@@ -1,6 +1,7 @@
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View } from 'react-native';
 import { Button, Text, Icon } from 'react-native-elements';
+import { useLinkTo } from '@react-navigation/native';
 import { CommonScreenProps } from '~/navigation/common/CommonParams';
 import getString from '~/utils/locales/STRINGS';
 import { getUserServiceTermURL } from '~/utils/votera/agoraconf';
@@ -10,18 +11,23 @@ import globalStyle from '~/styles/global';
 function UserServiceScreen({ route, navigation }: CommonScreenProps<'UserService'>): JSX.Element {
     const [title] = useState(getString('인증회원약관'));
     const [uri] = useState(getUserServiceTermURL());
+    const linkTo = useLinkTo();
 
     const headerLeft = useCallback(() => {
         return (
             <Button
                 onPress={() => {
-                    navigation.pop();
+                    if (navigation.canGoBack()) {
+                        navigation.goBack();
+                    } else {
+                        linkTo('/home');
+                    }
                 }}
                 icon={<Icon name="chevron-left" tvParallaxProperties={undefined} />}
                 type="clear"
             />
         );
-    }, [navigation]);
+    }, [navigation, linkTo]);
 
     const headerTitle = useCallback(() => {
         return (

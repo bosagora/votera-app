@@ -76,7 +76,7 @@ function LoginScreen({ navigation }: AccessScreenProps<'Login'>): JSX.Element {
                 {metamaskStatus === MetamaskStatus.UNAVAILABLE && (
                     <CommonButton
                         title={getString('메타마스크 설치하기')}
-                        buttonStyle={{ justifyContent: 'space-between', paddingHorizontal: 21, width: 271 }}
+                        buttonStyle={globalStyle.metaButton}
                         filled
                         onPress={() => {
                             onboarding.current?.startOnboarding();
@@ -87,7 +87,7 @@ function LoginScreen({ navigation }: AccessScreenProps<'Login'>): JSX.Element {
                 {metamaskStatus === MetamaskStatus.NOT_CONNECTED && (
                     <CommonButton
                         title={getString('메타마스크 연결하기')}
-                        buttonStyle={{ justifyContent: 'space-between', paddingHorizontal: 21, width: 271 }}
+                        buttonStyle={globalStyle.metaButton}
                         filled
                         onPress={metamaskConnect}
                         raised
@@ -97,7 +97,7 @@ function LoginScreen({ navigation }: AccessScreenProps<'Login'>): JSX.Element {
                 {metamaskStatus === MetamaskStatus.OTHER_CHAIN && (
                     <CommonButton
                         title={getString('메타마스크 체인 변경')}
-                        buttonStyle={{ justifyContent: 'space-between', paddingHorizontal: 21, width: 271 }}
+                        buttonStyle={globalStyle.metaButton}
                         filled
                         onPress={metamaskSwitch}
                         raised
@@ -107,7 +107,7 @@ function LoginScreen({ navigation }: AccessScreenProps<'Login'>): JSX.Element {
                     <>
                         <CommonButton
                             title={getString('로그인')}
-                            buttonStyle={{ justifyContent: 'space-between', paddingHorizontal: 21, width: 271 }}
+                            buttonStyle={globalStyle.metaButton}
                             filled
                             onPress={onClickSignIn}
                             raised

@@ -3,6 +3,7 @@ import { View, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-nat
 import { Button, Text, Icon } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import { debounce } from 'lodash';
+import { useLinkTo } from '@react-navigation/native';
 import globalStyle from '~/styles/global';
 import NowNode from '~/components/input/SingleLineInput2';
 import { AuthContext } from '~/contexts/AuthContext';
@@ -26,6 +27,8 @@ function AccountInfo({ navigation, route }: MainScreenProps<'AccountInfo'>): JSX
     const [newName, setNewName] = useState<string>(user?.username || (isGuest ? 'Guest' : getString('User 없음')));
     const [nameError, setNameError] = useState(false);
     const [isEqual, setIsEqual] = useState(true);
+    const linkTo = useLinkTo();
+
     const [checkUsername, { loading }] = useCheckUsernameLazyQuery({
         fetchPolicy: 'no-cache',
         onCompleted: (data) => {
@@ -45,12 +48,18 @@ function AccountInfo({ navigation, route }: MainScreenProps<'AccountInfo'>): JSX
     const headerLeft = useCallback(() => {
         return (
             <Button
-                onPress={() => navigation.goBack()}
+                onPress={() => {
+                    if (navigation.canGoBack()) {
+                        navigation.goBack();
+                    } else {
+                        linkTo('/home');
+                    }
+                }}
                 icon={<Icon name="chevron-left" tvParallaxProperties={undefined} />}
                 type="clear"
             />
         );
-    }, [navigation]);
+    }, [navigation, linkTo]);
 
     React.useLayoutEffect(() => {
         navigation.setOptions({
@@ -77,7 +86,7 @@ function AccountInfo({ navigation, route }: MainScreenProps<'AccountInfo'>): JSX
                 await changeVoterName(username);
                 setIsEqual(true);
                 dispatch(hideLoadingAniModal());
-                dispatch(showSnackBar(getString('노드 이름을 변경')));
+                dispatch(showSnackBar(getString('계정이름이 변경되었습니다')));
             } catch (err) {
                 console.log('changeVoterName error : ', err);
                 dispatch(hideLoadingAniModal());
@@ -138,7 +147,7 @@ function AccountInfo({ navigation, route }: MainScreenProps<'AccountInfo'>): JSX
 
                 <View style={{ marginTop: 60 }}>
                     <Text style={[globalStyle.btext, { marginBottom: 15, color: 'black' }]}>
-                        {getString('현재 로그인한 노드')}
+                        {getString('현재 로그인한 계정')}
                     </Text>
                     <NowNode
                         onChangeText={(text) => {

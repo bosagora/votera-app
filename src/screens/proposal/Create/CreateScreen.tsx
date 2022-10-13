@@ -1,5 +1,5 @@
 import React, { useContext, useCallback, useEffect } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 import { BigNumber } from 'ethers';
 import CommonButton from '~/components/button/CommonButton';
 import {
@@ -16,10 +16,7 @@ import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
 import CommonsBudget from '~/utils/votera/CommonsBudget';
 import PaymentInfo from '~/components/proposal/PaymentInfo';
-
-const styles = StyleSheet.create({
-    metaButton: { justifyContent: 'space-between', paddingHorizontal: 21, width: 271 },
-});
+import globalStyle from '~/styles/global';
 
 interface Props {
     onLayout: (h: number) => void;
@@ -164,7 +161,7 @@ function CreateScreen(props: Props): JSX.Element {
             {metamaskStatus === MetamaskStatus.NOT_CONNECTED && (
                 <CommonButton
                     title={getString('메타마스크 연결하기')}
-                    buttonStyle={styles.metaButton}
+                    buttonStyle={globalStyle.metaButton}
                     filled
                     onPress={metamaskConnect}
                     raised
@@ -174,7 +171,7 @@ function CreateScreen(props: Props): JSX.Element {
             {metamaskStatus === MetamaskStatus.OTHER_CHAIN && (
                 <CommonButton
                     title={getString('메타마스크 체인 변경')}
-                    buttonStyle={styles.metaButton}
+                    buttonStyle={globalStyle.metaButton}
                     filled
                     onPress={metamaskSwitch}
                     raised

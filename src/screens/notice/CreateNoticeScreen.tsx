@@ -7,6 +7,7 @@ import { Button, Input, Text, Icon } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemeContext } from 'styled-components/native';
 import { useAssets } from 'expo-asset';
+import { useLinkTo } from '@react-navigation/native';
 import ImagePicker from '~/components/input/ImagePicker';
 import DocumentPicker from '~/components/input/DocumentPicker';
 import globalStyle from '~/styles/global';
@@ -74,6 +75,7 @@ function CreateNoticeScreen({ navigation, route }: MainScreenProps<'CreateNotice
     const [mainImage, setMainImage] = useState<ImagePickerResult>();
     const [uploadFiles, setUploadFiles] = useState<DocumentResult[]>([]);
     const [assets] = useAssets(iconAssets);
+    const linkTo = useLinkTo();
 
     const [uploadAttachment] = useUploadFileMutation();
 
@@ -123,24 +125,34 @@ function CreateNoticeScreen({ navigation, route }: MainScreenProps<'CreateNotice
                 });
 
                 dispatch(hideLoadingAniModal());
-                navigation.goBack();
+                if (navigation.canGoBack()) {
+                    navigation.goBack();
+                } else {
+                    linkTo('/home');
+                }
             } catch (e) {
                 console.log('CreateNotice error : ', e);
                 dispatch(hideLoadingAniModal());
             }
         },
-        [activityId, createProposalNotice, dispatch, mainImage, navigation, uploadAttachment, uploadFiles],
+        [activityId, createProposalNotice, dispatch, linkTo, mainImage, navigation, uploadAttachment, uploadFiles],
     );
 
     const headerLeft = useCallback(() => {
         return (
             <Button
-                onPress={() => navigation.goBack()}
+                onPress={() => {
+                    if (navigation.canGoBack()) {
+                        navigation.goBack();
+                    } else {
+                        linkTo('/home');
+                    }
+                }}
                 icon={<Icon name="chevron-left" color="white" tvParallaxProperties={undefined} />}
                 type="clear"
             />
         );
-    }, [navigation]);
+    }, [navigation, linkTo]);
 
     const headerRight = useCallback(() => {
         return (
@@ -182,13 +194,6 @@ function CreateNoticeScreen({ navigation, route }: MainScreenProps<'CreateNotice
             headerShown: true,
         });
     }, [headerBackground, headerLeft, headerRight, navigation]);
-
-    // useEffect(() => {
-    //     if(data && data.createNotice) {
-    //         dispatch(ActionCreators.loadingAniModal({ visibility: false }));
-    //         navigation.pop();
-    //     }
-    // }, [data]);
 
     return (
         <>

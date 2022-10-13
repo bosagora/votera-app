@@ -106,9 +106,9 @@ function HomeScreen({ navigation, route }: MainScreenProps<'Home'>): JSX.Element
             <View style={{ flexDirection: 'row' }}>
                 {metamaskStatus === MetamaskStatus.NOT_CONNECTED && (
                     <Button
-                        containerStyle={[globalStyle.metaButton, { backgroundColor: themeContext.color.primary }]}
+                        containerStyle={[globalStyle.headerMetaButton, { backgroundColor: themeContext.color.primary }]}
                         title="CONNECT"
-                        titleStyle={globalStyle.metaTitle}
+                        titleStyle={globalStyle.headerMetaTitle}
                         onPress={() => {
                             metamaskConnect();
                         }}
@@ -116,7 +116,7 @@ function HomeScreen({ navigation, route }: MainScreenProps<'Home'>): JSX.Element
                 )}
                 {metamaskStatus === MetamaskStatus.CONNECTING && <ActivityIndicator />}
                 {(metamaskStatus === MetamaskStatus.CONNECTED || metamaskStatus === MetamaskStatus.OTHER_CHAIN) && (
-                    <View style={[globalStyle.metaButton, { borderColor: themeContext.color.primary }]}>
+                    <View style={[globalStyle.headerMetaButton, { borderColor: themeContext.color.primary }]}>
                         <Text style={{ color: themeContext.color.primary }}>CONNECTED</Text>
                     </View>
                 )}

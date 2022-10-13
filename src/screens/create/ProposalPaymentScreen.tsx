@@ -3,6 +3,7 @@ import { View, Image, ActivityIndicator, ScrollView, ImageURISource, StyleSheet 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAssets } from 'expo-asset';
 import { BigNumber } from 'ethers';
+import { useLinkTo } from '@react-navigation/native';
 import globalStyle from '~/styles/global';
 import CommonButton from '~/components/button/CommonButton';
 import {
@@ -32,7 +33,6 @@ const iconAssets = [require('@assets/images/header/bg.png')];
 
 const styles = StyleSheet.create({
     container: { alignItems: 'center', backgroundColor: 'white', flex: 1 },
-    metaButton: { justifyContent: 'space-between', paddingHorizontal: 21, width: 271 },
 });
 
 function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment'>): JSX.Element {
@@ -43,6 +43,7 @@ function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment
     const dispatch = useAppDispatch();
     const [assets] = useAssets(iconAssets);
     const insets = useSafeAreaInsets();
+    const linkTo = useLinkTo();
 
     const [getProposalFee, { data, refetch }] = useGetProposalFeeLazyQuery({
         fetchPolicy: 'cache-and-network',
@@ -69,11 +70,11 @@ function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment
                 }}
                 onPress={() => {
                     fetchProposal(id);
-                    navigation.navigate('ProposalDetail', { id });
+                    linkTo(`/detail/${id}`);
                 }}
             />
         );
-    }, [fetchProposal, navigation, id]);
+    }, [fetchProposal, linkTo, id]);
 
     const headerBackground = useCallback(() => {
         return (
@@ -231,7 +232,7 @@ function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment
                 {metamaskStatus === MetamaskStatus.NOT_CONNECTED && (
                     <CommonButton
                         title={getString('메타마스크 연결하기')}
-                        buttonStyle={styles.metaButton}
+                        buttonStyle={globalStyle.metaButton}
                         filled
                         onPress={metamaskConnect}
                         raised
@@ -241,7 +242,7 @@ function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment
                 {metamaskStatus === MetamaskStatus.OTHER_CHAIN && (
                     <CommonButton
                         title={getString('메타마스크 체인 변경')}
-                        buttonStyle={styles.metaButton}
+                        buttonStyle={globalStyle.metaButton}
                         filled
                         onPress={metamaskSwitch}
                         raised

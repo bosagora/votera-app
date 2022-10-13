@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator } from 'react-native';
 import CommonButton from '~/components/button/CommonButton';
 import { convertWithdrawRevertMessage, getRevertMessage, VOTE_SELECT } from '~/utils/votera/voterautil';
 import {
@@ -20,11 +20,7 @@ import Voting from './voting';
 import VoteResult from './result';
 import PendingVote from './pendingVote';
 import CommonsBudget from '~/utils/votera/CommonsBudget';
-
-const styles = StyleSheet.create({
-    container: { alignItems: 'center', justifyContent: 'center' },
-    metaButton: { justifyContent: 'space-between', paddingHorizontal: 21, width: 271 },
-});
+import globalStyle from '~/styles/global';
 
 interface Props {
     onLayout: (h: number) => void;
@@ -251,10 +247,10 @@ function VoteScreen(props: Props): JSX.Element {
     const renderOtherChain = () => {
         if (needVote) {
             return (
-                <View style={styles.container}>
+                <View style={globalStyle.center}>
                     <CommonButton
                         title={getString('메타마스크 체인 변경')}
-                        buttonStyle={styles.metaButton}
+                        buttonStyle={globalStyle.metaButton}
                         filled
                         onPress={metamaskSwitch}
                         raised
@@ -298,10 +294,10 @@ function VoteScreen(props: Props): JSX.Element {
         <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)}>
             {metamaskStatus === MetamaskStatus.INITIALIZING && <ActivityIndicator size="large" />}
             {metamaskStatus === MetamaskStatus.NOT_CONNECTED && (
-                <View style={styles.container}>
+                <View style={globalStyle.center}>
                     <CommonButton
                         title={getString('메타마스크 연결하기')}
-                        buttonStyle={styles.metaButton}
+                        buttonStyle={globalStyle.metaButton}
                         filled
                         onPress={metamaskConnect}
                         raised
