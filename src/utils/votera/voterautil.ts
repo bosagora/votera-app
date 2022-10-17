@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { BigNumber } from 'ethers';
 import { commify, formatEther, parseEther } from 'ethers/lib/utils';
 import { getFundProposalFeePermil } from './agoraconf';
@@ -54,14 +56,19 @@ export function calculateProposalFee(_amount: string | null | undefined): BigNum
 // hardhat node VM
 const ERROR_MSG = `Error: VM Exception while processing transaction: reverted with reason string '`;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getRevertMessage(error: any): string {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (error.reason && (typeof error.reason === 'string' || error.reason instanceof String)) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
         const reason = error.reason.valueOf() as string;
         if (reason.startsWith(ERROR_MSG) && reason.endsWith("'")) {
             return reason.slice(ERROR_MSG.length, -1);
+        }
+    } else if (
+        error.data?.message &&
+        (typeof error.data.message === 'string' || error.data.message instanceof String)
+    ) {
+        const message = error.data.message.valueOf() as string;
+        if (message.startsWith('err: insufficient funds for')) {
+            return 'insufficient funds for';
         }
     }
     return '';
@@ -85,6 +92,8 @@ export function convertCreateRevertMessage(revertMsg: string) {
             return getString('권한이 없습니다&#46;');
         case 'E001':
             return getString('잘못 입력된 값이 있습니다&#46;');
+        case 'insufficient funds for':
+            return getString('잔액이 부족해 실행하지 못했습니다&#46;');
         default:
             return getString('제안 생성 중 알 수 없는 오류가 발생했습니다&#46;');
     }

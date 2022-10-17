@@ -7,7 +7,7 @@ import { AuthContext } from '~/contexts/AuthContext';
 import { ProposalContext } from '~/contexts/ProposalContext';
 import ProposalCard from '~/components/proposal/ProposalCard';
 import ProposalTop from '~/components/proposal/ProposalTop';
-import ProposalsHeader from '~/components/proposal/ProposalHeader';
+import ProposalHeader from '~/components/proposal/ProposalHeader';
 import { Proposal, useGetProposalsLazyQuery } from '~/graphql/generated/generated';
 import { MainDrawerParams } from '~/navigation/main/MainParams';
 import { ProposalFilterType } from '~/types/filterType';
@@ -106,7 +106,7 @@ function HomeView(props: HomeViewProps): JSX.Element {
                     }}
                 />
             )}
-            <ProposalsHeader
+            <ProposalHeader
                 username={isGuest || !user ? 'Guest' : user.username || ''}
                 currentFilter={filter}
                 setFilter={setFilter}

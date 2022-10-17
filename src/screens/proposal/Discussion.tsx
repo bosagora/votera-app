@@ -1,9 +1,8 @@
 import React, { useContext, useState, useCallback } from 'react';
-import { View } from 'react-native';
+import { TouchableOpacity, View, StyleSheet } from 'react-native';
 import { Button, Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import FilterButton from '~/components/button/FilterButton';
 import { OpinionFilterType } from '~/types/filterType';
 import MultilineInput from '~/components/input/MultiLineInput';
 import OpinionCard from '~/components/opinion/OpinionCard';
@@ -14,6 +13,12 @@ import { AuthContext } from '~/contexts/AuthContext';
 import getString from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
+
+const styles = StyleSheet.create({
+    filterRow: { alignItems: 'center', flexDirection: 'row', paddingTop: 12 },
+    filterSeparator: { height: 9, marginHorizontal: 5, width: 1 },
+    moreButton: { marginTop: 10 },
+});
 
 interface DiscussionProps {
     id: string;
@@ -72,8 +77,7 @@ function Discussion(props: DiscussionProps): JSX.Element {
                     ).catch(console.log);
                 }
                 */
-                dispatch(showSnackBar(getString('글이 등록 되었습니다&#46;')));
-                setText('');
+                dispatch(showSnackBar(getString('의견이 등록 되었습니다&#46;')));
                 // if (commentRefetch) commentRefetch();
             } catch (err) {
                 console.log(err);
@@ -82,22 +86,33 @@ function Discussion(props: DiscussionProps): JSX.Element {
         [createActivityComment, dispatch, isGuest],
     );
 
+    const selectFilterTextStyle = useCallback(
+        (active: boolean) => {
+            return active
+                ? [globalStyle.btext, { fontSize: 10, color: themeContext.color.primary }]
+                : [globalStyle.rtext, { fontSize: 10, color: themeContext.color.textBlack }];
+        },
+        [themeContext.color.primary, themeContext.color.textBlack],
+    );
+
     return (
         <View onLayout={(event) => onLayout(event.nativeEvent.layout.height)}>
             <View style={[globalStyle.flexRowBetween, { marginBottom: 20 }]}>
-                <Text style={[globalStyle.gbtext, { lineHeight: 20, fontSize: 12 }]}>{user?.username}</Text>
+                <Text style={[globalStyle.gbtext, { color: themeContext.color.black, lineHeight: 13, fontSize: 11 }]}>
+                    {user?.username}
+                </Text>
                 <View style={{ flexDirection: 'row' }}>
-                    <ShortButton
+                    {/* <ShortButton
                         title={getString('새로고침')}
                         titleStyle={{ fontSize: 10 }}
                         buttonStyle={[globalStyle.shortSmall, { marginRight: 5 }]}
                         onPress={() => {
                             refetch();
                         }}
-                    />
+                    /> */}
                     <ShortButton
                         title={getString('공지보기')}
-                        titleStyle={{ fontSize: 10 }}
+                        titleStyle={{ fontSize: 10, lineHeight: 19 }}
                         buttonStyle={globalStyle.shortSmall}
                         onPress={moveToNotice}
                     />
@@ -107,20 +122,35 @@ function Discussion(props: DiscussionProps): JSX.Element {
                 onlyRead={false}
                 value={text}
                 onChangeText={setText}
-                placeholder={getString('이곳에 자유롭게 글을 남겨주세요')}
-                placeholderTextColor={themeContext.color.disabled}
+                placeholder={getString('이곳에 자유롭게 의견을 남겨주세요')}
                 onPress={() => {
-                    createComment(text).catch(console.log);
+                    createComment(text)
+                        .then(() => {
+                            setText('');
+                        })
+                        .catch(console.log);
                 }}
             />
-            <View style={{ alignItems: 'flex-start', paddingTop: 12, zIndex: 1 }}>
-                <FilterButton
-                    filterType={OpinionFilterType}
-                    currentFilter={filter}
-                    setFilter={(value) => {
-                        setFilter(value as OpinionFilterType);
+            <View style={styles.filterRow}>
+                <TouchableOpacity
+                    onPress={() => {
+                        setFilter(OpinionFilterType.LATEST);
                     }}
-                />
+                >
+                    <Text style={selectFilterTextStyle(filter === OpinionFilterType.LATEST)}>
+                        {getString(OpinionFilterType.LATEST)}
+                    </Text>
+                </TouchableOpacity>
+                <View style={[styles.filterSeparator, { backgroundColor: themeContext.color.separator }]} />
+                <TouchableOpacity
+                    onPress={() => {
+                        setFilter(OpinionFilterType.POPULATION);
+                    }}
+                >
+                    <Text style={selectFilterTextStyle(filter === OpinionFilterType.POPULATION)}>
+                        {getString(OpinionFilterType.POPULATION)}
+                    </Text>
+                </TouchableOpacity>
             </View>
             {commentsData?.map((comment, index) => (
                 <OpinionCard
@@ -136,7 +166,7 @@ function Discussion(props: DiscussionProps): JSX.Element {
                     onPress={() => {
                         fetchMore();
                     }}
-                    buttonStyle={{ marginTop: 10 }}
+                    buttonStyle={styles.moreButton}
                 />
             )}
         </View>

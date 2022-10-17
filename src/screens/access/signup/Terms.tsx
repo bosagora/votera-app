@@ -1,9 +1,8 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { View, TouchableOpacity } from 'react-native';
-import { useLinkTo, useNavigation } from '@react-navigation/native';
+import { useLinkTo } from '@react-navigation/native';
 import { Text, CheckBox, Icon } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
-import { AccessNavigationProps } from '~/navigation/access/AccessParams';
 import CommonButton from '~/components/button/CommonButton';
 import getString from '~/utils/locales/STRINGS';
 import globalStyle from '~/styles/global';
@@ -34,14 +33,14 @@ function Terms(props: TermsProps): JSX.Element {
                 borderRadius: 10,
                 alignItems: 'center',
                 justifyContent: 'center',
-                backgroundColor: isActive ? color.primary : 'white',
+                backgroundColor: isActive ? color.primary : color.white,
                 borderColor: isActive ? color.primary : color.boxBorder,
             }}
         >
             <Icon
                 name="check"
                 size={18}
-                color={isActive ? 'white' : color.boxBorder}
+                color={isActive ? color.white : color.boxBorder}
                 tvParallaxProperties={undefined}
             />
         </View>

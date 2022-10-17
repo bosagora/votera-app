@@ -43,7 +43,7 @@ function PendingAssess(): JSX.Element {
             </View>
 
             <View style={{ flexDirection: 'row' }}>
-                <Text style={defaultStyle}>{getString('요청비용')}</Text>
+                <Text style={defaultStyle}>{getString('요청금액')}</Text>
                 <Text style={[globalStyle.btext, defaultStyle, { color: themeContext.color.primary, marginLeft: 19 }]}>
                     {StringWeiAmountFormat(proposal?.fundingAmount)} BOA
                 </Text>

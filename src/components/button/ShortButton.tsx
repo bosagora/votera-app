@@ -20,7 +20,8 @@ function ShortButton(props: Props): JSX.Element {
                     borderRadius: 5,
                     backgroundColor: filled ? themeContext.color.primary : 'white',
                     borderWidth: 1,
-                    borderColor: themeContext.color.primary,
+                    borderStyle: 'solid',
+                    borderColor: filled ? themeContext.color.primary : themeContext.color.boxBorder,
                 },
                 buttonStyle,
             ]}

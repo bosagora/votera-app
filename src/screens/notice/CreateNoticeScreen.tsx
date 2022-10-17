@@ -267,6 +267,7 @@ function CreateNoticeScreen({ navigation, route }: MainScreenProps<'CreateNotice
                             onChangeFiles={(files) => setUploadFiles(files)}
                             value={uploadFiles}
                             placeholder={getString('자료를 등록해주세요')}
+                            fileType={['application/pdf', 'image/jpeg', 'image/png']}
                         />
                     </RowWrapper>
                 </View>

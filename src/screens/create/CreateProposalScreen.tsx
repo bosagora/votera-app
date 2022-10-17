@@ -506,19 +506,6 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
     }, [headerBackground, headerLeft, headerRight, navigation]);
 
     useEffect(() => {
-        if (!isGuest) {
-            if (!user?.memberId) {
-                dispatch(showSnackBar(getString('사용자 정보를 읽어올 수 없습니다')));
-                if (navigation.canGoBack()) {
-                    navigation.goBack();
-                } else {
-                    linkTo('/home');
-                }
-            }
-        }
-    }, [dispatch, isGuest, navigation, linkTo, user?.memberId]);
-
-    useEffect(() => {
         if (pickedDate && pickedDate.startDate && pickedDate.endDate) {
             setDate({
                 startDate: pickedDate.startDate,
@@ -669,7 +656,6 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
                         </RowWrapper>
                     )}
                     <RowWrapper label={getString('목표 및 설명')} mandatory>
-                        {/* <MultilineInput onlyRead={false} /> */}
                         <Input
                             value={description}
                             textAlignVertical="top"
@@ -720,6 +706,7 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
                             onChangeFiles={(files) => setUploadFiles(files)}
                             value={uploadFiles}
                             placeholder={getString('자료를 등록해주세요')}
+                            fileType={['application/pdf']}
                         />
                     </RowWrapper>
 

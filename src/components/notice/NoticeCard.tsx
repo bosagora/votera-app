@@ -10,32 +10,37 @@ import { ProposalContext } from '~/contexts/ProposalContext';
 import getString from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
-import { adjustAttachmentImage, AttachmentFile, AttachmentImage, downloadFile, filterAttachment } from '~/utils/attach';
+import { adjustAttachmentImage, AttachmentFile, AttachmentImage, filterAttachment } from '~/utils/attach';
 import MultilineInput from '../input/MultiLineInput';
 import DownloadComponent from '../ui/Download';
 import CommentCard from '../opinion/CommentCard';
 import ShortButton from '../button/ShortButton';
 
 const styles = StyleSheet.create({
-    noticeContainer: {
-        backgroundColor: 'white',
-        borderBottomColor: 'rgb(242,244,250)',
-        borderBottomWidth: 3,
-        padding: 23,
-    },
+    bottomWrapper: { alignItems: 'center', flexDirection: 'row', marginTop: 18 },
+    container: { borderBottomWidth: 3, padding: 23 },
+    content: { fontSize: 13, lineHeight: 23 },
+    contentWrapper: { paddingVertical: 30 },
     regularButton: {
         alignItems: 'center',
-        borderColor: 'rgb(222, 212, 248)',
         borderRadius: 6,
+        borderStyle: 'solid',
         borderWidth: 1,
         height: 26,
         justifyContent: 'center',
         paddingHorizontal: 10,
+        width: 52,
     },
-    titleText: {
-        flex: 1,
-        fontSize: 16,
-    },
+    regularButtonText: { fontSize: 10, lineHeight: 19 },
+    // separator: {
+    //     borderLeftWidth: 1,
+    //     height: 11,
+    //     marginLeft: 9,
+    //     width: 11,
+    // },
+    titleText: { flex: 1, fontSize: 14, lineHeight: 22 },
+    writeDate: { fontSize: 10, lineHeight: 20, marginLeft: 12 },
+    writerName: { fontSize: 9, lineHeight: 11 },
 });
 
 const FETCH_INIT_LIMIT = 5;
@@ -96,7 +101,7 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
     const { noticeAId, noticeData, noticeStatus } = props;
     const dispatch = useAppDispatch();
     const themeContext = useContext(ThemeContext);
-    const { user, isGuest } = useContext(AuthContext);
+    const { isGuest } = useContext(AuthContext);
     const { createPostComment } = useContext(ProposalContext);
 
     const [text, setText] = useState<string>('');
@@ -199,8 +204,7 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
                 ).catch(console.log);
             }
             */
-                dispatch(showSnackBar(getString('글이 등록 되었습니다&#46;')));
-                setText('');
+                dispatch(showSnackBar(getString('의견이 등록 되었습니다&#46;')));
             } catch (err) {
                 console.log(err);
             } finally {
@@ -229,31 +233,40 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
     };
 
     return (
-        <View style={styles.noticeContainer}>
+        <View
+            style={[
+                styles.container,
+                { backgroundColor: themeContext.color.white, borderBottomColor: themeContext.color.gray },
+            ]}
+        >
             <TouchableOpacity onPress={() => setExpanded(!expanded)}>
                 <View style={globalStyle.flexRowBetween}>
                     <Text style={[globalStyle.mtext, styles.titleText]}>{getContentTitle(noticeData)}</Text>
-                    <View style={styles.regularButton}>
-                        <Text style={[globalStyle.btext, { fontSize: 12, color: themeContext.color.primary }]}>
+                    <View style={[styles.regularButton, { borderColor: themeContext.color.boxBorder }]}>
+                        <Text
+                            style={[globalStyle.btext, { color: themeContext.color.primary }, styles.regularButtonText]}
+                        >
                             {getString('답글 #N').replace('#N', replyCount?.toString() || '0')}
                         </Text>
                     </View>
                 </View>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 18 }}>
-                    <Text style={[globalStyle.gmtext, { fontSize: 11, color: 'black', lineHeight: 15 }]}>
+                <View style={styles.bottomWrapper}>
+                    <Text style={[globalStyle.gmtext, { color: themeContext.color.black }, styles.writerName]}>
                         {noticeData.writer?.username || 'username'}
                     </Text>
-                    <Text style={[globalStyle.rltext, { fontSize: 12, marginLeft: 12 }]}>
+                    <Text style={[globalStyle.rltext, { color: themeContext.color.textBlack }, styles.writeDate]}>
                         {dayjs(noticeData.createdAt as string).format('YYYY.M.D')}
                     </Text>
                     {/** TODO */}
-                    {/* <View style={{ height: 9, width: 1, backgroundColor: 'rgb(220,217,227)', marginHorizontal: 10 }} /> */}
-                    {/* <RLText style={{ fontSize: 12 }}>조회수</RLText> */}
+                    {/* <View style={[styles.separator, { borderColor: themeContext.color.separator }]} /> */}
+                    {/* <Text style={[globalStyle.ltext, { color: themeContext.color.textBlack }, styles.writeDate]}>조회수</Text> */}
                 </View>
             </TouchableOpacity>
             {expanded && (
-                <View style={{ paddingVertical: 30 }}>
-                    <Text style={[globalStyle.ltext, { color: 'black' }]}>{getContentText(noticeData)}</Text>
+                <View style={styles.contentWrapper}>
+                    <Text style={[globalStyle.ltext, { color: themeContext.color.black }, styles.content]}>
+                        {getContentText(noticeData)}
+                    </Text>
                     <View>
                         {noticeImgs?.map((image) =>
                             image ? (
@@ -267,29 +280,13 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
                     </View>
                     <View style={{ marginTop: 20 }}>
                         {noticeFiles.map((file) => {
-                            return (
-                                <DownloadComponent
-                                    key={`file_${file.name || ''}`}
-                                    label={file?.name || 'filename'}
-                                    onPress={() => {
-                                        if (file) {
-                                            downloadFile(file.url, file.name)
-                                                .then(() => {
-                                                    dispatch(showSnackBar(getString('다운로드가 완료 되었습니다')));
-                                                })
-                                                .catch((err) => {
-                                                    console.log('downloadFile error', err);
-                                                });
-                                        }
-                                    }}
-                                />
-                            );
+                            return <DownloadComponent key={`file_${file.name || ''}`} file={file} />;
                         })}
                     </View>
                     <View style={{ marginVertical: 28 }}>
                         <View style={globalStyle.flexRowBetween}>
                             <Text>{getString('#N개 답글').replace('#N', replyCount?.toString() || '0')}</Text>
-                            <ShortButton
+                            {/* <ShortButton
                                 title={getString('새로고침')}
                                 titleStyle={{ fontSize: 10 }}
                                 buttonStyle={[globalStyle.shortSmall, { marginRight: 5 }]}
@@ -302,7 +299,7 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
                                     });
                                     getNoticeComments({ variables }).catch(console.log);
                                 }}
-                            />
+                            /> */}
                         </View>
                         {replyData?.map((comment, index) => {
                             return (
@@ -310,6 +307,7 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
                                     key={`noticeComment_${comment.id}`}
                                     post={comment}
                                     status={replyStatus ? replyStatus[index] : undefined}
+                                    separator={index < replyData.length - 1}
                                 />
                             );
                         })}
@@ -320,9 +318,13 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
                         onlyRead={false}
                         value={text}
                         onChangeText={setText}
-                        placeholder={getString('이곳에 자유롭게 글을 남겨주세요')}
+                        placeholder={getString('이곳에 자유롭게 의견을 남겨주세요')}
                         onPress={() => {
-                            createComment(text).catch(console.log);
+                            createComment(text)
+                                .then(() => {
+                                    setText('');
+                                })
+                                .catch(console.log);
                         }}
                     />
 

@@ -1,29 +1,45 @@
-import React, { useContext, useState, useRef, useEffect } from 'react';
+/* eslint-disable import/extensions */
+/* eslint-disable global-require */
+import React, { useContext, useRef, useEffect } from 'react';
 import { View, Image, ActivityIndicator, ImageURISource } from 'react-native';
-import { Button, Text, CheckBox } from 'react-native-elements';
+import { Button, Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import MetaMaskOnboarding from '@metamask/onboarding';
 import { useAssets } from 'expo-asset';
 import { AccessScreenProps } from '~/navigation/access/AccessParams';
 import CommonButton from '~/components/button/CommonButton';
-import { AuthContext, MetamaskStatus, currentKeepSignIn, changeKeepSignIn } from '~/contexts/AuthContext';
+import { AuthContext, MetamaskStatus } from '~/contexts/AuthContext';
 import globalStyle from '~/styles/global';
 import getString from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
+import { WhereType } from '~/graphql/hooks/Proposals';
 
 enum EnumIconAsset {
     FullnameLogo = 0,
+    ArrowGrad,
 }
 
-// eslint-disable-next-line global-require, import/extensions
-const iconAssets = [require('@assets/images/votera/voteraFullnameLogo.png')];
+const iconAssets = [
+    require('@assets/images/votera/voteraFullnameLogo.png'),
+    require('@assets/icons/arrow/arrowGrad.png'),
+];
 
 function LoginScreen({ navigation }: AccessScreenProps<'Login'>): JSX.Element {
     const themeContext = useContext(ThemeContext);
     const dispatch = useAppDispatch();
-    const { user, enrolled, metamaskStatus, metamaskConnect, metamaskSwitch, login } = useContext(AuthContext);
-    const [keepSignIn, setKeepSignIn] = useState(currentKeepSignIn());
+    const {
+        user,
+        enrolled,
+        metamaskStatus,
+        metamaskConnect,
+        metamaskSwitch,
+        login,
+        setRouteLoaded,
+        routeLoaded,
+        setGuestMode,
+        isGuest,
+    } = useContext(AuthContext);
     const onboarding = useRef<MetaMaskOnboarding>();
     const [assets] = useAssets(iconAssets);
 
@@ -47,11 +63,14 @@ function LoginScreen({ navigation }: AccessScreenProps<'Login'>): JSX.Element {
         }
     }, [metamaskStatus, enrolled, user, navigation]);
 
-    const onClickSignIn = () => {
-        if (keepSignIn !== currentKeepSignIn()) {
-            changeKeepSignIn(keepSignIn);
+    useEffect(() => {
+        if (isGuest && routeLoaded) {
+            navigation.navigate('RootUser', { screen: 'Home', params: { where: WhereType.PROJECT } });
         }
-        login(keepSignIn)
+    }, [isGuest, navigation, routeLoaded]);
+
+    const onClickSignIn = () => {
+        login(false)
             .then((result) => {
                 if (!result.succeeded) {
                     console.log('login failed message = ', result.message);
@@ -104,24 +123,27 @@ function LoginScreen({ navigation }: AccessScreenProps<'Login'>): JSX.Element {
                     />
                 )}
                 {metamaskStatus === MetamaskStatus.CONNECTED && (
-                    <>
-                        <CommonButton
-                            title={getString('로그인')}
-                            buttonStyle={globalStyle.metaButton}
-                            filled
-                            onPress={onClickSignIn}
-                            raised
-                        />
-                        <CheckBox
-                            center
-                            title={getString('로그인 상태 유지')}
-                            checked={keepSignIn}
-                            onPress={() => {
-                                setKeepSignIn(!keepSignIn);
-                            }}
-                        />
-                    </>
+                    <CommonButton
+                        title={getString('로그인')}
+                        buttonStyle={globalStyle.metaButton}
+                        filled
+                        onPress={onClickSignIn}
+                        raised
+                    />
                 )}
+                <Button
+                    title={getString('둘러보기')}
+                    titleStyle={[globalStyle.mtext, { marginRight: 16, fontSize: 14 }]}
+                    icon={assets ? <Image source={assets[EnumIconAsset.ArrowGrad] as ImageURISource} /> : undefined}
+                    iconRight
+                    buttonStyle={{ justifyContent: 'flex-end', paddingHorizontal: 21, marginTop: 10 }}
+                    iconContainerStyle={{ paddingLeft: 16 }}
+                    type="clear"
+                    onPress={() => {
+                        setRouteLoaded(false);
+                        setGuestMode(true);
+                    }}
+                />
                 <View style={{ marginBottom: 77, marginTop: 34, alignItems: 'center' }}>
                     <Text style={[globalStyle.gmtext, { fontSize: 11, color: themeContext.color.textGray }]}>
                         (C) 2022 BOSAGORA.

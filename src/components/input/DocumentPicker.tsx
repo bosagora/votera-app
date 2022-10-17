@@ -25,12 +25,14 @@ const styles = StyleSheet.create({
 interface Props {
     data: DocumentPicker.DocumentResult;
     placeholder: string;
+    fileType: string[];
     addFile: (fileData: DocumentPicker.DocumentResult) => void;
     removeFile: (fileData: DocumentPicker.DocumentResult) => void;
 }
 
 interface PickerProps {
     placeholder: string;
+    fileType: string[];
     onChangeFiles: (files: DocumentPicker.DocumentResult[]) => void;
     value?: DocumentPicker.DocumentResult[];
 }
@@ -38,7 +40,7 @@ interface PickerProps {
 const MAX_SIZE = 10 * 1024 * 1024;
 
 function DocumentPickerComponent(props: Props): JSX.Element {
-    const { data, removeFile, addFile, placeholder, ...others } = props;
+    const { data, removeFile, addFile, fileType, placeholder, ...others } = props;
     const themeContext = useContext(ThemeContext);
     const [fileSource, setFileSource] = useState<DocumentPicker.DocumentResult>();
     const dispatch = useAppDispatch();
@@ -57,7 +59,7 @@ function DocumentPickerComponent(props: Props): JSX.Element {
     const pickFile = async () => {
         try {
             const result = await DocumentPicker.getDocumentAsync({
-                type: '*/*',
+                type: fileType.length === 0 ? '*/*' : fileType,
             });
             if (result.type !== 'cancel') {
                 if (result.size && result.size > MAX_SIZE) {
@@ -100,7 +102,7 @@ function DocumentPickerComponent(props: Props): JSX.Element {
                 }}
             >
                 <Icon
-                    color={fileSource?.type === 'success' ? themeContext.color.primary : 'white'}
+                    color={fileSource?.type === 'success' ? themeContext.color.primary : themeContext.color.white}
                     name={fileSource?.type === 'success' ? 'clear' : 'add'}
                     tvParallaxProperties={undefined}
                 />
@@ -110,7 +112,7 @@ function DocumentPickerComponent(props: Props): JSX.Element {
 }
 
 function DocumentPickerWrapper(props: PickerProps): JSX.Element {
-    const { value, onChangeFiles, placeholder } = props;
+    const { value, onChangeFiles, placeholder, fileType } = props;
 
     const addFile = (fileData: DocumentPicker.DocumentResult) => {
         if (fileData.type !== 'success') {
@@ -149,6 +151,7 @@ function DocumentPickerWrapper(props: PickerProps): JSX.Element {
                         addFile={(fileDatas) => addFile(fileDatas)}
                         removeFile={(fileData) => removeFile(fileData)}
                         placeholder={placeholder}
+                        fileType={fileType}
                     />
                 );
             })}
@@ -159,6 +162,7 @@ function DocumentPickerWrapper(props: PickerProps): JSX.Element {
                     addFile={(fileDatas) => addFile(fileDatas)}
                     removeFile={(fileData) => removeFile(fileData)}
                     placeholder={placeholder}
+                    fileType={fileType}
                 />
             )}
         </>

@@ -325,31 +325,21 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
             extrapolate: 'clamp',
         });
         return (
-            <View style={{ justifyContent: 'space-around', flex: 1 }}>
-                <Animated.View
-                    style={{
-                        borderWidth: 1,
-                        borderColor: 'white',
-                        borderRadius: 6,
-                        alignSelf: 'center',
-                        paddingHorizontal: 7,
-                        paddingVertical: 5,
-                        opacity,
-                    }}
-                >
-                    <Text style={[globalStyle.mtext, { fontSize: 11, color: 'white' }]}>
+            <View style={styles.titleContainer}>
+                <Animated.View style={[styles.typeBox, { opacity }]}>
+                    <Text style={[globalStyle.mtext, styles.typeText]}>
                         {proposal?.type === EnumProposalType.Business ? getString('사업제안') : getString('시스템제안')}
                     </Text>
                 </Animated.View>
-                <Text style={[globalStyle.btext, { color: 'white', fontSize: 20, maxWidth: 220, textAlign: 'center' }]}>
+                <Text style={[globalStyle.btext, styles.titleText]} numberOfLines={3}>
                     {proposal?.name}
                 </Text>
                 <Animated.View style={{ alignItems: 'center', opacity }}>
                     {proposal?.type === EnumProposalType.Business && (
                         <Period
-                            type={getString('제안기간')}
-                            typeStyle={{ fontSize: 14 }}
-                            periodStyle={{ fontSize: 13 }}
+                            type={getString('평가 기간')}
+                            typeStyle={styles.periodText}
+                            periodStyle={styles.period}
                             color="white"
                             created={proposal?.assessPeriod?.begin as string}
                             deadline={proposal?.assessPeriod?.end as string}
@@ -358,8 +348,8 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
 
                     <Period
                         type={getString('투표 기간')}
-                        typeStyle={{ fontSize: 14 }}
-                        periodStyle={{ fontSize: 13 }}
+                        typeStyle={styles.periodText}
+                        periodStyle={styles.period}
                         color="white"
                         created={proposal?.votePeriod?.begin as string}
                         deadline={proposal?.votePeriod?.end as string}

@@ -83,7 +83,7 @@ function ProposalTop(props: ProposalTopProps): JSX.Element {
                     <View style={{ paddingTop: Platform.OS === 'android' ? 0 : 13 }}>
                         {type === EnumProposalType.Business && (
                             <Period
-                                type={getString('제안기간')}
+                                type={getString('평가기간')}
                                 created={assessPeriod?.begin as string}
                                 deadline={assessPeriod?.end as string}
                                 color="white"
@@ -101,12 +101,7 @@ function ProposalTop(props: ProposalTopProps): JSX.Element {
                 </View>
             </ImageBackground>
             <View style={styles.writeContent}>
-                <TouchableOpacity
-                    style={styles.writeButton}
-                    onPress={() => {
-                        onPress();
-                    }}
-                >
+                <TouchableOpacity style={styles.writeButton} onPress={onPress}>
                     <Icon
                         name="chevron-right"
                         color="white"

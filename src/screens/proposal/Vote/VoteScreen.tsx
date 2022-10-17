@@ -31,8 +31,16 @@ function VoteScreen(props: Props): JSX.Element {
     const { onLayout, onRefresh } = props;
     const dispatch = useAppDispatch();
     const { proposal, isJoined, joinProposal, fetchProposal } = useContext(ProposalContext);
-    const { user, isGuest, metamaskStatus, metamaskProvider, signOut, metamaskConnect, metamaskSwitch } =
-        useContext(AuthContext);
+    const {
+        user,
+        isGuest,
+        metamaskStatus,
+        metamaskProvider,
+        signOut,
+        metamaskConnect,
+        metamaskSwitch,
+        metamaskUpdateBalance,
+    } = useContext(AuthContext);
     const [isValidator, setIsValidator] = useState(false);
     const [needVote, setNeedVote] = useState(false);
     const [runningTx, setRunningTx] = useState(false);
@@ -161,6 +169,7 @@ function VoteScreen(props: Props): JSX.Element {
                         setRunningTx(false);
                     });
 
+                metamaskUpdateBalance();
                 setNeedVote(false);
                 dispatch(hideLoadingAniModal());
                 onRefresh();
@@ -179,6 +188,7 @@ function VoteScreen(props: Props): JSX.Element {
             isJoined,
             joinProposal,
             metamaskProvider,
+            metamaskUpdateBalance,
             proposal?.proposalId,
             proposal?.voteraVoteAddress,
             onRefresh,
@@ -215,6 +225,7 @@ function VoteScreen(props: Props): JSX.Element {
             );
             const tx = await commonsBudget.withdraw(proposal.proposalId, {});
             const receipt = await tx.wait();
+            metamaskUpdateBalance();
             if (receipt.status) {
                 refetchVoteStatus().catch(console.log);
                 return '';
@@ -228,7 +239,14 @@ function VoteScreen(props: Props): JSX.Element {
         } finally {
             setRunningTx(false);
         }
-    }, [isGuest, metamaskProvider, proposal?.proposalId, refetchVoteStatus, voteStatusData?.voteStatus]);
+    }, [
+        isGuest,
+        metamaskProvider,
+        metamaskUpdateBalance,
+        proposal?.proposalId,
+        refetchVoteStatus,
+        voteStatusData?.voteStatus,
+    ]);
 
     if (proposal?.status === EnumProposalStatus.PendingVote) {
         return (
@@ -289,6 +307,10 @@ function VoteScreen(props: Props): JSX.Element {
         }
         return <VoteResult data={voteStatusData?.voteStatus} runWithdraw={runWithdraw} />;
     };
+
+    if (isGuest) {
+        return <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)}>{renderConnected()}</View>;
+    }
 
     return (
         <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)}>

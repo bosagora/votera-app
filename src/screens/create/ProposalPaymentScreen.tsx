@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useCallback } from 'react';
 import { View, Image, ActivityIndicator, ScrollView, ImageURISource, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Icon } from 'react-native-elements';
 import { useAssets } from 'expo-asset';
 import { BigNumber } from 'ethers';
 import { useLinkTo } from '@react-navigation/native';
@@ -76,6 +77,10 @@ function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment
         );
     }, [fetchProposal, linkTo, id]);
 
+    const headerLeft = useCallback(() => {
+        return <Icon name="chevron-left" color="transparent" tvParallaxProperties={undefined} />;
+    }, []);
+
     const headerBackground = useCallback(() => {
         return (
             <>
@@ -102,11 +107,12 @@ function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment
         navigation.setOptions({
             title: getString('수수료 납입'),
             headerTitleStyle: [globalStyle.headerTitle, { color: 'white' }],
+            headerLeft,
             headerRight,
             headerBackground,
             headerShown: true,
         });
-    }, [headerBackground, headerRight, navigation]);
+    }, [headerBackground, headerLeft, headerRight, navigation]);
 
     useEffect(() => {
         if (id) {

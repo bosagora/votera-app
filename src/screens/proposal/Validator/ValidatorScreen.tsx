@@ -15,13 +15,26 @@ import {
 } from '~/graphql/generated/generated';
 import globalStyle from '~/styles/global';
 import ShortButton from '~/components/button/ShortButton';
+import Anchor from '~/components/anchor/Anchor';
 import getString from '~/utils/locales/STRINGS';
 import { getValidatorDateString } from '~/utils/time';
 import { VOTE_SELECT } from '~/utils/votera/voterautil';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
+import { getBlockExplorerUrl } from '~/utils/votera/agoraconf';
 
 const styles = StyleSheet.create({
+    anchor: {
+        flex: 1,
+        flexDirection: 'row',
+        marginHorizontal: 10,
+    },
+    anchorText: {
+        borderBottomColor: 'black',
+        borderBottomWidth: 1,
+        fontSize: 14,
+        lineHeight: 18,
+    },
     header: {
         alignItems: 'center',
         height: 35,
@@ -53,15 +66,17 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
     },
     itemDate: {
-        color: 'gray',
-        fontSize: 8,
+        fontSize: 12,
         left: 0,
+        lineHeight: 18,
         position: 'absolute',
         textAlign: 'right',
         top: 60,
         width: '100%',
     },
     itemStatus: {
+        fontSize: 14,
+        lineHeight: 18,
         textAlign: 'right',
     },
     listHeader: {
@@ -75,11 +90,6 @@ const styles = StyleSheet.create({
     },
     moreText: {
         textAlign: 'center',
-    },
-    name: {
-        flex: 1,
-        marginHorizontal: 10,
-        textDecorationLine: 'underline',
     },
     nameColumn: {
         flex: 1,
@@ -210,10 +220,14 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
                     <View style={styles.nameColumn}>
                         <View style={styles.nameKeyRow}>
                             <Octicons name="key" size={18} />
-                            <View style={[styles.name, { flexDirection: 'row' }]}>
-                                <Text numberOfLines={1}>{publicKey.slice(0, ELLIPSIS_TAIL_SIZE)}</Text>
-                                <Text>{publicKey.slice(ELLIPSIS_TAIL_SIZE)}</Text>
-                            </View>
+                            <Anchor style={styles.anchor} source={getBlockExplorerUrl(address)}>
+                                <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
+                                    {publicKey.slice(0, ELLIPSIS_TAIL_SIZE)}
+                                </Text>
+                                <Text style={[globalStyle.rtext, styles.anchorText]}>
+                                    {publicKey.slice(ELLIPSIS_TAIL_SIZE)}
+                                </Text>
+                            </Anchor>
                             <TouchableOpacity
                                 onPress={() => {
                                     setStringAsync(publicKey)
@@ -228,10 +242,14 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
                         </View>
                         <View style={styles.nameGlobeRow}>
                             <Octicons name="globe" size={18} />
-                            <View style={[styles.name, { flexDirection: 'row' }]}>
-                                <Text numberOfLines={1}>{address.slice(0, ELLIPSIS_TAIL_SIZE)}</Text>
-                                <Text>{address.slice(ELLIPSIS_TAIL_SIZE)}</Text>
-                            </View>
+                            <Anchor style={styles.anchor} source={getBlockExplorerUrl(address)}>
+                                <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
+                                    {address.slice(0, ELLIPSIS_TAIL_SIZE)}
+                                </Text>
+                                <Text style={[globalStyle.rtext, styles.anchorText]}>
+                                    {address.slice(ELLIPSIS_TAIL_SIZE)}
+                                </Text>
+                            </Anchor>
                             <TouchableOpacity
                                 onPress={() => {
                                     setStringAsync(address)
@@ -246,17 +264,19 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
                         </View>
                     </View>
                     <View style={styles.statusColumn}>
-                        <Text style={styles.itemStatus}>
+                        <Text style={[globalStyle.rtext, styles.itemStatus]}>
                             {item.assessUpdate ? getString('평가완료') : getString('미평가')}
                         </Text>
                         {item.assessUpdate && (
-                            <Text style={styles.itemDate}>{getValidatorDateString(item.assessUpdate)}</Text>
+                            <Text style={[globalStyle.ltext, { color: themeContext.color.textBlack }, styles.itemDate]}>
+                                {getValidatorDateString(item.assessUpdate)}
+                            </Text>
                         )}
                     </View>
                 </View>
             );
         },
-        [themeContext.color.primary, dispatch],
+        [themeContext.color.primary, themeContext.color.textBlack, dispatch],
     );
 
     return (
@@ -304,10 +324,14 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
                     <View style={styles.nameColumn}>
                         <View style={styles.nameKeyRow}>
                             <Octicons name="key" size={18} />
-                            <View style={[styles.name, { flexDirection: 'row' }]}>
-                                <Text numberOfLines={1}>{publicKey.slice(0, ELLIPSIS_TAIL_SIZE)}</Text>
-                                <Text>{publicKey.slice(ELLIPSIS_TAIL_SIZE)}</Text>
-                            </View>
+                            <Anchor style={styles.anchor} source={getBlockExplorerUrl(address)}>
+                                <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
+                                    {publicKey.slice(0, ELLIPSIS_TAIL_SIZE)}
+                                </Text>
+                                <Text style={[globalStyle.rtext, styles.anchorText]}>
+                                    {publicKey.slice(ELLIPSIS_TAIL_SIZE)}
+                                </Text>
+                            </Anchor>
                             <TouchableOpacity
                                 onPress={() => {
                                     setStringAsync(publicKey)
@@ -322,10 +346,14 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
                         </View>
                         <View style={styles.nameGlobeRow}>
                             <Octicons name="globe" size={18} />
-                            <View style={[styles.name, { flexDirection: 'row' }]}>
-                                <Text numberOfLines={1}>{address.slice(0, ELLIPSIS_TAIL_SIZE)}</Text>
-                                <Text>{address.slice(ELLIPSIS_TAIL_SIZE)}</Text>
-                            </View>
+                            <Anchor style={styles.anchor} source={getBlockExplorerUrl(address)}>
+                                <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
+                                    {address.slice(0, ELLIPSIS_TAIL_SIZE)}
+                                </Text>
+                                <Text style={[globalStyle.rtext, styles.anchorText]}>
+                                    {address.slice(ELLIPSIS_TAIL_SIZE)}
+                                </Text>
+                            </Anchor>
                             <TouchableOpacity
                                 onPress={() => {
                                     setStringAsync(address)
@@ -340,17 +368,19 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
                         </View>
                     </View>
                     <View style={styles.statusColumn}>
-                        <Text style={styles.itemStatus}>
+                        <Text style={[globalStyle.rtext, styles.itemStatus]}>
                             {item.ballotUpdate ? getString('투표완료') : getString('미투표')}
                         </Text>
                         {item.ballotUpdate && (
-                            <Text style={styles.itemDate}>{getValidatorDateString(item.ballotUpdate)}</Text>
+                            <Text style={[globalStyle.ltext, { color: themeContext.color.textBlack }, styles.itemDate]}>
+                                {getValidatorDateString(item.ballotUpdate)}
+                            </Text>
                         )}
                     </View>
                 </View>
             );
         },
-        [themeContext.color.primary, dispatch],
+        [themeContext.color.primary, themeContext.color.textBlack, dispatch],
     );
 
     return (
@@ -396,7 +426,9 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                 return (
                     <View style={styles.itemBallotContainer}>
                         <View style={[styles.itemBallotAgree, { borderColor: themeContext.color.agree }]} />
-                        <Text style={{ color: themeContext.color.agree }}>{getString('찬성')}</Text>
+                        <Text style={[globalStyle.rtext, { color: themeContext.color.agree }]}>
+                            {getString('찬성')}
+                        </Text>
                     </View>
                 );
             }
@@ -404,14 +436,16 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                 return (
                     <View style={styles.itemBallotContainer}>
                         <Icon name="close" color={themeContext.color.disagree} tvParallaxProperties={undefined} />
-                        <Text style={{ color: themeContext.color.disagree }}>{getString('반대')}</Text>
+                        <Text style={[globalStyle.rtext, { color: themeContext.color.disagree }]}>
+                            {getString('반대')}
+                        </Text>
                     </View>
                 );
             }
             return (
                 <View style={styles.itemBallotContainer}>
                     {assets && <Image source={assets[EnumIconAsset.Abstain] as ImageURISource} />}
-                    <Text style={{ color: themeContext.color.abstain }}>{getString('기권')}</Text>
+                    <Text style={[globalStyle.rtext, { color: themeContext.color.abstain }]}>{getString('기권')}</Text>
                 </View>
             );
         },
@@ -427,10 +461,14 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                     <View style={styles.nameColumn}>
                         <View style={styles.nameKeyRow}>
                             <Octicons name="key" size={18} />
-                            <View style={[styles.name, { flexDirection: 'row' }]}>
-                                <Text numberOfLines={1}>{publicKey.slice(0, ELLIPSIS_TAIL_SIZE)}</Text>
-                                <Text>{publicKey.slice(ELLIPSIS_TAIL_SIZE)}</Text>
-                            </View>
+                            <Anchor style={styles.anchor} source={getBlockExplorerUrl(address)}>
+                                <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
+                                    {publicKey.slice(0, ELLIPSIS_TAIL_SIZE)}
+                                </Text>
+                                <Text style={[globalStyle.rtext, styles.anchorText]}>
+                                    {publicKey.slice(ELLIPSIS_TAIL_SIZE)}
+                                </Text>
+                            </Anchor>
                             <TouchableOpacity
                                 onPress={() => {
                                     setStringAsync(publicKey)
@@ -445,10 +483,14 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                         </View>
                         <View style={styles.nameGlobeRow}>
                             <Octicons name="globe" size={18} />
-                            <View style={[styles.name, { flexDirection: 'row' }]}>
-                                <Text numberOfLines={1}>{address.slice(0, ELLIPSIS_TAIL_SIZE)}</Text>
-                                <Text>{address.slice(ELLIPSIS_TAIL_SIZE)}</Text>
-                            </View>
+                            <Anchor style={styles.anchor} source={getBlockExplorerUrl(address)}>
+                                <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
+                                    {address.slice(0, ELLIPSIS_TAIL_SIZE)}
+                                </Text>
+                                <Text style={[globalStyle.rtext, styles.anchorText]}>
+                                    {address.slice(ELLIPSIS_TAIL_SIZE)}
+                                </Text>
+                            </Anchor>
                             <TouchableOpacity
                                 onPress={() => {
                                     setStringAsync(address)
@@ -466,16 +508,18 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                         {item.ballotUpdate ? (
                             showBallotResult(item.choice)
                         ) : (
-                            <Text style={styles.itemStatus}>{getString('미투표')}</Text>
+                            <Text style={[globalStyle.rtext, styles.itemStatus]}>{getString('미투표')}</Text>
                         )}
                         {item.ballotUpdate && (
-                            <Text style={styles.itemDate}>{getValidatorDateString(item.ballotUpdate)}</Text>
+                            <Text style={[globalStyle.ltext, { color: themeContext.color.textBlack }, styles.itemDate]}>
+                                {getValidatorDateString(item.ballotUpdate)}
+                            </Text>
                         )}
                     </View>
                 </View>
             );
         },
-        [showBallotResult, themeContext.color.primary, dispatch],
+        [themeContext.color.primary, themeContext.color.textBlack, showBallotResult, dispatch],
     );
 
     return (

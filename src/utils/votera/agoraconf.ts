@@ -8,9 +8,11 @@ let privacyTermUrl = `${httpLinkURI || ''}/privacy.html`;
 let userServiceTermUrl = `${httpLinkURI || ''}/userService.html`;
 let proposalFundMin = BigNumber.from(0);
 let proposalFundMax: BigNumber | undefined;
-let fundProposalFeePermil = BigNumber.from(10);
+let fundProposalFeePermil = BigNumber.from(1);
 let systemProposalFee = BigNumber.from('100000000000000000000');
 let voterFee = BigNumber.from('400000000000000');
+let withdrawDelayPeriod = 86400;
+let blockExplorerUrl = '';
 
 export function setAgoraConf(
     agora:
@@ -23,6 +25,7 @@ export function setAgoraConf(
               | 'commonsBudgetAddress'
               | 'voteraVoteAddress'
               | 'providerUrl'
+              | 'blockExplorerUrl'
           >
         | undefined,
 ) {
@@ -70,6 +73,9 @@ export function setAgoraConf(
         proposalFundMax = fundMax;
         proposalFundMin = fundMin;
     }
+    if (agora.blockExplorerUrl) {
+        blockExplorerUrl = agora.blockExplorerUrl;
+    }
 }
 
 export function getPrivacyTermURL() {
@@ -78,6 +84,10 @@ export function getPrivacyTermURL() {
 
 export function getUserServiceTermURL() {
     return userServiceTermUrl;
+}
+
+export function getBlockExplorerUrl(address: string): string {
+    return `${blockExplorerUrl}/${address}`;
 }
 
 export function isValidFundAmount(_amount: string | undefined | null): boolean {
@@ -100,6 +110,10 @@ export function getVoterFee(): BigNumber {
     return voterFee;
 }
 
+export function getWithdrawDelayPeriod(): number {
+    return withdrawDelayPeriod;
+}
+
 export function setFeePolicy(feePolicy: FeePolicyPayload) {
     if (feePolicy.fundProposalFeePermil) {
         fundProposalFeePermil = BigNumber.from(feePolicy.fundProposalFeePermil);
@@ -109,5 +123,8 @@ export function setFeePolicy(feePolicy: FeePolicyPayload) {
     }
     if (feePolicy.voterFee) {
         voterFee = BigNumber.from(feePolicy.voterFee);
+    }
+    if (feePolicy.withdrawDelayPeriod) {
+        withdrawDelayPeriod = feePolicy.withdrawDelayPeriod;
     }
 }

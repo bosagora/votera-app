@@ -45,6 +45,7 @@ const globalStyle = StyleSheet.create({
     headerMetaButton: {
         alignItems: 'center',
         borderRadius: 20,
+        borderStyle: 'solid',
         height: 31,
         justifyContent: 'center',
         shadowColor: 'rgba(0, 0, 0, 0.25)',
@@ -56,12 +57,14 @@ const globalStyle = StyleSheet.create({
     headerMetaTitle: Platform.select({
         web: {
             fontFamily: `'Noto Sans KR', sans-serif`,
-            fontSize: 14,
-            fontWeight: '400',
+            fontSize: 15,
+            fontWeight: '700',
+            lineHeight: 18,
         },
         default: {
-            fontFamily: 'NotoSansCJKkrRegular',
-            fontSize: 14,
+            fontFamily: 'NotoSansCJKkrBold',
+            fontSize: 15,
+            lineHeight: 18,
         },
     }),
     headerTitle: Platform.select({
@@ -158,7 +161,6 @@ const globalStyle = StyleSheet.create({
         },
     }),
     shortSmall: {
-        backgroundColor: 'transparent',
         borderRadius: 6,
         height: 26,
         padding: 0,

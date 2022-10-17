@@ -77,7 +77,7 @@ function ProposalCard(props: ProposalCardProps): JSX.Element {
                     <View style={{ paddingTop: Platform.OS === 'android' ? 0 : 13 }}>
                         {type === EnumProposalType.Business && assessPeriod && (
                             <Period
-                                type={getString('제안기간')}
+                                type={getString('평가기간')}
                                 created={assessPeriod?.begin as string}
                                 deadline={assessPeriod?.end as string}
                             />

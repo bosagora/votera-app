@@ -89,7 +89,7 @@ function ProposalPreviewScreen({ navigation, route }: MainScreenProps<'ProposalP
                 <Animated.View style={{ alignItems: 'center', opacity }}>
                     {assessPeriod?.begin && assessPeriod.end && (
                         <Period
-                            type={getString('제안기간')}
+                            type={getString('평가기간')}
                             typeStyle={{ fontSize: 14 }}
                             periodStyle={{ fontSize: 13 }}
                             color="white"

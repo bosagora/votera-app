@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useState, useEffect } from 'react';
-import { View, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, ScrollView, ActivityIndicator } from 'react-native';
 import { Button, Text, Icon } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import { debounce } from 'lodash';
@@ -23,7 +23,7 @@ const headerTitle = () => <Text style={globalStyle.headerTitle}>{getString('설�
 function AccountInfo({ navigation, route }: MainScreenProps<'AccountInfo'>): JSX.Element {
     const themeContext = useContext(ThemeContext);
     const dispatch = useAppDispatch();
-    const { user, changeVoterName, signOut, setGuestMode, isGuest } = useContext(AuthContext);
+    const { user, changeVoterName, isGuest } = useContext(AuthContext);
     const [newName, setNewName] = useState<string>(user?.username || (isGuest ? 'Guest' : getString('User 없음')));
     const [nameError, setNameError] = useState(false);
     const [isEqual, setIsEqual] = useState(true);
@@ -115,14 +115,6 @@ function AccountInfo({ navigation, route }: MainScreenProps<'AccountInfo'>): JSX
         };
     }, [debounceNameCheck]);
 
-    const onClickSignout = () => {
-        if (isGuest) {
-            setGuestMode(false);
-        } else {
-            signOut();
-        }
-    };
-
     return (
         <View style={{ flex: 1, backgroundColor: 'white' }}>
             <FocusAwareStatusBar barStyle="dark-content" backgroundColor="white" />
@@ -195,14 +187,6 @@ function AccountInfo({ navigation, route }: MainScreenProps<'AccountInfo'>): JSX
                     </Text>
                 )}
                 {loading && <ActivityIndicator size="large" />}
-                <TouchableOpacity
-                    style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 18 }}
-                    onPress={onClickSignout}
-                >
-                    <Text style={{ fontSize: 13, color: themeContext.color.primary, textDecorationLine: 'underline' }}>
-                        {isGuest ? getString('둘러보기 종료') : getString('로그아웃')}
-                    </Text>
-                </TouchableOpacity>
 
                 <View style={{ height: 1, backgroundColor: 'rgb(235,234,239)', marginVertical: 30 }} />
             </ScrollView>

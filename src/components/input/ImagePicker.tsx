@@ -126,7 +126,7 @@ function ImagePickerComponent(props: Props): JSX.Element {
                 }}
             >
                 <Icon
-                    color={imageUri ? themeContext.color.primary : 'white'}
+                    color={imageUri ? themeContext.color.primary : themeContext.color.white}
                     name={imageUri ? 'clear' : 'add'}
                     tvParallaxProperties={undefined}
                 />

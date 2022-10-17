@@ -5,7 +5,7 @@
     "#N개 답글": "#N comments",
     "답글작성": "Comment",
     "다운로드가 완료 되었습니다": "Download complete",
-    "이곳에 자유롭게 글을 남겨주세요": "Write your comments here&#46;",
+    "이곳에 자유롭게 의견을 남겨주세요": "Write your comments here&#46;",
     "이곳에 답글을 남겨주세요": "Add a commnet",
     "내가 신고한 답글입니다&#46;": "Reported comments by me",
     "신고된 답글입니다&#46;": "Reported comments",
@@ -159,7 +159,7 @@
     "입금주소": "Account",
     "입금금액": "Payment Details",
     "제안요약": "Proposal Summary",
-    "요청비용": "Requested Amount",
+    "요청금액": "Requested Amount",
     "사업내용": "Details",
     "현재 디바이스에서 사용자 정보를 찾을 수 없습니다": "User informations are not found in current device",
     "노드 갱신하기": "renew node",
@@ -205,7 +205,8 @@
     "공지글 #N": "announcement #N",
     "공지사항": "Notice",
     "공지보기": "Notice",
-    "글이 등록 되었습니다&#46;": "Successfully registered",
+    "의견이 등록 되었습니다&#46;": "Successfully registered",
+    "답글이 등록 되었습니다&#46;": "Successfully registered",
     "제안유형": "Proposal Type",
     "제안상태": "Proposal Condition",
     "적합도 평가": "Review score",
@@ -213,6 +214,7 @@
     "다운로드가 완료 되었습니다&#46;": "Download Complete",
     "제안 적합도 평가하기": "Evaluate the suitablity",
     "평가기간": "Evaluation Period",
+    "평가 기간": "Evaluation Period",
     "평가하기": "Review",
     "사전 평가 준비": "Pre-evaluation preparation",
     "제안 생성 준비": "Preparation Creation",
@@ -384,5 +386,6 @@
     "제안에 찬성합니다!": "I agree with the proposal",
     "제안에 반대합니다!": "I am against the proposal",
     "입금하기": "Payment",
-    "클립보드에 복사되었습니다": "Copied to clipboard"
+    "클립보드에 복사되었습니다": "Copied to clipboard",
+    "잔액이 부족해 실행하지 못했습니다&#46;": "Failed due to insufficient balance"
 }

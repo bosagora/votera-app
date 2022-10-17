@@ -27,7 +27,15 @@ interface Props {
 function AssessScreen(props: Props): JSX.Element {
     const { assessResultData, onLayout, refetchAssess, onChangeStatus } = props;
     const { proposal, isJoined, joinProposal, fetchProposal } = useContext(ProposalContext);
-    const { metamaskStatus, metamaskProvider, signOut, metamaskConnect, metamaskSwitch } = useContext(AuthContext);
+    const {
+        metamaskStatus,
+        metamaskProvider,
+        isGuest,
+        signOut,
+        metamaskConnect,
+        metamaskSwitch,
+        metamaskUpdateBalance,
+    } = useContext(AuthContext);
     const [needEvaluation, setNeedEvaluation] = useState(false);
     const [submitAssess] = useSubmitAssessMutation();
 
@@ -92,6 +100,7 @@ function AssessScreen(props: Props): JSX.Element {
                         },
                     },
                 });
+                metamaskUpdateBalance();
                 refetchAssess();
                 setNeedEvaluation(false);
             } catch (e) {
@@ -102,6 +111,7 @@ function AssessScreen(props: Props): JSX.Element {
             isJoined,
             joinProposal,
             metamaskProvider,
+            metamaskUpdateBalance,
             needEvaluation,
             proposal?.proposalId,
             proposal?.voteraVoteAddress,
@@ -153,6 +163,14 @@ function AssessScreen(props: Props): JSX.Element {
         }
         return <EvaluationResult assessResultData={assessResultData} />;
     };
+
+    if (isGuest) {
+        return (
+            <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)}>
+                <EvaluationResult assessResultData={assessResultData} />
+            </View>
+        );
+    }
 
     return (
         <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)}>

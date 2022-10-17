@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import React, { useEffect, useState, useContext, useCallback } from 'react';
-import { View, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, Platform } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Text, Divider, Icon, Button } from 'react-native-elements';
+import { ThemeContext } from 'styled-components/native';
 import { debounce } from 'lodash';
 import MultilineInput from '~/components/input/MultiLineInput';
 import CommentCard from '~/components/opinion/CommentCard';
@@ -14,6 +15,7 @@ import { useInteraction } from '~/graphql/hooks/Interactions';
 import getString from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
+import useReport from '~/graphql/hooks/Reports';
 import CommentButton from '../button/CommentButton';
 import CommentLikeButton from '../button/CommentLikeButton';
 import ShortButton from '../button/ShortButton';
@@ -35,22 +37,21 @@ function getContentText(postData: Post): string {
 }
 
 const styles = StyleSheet.create({
-    contents: {
-        backgroundColor: 'white',
-        paddingTop: 35,
-    },
-    report: {
-        alignItems: 'center',
-        height: 72,
-        justifyContent: 'center',
-    },
+    bottomWrapper: { alignItems: 'center', flexDirection: 'row', paddingBottom: 35 },
+    container: { paddingTop: 35 },
+    content: { fontSize: 13, lineHeight: 21 },
+    contentWrapper: { paddingBottom: 18 },
+    headerButton: { fontSize: 10, lineHeight: 20 },
+    headerWrapper: { flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 11 },
+    likeButton: { marginLeft: 6.5 },
+    report: { alignItems: 'center', height: 72, justifyContent: 'center' },
     separator: {
-        borderColor: 'rgb(220, 217, 227)',
         borderLeftWidth: 1,
         height: 11,
         marginLeft: 9,
         width: 11,
     },
+    writerName: { fontSize: 10, lineHeight: 12 },
 });
 
 const FETCH_INIT_LIMIT = 10;
@@ -126,7 +127,7 @@ function Reply(props: ReplyProps): JSX.Element {
                 ).catch(console.log);
             }
             */
-            dispatch(showSnackBar(getString('글이 등록 되었습니다&#46;')));
+            dispatch(showSnackBar(getString('답글이 등록 되었습니다&#46;')));
         },
         [activityId, createPostComment, dispatch, isGuest, post.id],
     );
@@ -154,10 +155,10 @@ function Reply(props: ReplyProps): JSX.Element {
     return (
         <>
             <View style={globalStyle.flexRowBetween}>
-                <Text style={[globalStyle.rrtext, { fontSize: 13 }]}>
+                <Text style={[globalStyle.rrtext, { fontSize: 13, lineHeight: 21 }]}>
                     {getString('#N개 답글').replace('#N', replyCount.toString() || '0')}
                 </Text>
-                <ShortButton
+                {/* <ShortButton
                     title={getString('새로고침')}
                     titleStyle={{ fontSize: 10 }}
                     buttonStyle={[globalStyle.shortSmall, { marginRight: 5 }]}
@@ -170,11 +171,17 @@ function Reply(props: ReplyProps): JSX.Element {
                         });
                         refetch(variables).catch(console.log);
                     }}
-                />
+                /> */}
             </View>
             {replyData?.map((reply, index) => {
-                const status = replyStatus ? replyStatus[index] : undefined;
-                return <CommentCard key={`reply_${reply.id}`} post={reply} status={status} />;
+                return (
+                    <CommentCard
+                        key={`reply_${reply.id}`}
+                        post={reply}
+                        status={replyStatus ? replyStatus[index] : undefined}
+                        separator={index < replyData.length - 1}
+                    />
+                );
             })}
             {renderFetchMoreButton()}
             <MultilineInput
@@ -210,7 +217,7 @@ interface OpinionCardProps {
 function OpinionCard(props: OpinionCardProps): JSX.Element {
     const { activityId, post, status } = props;
     const { isGuest } = useContext(AuthContext);
-    const { reportPost, restorePost } = useContext(ProposalContext);
+    const themeContext = useContext(ThemeContext);
     const dispatch = useAppDispatch();
     const [showReply, setShowReply] = useState(false);
     const [isReported] = useState(post.status === 'DELETED' || !!status?.isReported);
@@ -219,6 +226,8 @@ function OpinionCard(props: OpinionCardProps): JSX.Element {
     const [likeCount, setLikeCount] = useState(0);
     const [commentCount, setCommentCount] = useState(0);
     const { runToggleLike } = useInteraction();
+    const [cardWidth, setCardWidth] = useState(0);
+    const { restore, report } = useReport();
 
     const handler = useCallback(
         debounce((toValue: boolean) => {
@@ -256,103 +265,6 @@ function OpinionCard(props: OpinionCardProps): JSX.Element {
         handler(!localIsLiked);
     };
 
-    const report = useCallback(() => {
-        if (isGuest) {
-            dispatch(showSnackBar(getString('둘러보기 중에는 사용할 수 없습니다')));
-            return;
-        }
-
-        if (Platform.OS === 'web') {
-            if (window.confirm(getString('이 게시물을 신고하시겠습니까?'))) {
-                reportPost(activityId, post.id)
-                    .then((succeeded) => {
-                        // 여기 오기 rendering 되어서 없어질 듯
-                        dispatch(showSnackBar(getString('신고 처리가 완료되었습니다')));
-                    })
-                    .catch((err) => {
-                        console.log('catch exception while reportPost : ', err);
-                        dispatch(showSnackBar(getString('신고 처리 중 오류가 발생했습니다')));
-                    });
-            }
-        } else {
-            Alert.alert(
-                getString('이 게시물을 신고하시겠습니까?'),
-                getString(
-                    '신고할 경우, 이 게시물은 회원님께 숨김 처리 됩니다&#46; 신고가 누적되면 다른 참여자들에게도 숨김처리가 될 예정입니다&#46;',
-                ),
-                [
-                    {
-                        text: getString('취소'),
-                        onPress: () => {
-                            console.log('cancel pressed');
-                        },
-                        style: 'cancel',
-                    },
-                    {
-                        text: getString('신고'),
-                        onPress: () => {
-                            reportPost(activityId, post.id)
-                                .then((succeeded) => {
-                                    // 여기 오기 rendering 되어서 없어질 듯
-                                    dispatch(showSnackBar(getString('신고 처리가 완료되었습니다')));
-                                })
-                                .catch((err) => {
-                                    console.log('catch exception while reportPost : ', err);
-                                    dispatch(showSnackBar(getString('신고 처리 중 오류가 발생했습니다')));
-                                });
-                        },
-                    },
-                ],
-            );
-        }
-    }, [activityId, dispatch, isGuest, post.id, reportPost]);
-
-    const restore = useCallback(() => {
-        if (isGuest) {
-            dispatch(showSnackBar(getString('둘러보기 중에는 사용할 수 없습니다')));
-            return;
-        }
-        if (Platform.OS === 'web') {
-            if (window.confirm(getString('신고를 취소하시겠습니까?'))) {
-                restorePost(activityId, post.id)
-                    .then((succeeded) => {
-                        dispatch(showSnackBar(getString('신고취소 처리가 완료되었습니다')));
-                    })
-                    .catch((err) => {
-                        console.log('catch exception while restorePost : ', err);
-                        dispatch(showSnackBar(getString('신고취소 처리 중 오류가 발생했습니다')));
-                    });
-            }
-        } else {
-            Alert.alert(
-                getString('신고를 취소하시겠습니까?'),
-                getString('신고를 취소하더라도 신고가 누적되어 있으면 여전히 숨김처리 되어 있습니다&#46;'),
-                [
-                    {
-                        text: getString('No'),
-                        onPress: () => {
-                            console.log('cancel pressed');
-                        },
-                        style: 'cancel',
-                    },
-                    {
-                        text: getString('Yes'),
-                        onPress: () => {
-                            restorePost(activityId, post.id)
-                                .then((succeeded) => {
-                                    dispatch(showSnackBar(getString('신고취소 처리가 완료되었습니다')));
-                                })
-                                .catch((err) => {
-                                    console.log('catch exception while restorePost : ', err);
-                                    dispatch(showSnackBar(getString('신고취소 처리 중 오류가 발생했습니다')));
-                                });
-                        },
-                    },
-                ],
-            );
-        }
-    }, [isGuest, dispatch, restorePost, activityId, post.id]);
-
     const commentHeader = () => {
         if (status?.isReported) {
             return (
@@ -362,16 +274,20 @@ function OpinionCard(props: OpinionCardProps): JSX.Element {
                             setShowContent(!showContent);
                         }}
                     >
-                        {showContent && <Text style={{ fontSize: 10 }}>{getString('내용숨기기')}</Text>}
-                        {!showContent && <Text style={{ fontSize: 10 }}>{getString('내용보기')}</Text>}
+                        {showContent && (
+                            <Text style={[globalStyle.rtext, styles.headerButton]}>{getString('내용숨기기')}</Text>
+                        )}
+                        {!showContent && (
+                            <Text style={[globalStyle.rtext, styles.headerButton]}>{getString('내용보기')}</Text>
+                        )}
                     </TouchableOpacity>
-                    <View style={styles.separator} />
+                    <View style={[styles.separator, { borderColor: themeContext.color.separator }]} />
                     <TouchableOpacity
                         onPress={() => {
-                            restore();
+                            restore(activityId, post.id);
                         }}
                     >
-                        <Text style={{ fontSize: 10 }}>{getString('신고취소')}</Text>
+                        <Text style={[globalStyle.rtext, styles.headerButton]}>{getString('신고취소')}</Text>
                     </TouchableOpacity>
                 </View>
             );
@@ -384,38 +300,53 @@ function OpinionCard(props: OpinionCardProps): JSX.Element {
                             setShowContent(!showContent);
                         }}
                     >
-                        {showContent && <Text style={{ fontSize: 10 }}>{getString('내용숨기기')}</Text>}
-                        {!showContent && <Text style={{ fontSize: 10 }}>{getString('내용보기')}</Text>}
+                        {showContent && (
+                            <Text style={[globalStyle.rtext, styles.headerButton]}>{getString('내용숨기기')}</Text>
+                        )}
+                        {!showContent && (
+                            <Text style={[globalStyle.rtext, styles.headerButton]}>{getString('내용보기')}</Text>
+                        )}
                     </TouchableOpacity>
                 </View>
             );
         }
         return (
             <View style={globalStyle.flexRowBetween}>
-                <Text style={{ fontSize: 10 }}>{sinceCalc(post.createdAt as string)}</Text>
-                <View style={styles.separator} />
+                <Text style={[globalStyle.rtext, styles.headerButton]}>{sinceCalc(post.createdAt as string)}</Text>
+                <View style={[styles.separator, { borderColor: themeContext.color.separator }]} />
                 <TouchableOpacity
                     onPress={() => {
-                        report();
+                        report(activityId, post.id);
                     }}
                 >
-                    <Text style={{ fontSize: 10 }}>{getString('신고')}</Text>
+                    <Text style={[globalStyle.rtext, styles.headerButton]}>{getString('신고')}</Text>
                 </TouchableOpacity>
             </View>
         );
     };
 
     return (
-        <View style={styles.contents}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 11 }}>
-                <Text style={[globalStyle.gbtext, { fontSize: 10 }]}>{post.writer?.username || ''}</Text>
+        <View
+            style={[styles.container, { backgroundColor: themeContext.color.white }]}
+            onLayout={(event) => {
+                setCardWidth(event.nativeEvent.layout.width);
+            }}
+        >
+            <View style={styles.headerWrapper}>
+                <Text style={[globalStyle.gbtext, { color: themeContext.color.black }, styles.writerName]}>
+                    {post.writer?.username || ''}
+                </Text>
                 {commentHeader()}
             </View>
-            <View style={{ paddingBottom: 18 }}>
-                {showContent && <Text style={{ fontSize: 13, lineHeight: 21 }}>{getContentText(post)}</Text>}
+            <View style={styles.contentWrapper}>
+                {showContent && (
+                    <Text style={[globalStyle.rtext, { color: themeContext.color.textBlack }, styles.content]}>
+                        {getContentText(post)}
+                    </Text>
+                )}
                 {!showContent && (
                     <View style={styles.report}>
-                        <Text style={{ fontSize: 13, lineHeight: 21 }}>
+                        <Text style={[globalStyle.rtext, { color: themeContext.color.textBlack }, styles.content]}>
                             {status?.isReported
                                 ? getString('내가 신고한 게시물입니다&#46;')
                                 : getString('신고된 게시물입니다&#46;')}
@@ -423,7 +354,7 @@ function OpinionCard(props: OpinionCardProps): JSX.Element {
                     </View>
                 )}
             </View>
-            <View style={{ flexDirection: 'row', paddingBottom: 35 }}>
+            <View style={styles.bottomWrapper}>
                 <CommentButton
                     commentCount={commentCount}
                     onPress={() => {
@@ -433,7 +364,7 @@ function OpinionCard(props: OpinionCardProps): JSX.Element {
                 />
                 {!isReported && (
                     <CommentLikeButton
-                        buttonStyle={{ marginLeft: 6.5 }}
+                        buttonStyle={styles.likeButton}
                         likeCount={likeCount}
                         onPress={() => {
                             toggleLike();
@@ -443,7 +374,9 @@ function OpinionCard(props: OpinionCardProps): JSX.Element {
                 )}
             </View>
             {showReply ? <Reply post={post} activityId={activityId} closeReply={() => setShowReply(false)} /> : null}
-            <Divider style={{ height: 3, backgroundColor: 'rgb(242,244,250)' }} />
+            <Divider
+                style={{ left: -22, height: 3, width: cardWidth + 44, backgroundColor: themeContext.color.gray }}
+            />
         </View>
     );
 }

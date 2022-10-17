@@ -112,21 +112,6 @@ function PaymentInfo(props: PaymentInfoProps): JSX.Element {
 
     return (
         <>
-            {proposal?.type === EnumProposalType.Business && (
-                <View style={{ marginTop: 30 }}>
-                    <Text style={globalStyle.btext}>{getString('사전 평가 기간')}</Text>
-                    <Text style={{ marginTop: 13 }}>{`${getCommonPeriodText(proposal?.assessPeriod)}`}</Text>
-                </View>
-            )}
-            {proposal?.type === EnumProposalType.System && (
-                <View style={{ marginTop: 30 }}>
-                    <Text style={globalStyle.btext}>{getString('투표 기간')}</Text>
-                    <Text style={{ marginTop: 13 }}>{`${getCommonPeriodText(proposal?.votePeriod)}`}</Text>
-                </View>
-            )}
-
-            <LineComponent />
-
             {proposalFee?.status === EnumFeeStatus.Wait && (
                 <>
                     <Text style={[globalStyle.btext, { color: themeContext.color.disagree }]}>
@@ -159,7 +144,7 @@ function PaymentInfo(props: PaymentInfoProps): JSX.Element {
 
             {proposal?.type === EnumProposalType.Business && (
                 <View style={{ flexDirection: 'row' }}>
-                    <Text style={[defaultStyle, { width: 80 }]}>{getString('요청비용')}</Text>
+                    <Text style={[defaultStyle, { width: 80 }]}>{getString('요청금액')}</Text>
                     <Text style={[globalStyle.btext, defaultStyle, { color: themeContext.color.primary }]}>
                         {StringWeiAmountFormat(proposal?.fundingAmount)} BOA
                     </Text>

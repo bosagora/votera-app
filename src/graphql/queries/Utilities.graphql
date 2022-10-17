@@ -17,10 +17,12 @@ query VoteraConfiguration {
         commonsBudgetAddress
         voteraVoteAddress
         providerUrl
+        blockExplorerUrl
     }
     feePolicy {
         fundProposalFeePermil
         systemProposalFee
         voterFee
+        withdrawDelayPeriod
     }
 }

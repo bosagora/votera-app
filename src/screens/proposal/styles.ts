@@ -23,10 +23,35 @@ const styles = StyleSheet.create({
         height: HEADER_HEIGHT,
         marginHorizontal: 10,
     },
+    period: { fontSize: 12, letterSpacing: 0.48, lineHeight: 20 },
+    periodText: { fontSize: 13, lineHeight: 22 },
     statusBar: {
         backgroundColor: 'transparent',
         height: STATUS_BAR_HEIGHT,
     },
+    titleContainer: {
+        alignItems: 'center',
+        flex: 1,
+        justifyContent: 'space-around',
+        width: '80%',
+    },
+    titleText: {
+        color: 'white',
+        fontSize: 18,
+        lineHeight: 24,
+        textAlign: 'center',
+        width: '100%',
+    },
+    typeBox: {
+        alignItems: 'center',
+        borderColor: 'white',
+        borderRadius: 6,
+        borderWidth: 1,
+        height: 23,
+        justifyContent: 'center',
+        width: 64,
+    },
+    typeText: { color: 'white', fontSize: 10, lineHeight: 20 },
 });
 
 export default styles;

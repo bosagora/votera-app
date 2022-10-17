@@ -15,6 +15,7 @@ import { ThemeContext } from 'styled-components/native';
 import { Button, Text } from 'react-native-elements';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, DrawerActions, useLinkTo } from '@react-navigation/native';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useAssets } from 'expo-asset';
 import { TabView, SceneRendererProps, NavigationState } from 'react-native-tab-view';
 import { AuthContext, MetamaskStatus } from '~/contexts/AuthContext';
@@ -54,7 +55,10 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     searchButton: {
+        alignItems: 'center',
+        justifyContent: 'center',
         marginLeft: 6,
+        width: 32,
     },
     tabButton: {
         alignItems: 'center',
@@ -79,7 +83,7 @@ function HomeScreen({ navigation, route }: MainScreenProps<'Home'>): JSX.Element
     const dispatch = useAppDispatch();
     const [assets] = useAssets(iconAssets);
     const { width } = useWindowDimensions();
-    const { metamaskStatus, metamaskConnect } = useContext(AuthContext);
+    const { isGuest, metamaskStatus, metamaskConnect } = useContext(AuthContext);
     const linkTo = useLinkTo();
     const [index, setIndex] = useState(0);
     const [routes] = useState(keys);
@@ -102,11 +106,27 @@ function HomeScreen({ navigation, route }: MainScreenProps<'Home'>): JSX.Element
 
     const headerRight = useCallback(() => {
         if (!assets) return null;
+        if (isGuest) {
+            return (
+                <View style={{ flexDirection: 'row' }}>
+                    <TouchableOpacity style={styles.searchButton} onPress={() => linkTo('/search')}>
+                        <MaterialIcons name="search" color="black" size={24} />
+                    </TouchableOpacity>
+                </View>
+            );
+        }
         return (
             <View style={{ flexDirection: 'row' }}>
                 {metamaskStatus === MetamaskStatus.NOT_CONNECTED && (
                     <Button
-                        containerStyle={[globalStyle.headerMetaButton, { backgroundColor: themeContext.color.primary }]}
+                        containerStyle={[
+                            globalStyle.headerMetaButton,
+                            {
+                                backgroundColor: themeContext.color.primary,
+                                borderWidth: 1,
+                                borderColor: themeContext.color.primary,
+                            },
+                        ]}
                         title="CONNECT"
                         titleStyle={globalStyle.headerMetaTitle}
                         onPress={() => {
@@ -116,19 +136,23 @@ function HomeScreen({ navigation, route }: MainScreenProps<'Home'>): JSX.Element
                 )}
                 {metamaskStatus === MetamaskStatus.CONNECTING && <ActivityIndicator />}
                 {(metamaskStatus === MetamaskStatus.CONNECTED || metamaskStatus === MetamaskStatus.OTHER_CHAIN) && (
-                    <View style={[globalStyle.headerMetaButton, { borderColor: themeContext.color.primary }]}>
-                        <Text style={{ color: themeContext.color.primary }}>CONNECTED</Text>
+                    <View
+                        style={[
+                            globalStyle.headerMetaButton,
+                            { backgroundColor: 'white', borderWidth: 3, borderColor: themeContext.color.primary },
+                        ]}
+                    >
+                        <Text style={[globalStyle.headerMetaTitle, { color: themeContext.color.primary }]}>
+                            CONNECTED
+                        </Text>
                     </View>
                 )}
-                <Button
-                    style={styles.searchButton}
-                    onPress={() => linkTo('/search')}
-                    icon={<Image source={assets[EnumIconAsset.Search] as ImageURISource} />}
-                    type="clear"
-                />
+                <TouchableOpacity style={styles.searchButton} onPress={() => linkTo('/search')}>
+                    <MaterialIcons name="search" color="black" size={24} />
+                </TouchableOpacity>
             </View>
         );
-    }, [assets, linkTo, metamaskConnect, metamaskStatus, themeContext.color.primary]);
+    }, [assets, isGuest, linkTo, metamaskConnect, metamaskStatus, themeContext.color.primary]);
 
     useLayoutEffect(() => {
         navigation.setOptions({

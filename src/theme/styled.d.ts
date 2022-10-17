@@ -20,6 +20,7 @@ declare module 'styled-components/native' {
             business: string;
             gray: string;
             placeholder: string;
+            separator: string;
         };
     }
 }

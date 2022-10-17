@@ -19,6 +19,7 @@ const theme: DefaultTheme = {
         business: 'rgb(29,192,220)',
         gray: 'rgb(242,244,250)',
         placeholder: 'rgb(182,175,198)',
+        separator: 'rgb(220,217,227)',
     },
 };
 

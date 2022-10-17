@@ -5,12 +5,12 @@ import getString from './locales/STRINGS';
 export function ddayCalc(time: string | undefined) {
     if (time === undefined) return '';
 
-    const Dday = dayjs(time);
+    const Dday = dayjs(`${time} UTC+0900`); // Korean time
     const now = dayjs(); // 현재(오늘) 날짜를 받아온다.
 
-    const day = Dday.diff(now, 'd');
+    const day = Math.ceil(Dday.diff(now, 'd', true));
     if (day < 0) return '';
-    return `D - ${day}`;
+    return `D - ${day > 0 ? day : 'day'}`;
 }
 
 // 과거

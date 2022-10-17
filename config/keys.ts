@@ -5,3 +5,5 @@ export const LOGIN_SESSION_SEED = 'login.SessionKey';
 
 export const AUTHCONTEXT_CONFIG = 'authConfig';
 export const LOCAL_TEMP_PROPOSALS = 'TEMP_PROPOSALS';
+
+export const SESSION_USER_KEY = 'userKey';

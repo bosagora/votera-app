@@ -26,8 +26,15 @@ interface Props {
 function CreateScreen(props: Props): JSX.Element {
     const { onChangeStatus, onLayout } = props;
     const { proposal } = useContext(ProposalContext);
-    const { metamaskStatus, metamaskProvider, signOut, metamaskConnect, metamaskSwitch, metamaskUpdateBalance } =
-        useContext(AuthContext);
+    const {
+        metamaskStatus,
+        metamaskProvider,
+        isGuest,
+        signOut,
+        metamaskConnect,
+        metamaskSwitch,
+        metamaskUpdateBalance,
+    } = useContext(AuthContext);
     const dispatch = useAppDispatch();
 
     const [getProposalFee, { data, refetch }] = useGetProposalFeeLazyQuery({
@@ -153,6 +160,23 @@ function CreateScreen(props: Props): JSX.Element {
         // redirect to landing page for installing metamask
         signOut();
         return <ActivityIndicator />;
+    }
+
+    if (isGuest) {
+        return (
+            <View onLayout={(event) => onLayout(event.nativeEvent.layout.height)}>
+                <View style={{ paddingHorizontal: 20, backgroundColor: 'white', flex: 1 }}>
+                    <PaymentInfo
+                        proposal={proposal}
+                        proposalFee={data?.proposalFee}
+                        onCallBudget={() => {
+                            dispatch(showSnackBar(getString('둘러보기 중에는 사용할 수 없습니다')));
+                        }}
+                        loading={loading}
+                    />
+                </View>
+            </View>
+        );
     }
 
     return (

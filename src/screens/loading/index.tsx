@@ -1,4 +1,5 @@
 import React, { useEffect, useContext } from 'react';
+import { MaterialIcons, Octicons } from '@expo/vector-icons';
 import { useVoteraConfigurationQuery } from '~/graphql/generated/generated';
 import { AuthContext } from '~/contexts/AuthContext';
 import { setAppUpdate } from '~/utils/device';
@@ -34,7 +35,14 @@ function Loading(props: LoadingProps): JSX.Element | null {
     }, [dispatch]);
 
     useEffect(() => {
-        if (!configLoading && loaded) onComplete();
+        if (!configLoading && loaded) {
+            const asyncHandler = async () => {
+                await MaterialIcons.loadFont();
+                await Octicons.loadFont();
+                onComplete();
+            };
+            asyncHandler().catch(console.log);
+        }
     }, [configLoading, loaded, onComplete]);
 
     return null;

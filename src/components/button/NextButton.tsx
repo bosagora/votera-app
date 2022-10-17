@@ -1,15 +1,14 @@
-import React from 'react';
-import { View, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import React, { useContext } from 'react';
+import { View, StyleSheet, Image, TouchableOpacity, StyleProp, ViewStyle } from 'react-native';
 import { Icon, Text } from 'react-native-elements';
+import { ThemeContext } from 'styled-components/native';
 import globalStyle from '~/styles/global';
 
 interface ButtonProps {
     icon?: Image;
     text: string;
-    styles: {
-        width: number;
-        backgroundColor: string;
-    };
+    filled: boolean;
+    styles?: StyleProp<ViewStyle> | undefined;
 }
 
 const styles = StyleSheet.create({
@@ -30,17 +29,18 @@ const styles = StyleSheet.create({
 });
 
 function ButtonContent(props: ButtonProps): JSX.Element {
-    const { text, styles: styleProps, icon } = props;
-    let otherColor = styles.textContents.color;
+    const { text, styles: styleProps, icon, filled } = props;
+    const themeContext = useContext(ThemeContext);
 
-    // 배경색이 흰색이면 글씨는 기본색
-    if (styleProps.backgroundColor === 'white') {
-        otherColor = 'rgba(112, 58, 222, 100)'; // FIXME: Global Color 지정
-    }
     return (
         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
             <TouchableOpacity
-                style={[globalStyle.center, styles.contents, styleProps]}
+                style={[
+                    globalStyle.center,
+                    styles.contents,
+                    { backgroundColor: filled ? themeContext.color.primary : themeContext.color.white },
+                    styleProps,
+                ]}
                 onPress={() => {
                     console.log('onPress Btn');
                 }}
@@ -48,13 +48,31 @@ function ButtonContent(props: ButtonProps): JSX.Element {
                 <View style={{ flexDirection: 'row' }}>
                     <>
                         {icon}
-                        <Text style={[globalStyle.btext, styles.textContents, { color: otherColor }]}>{text}</Text>
+                        <Text
+                            style={[
+                                globalStyle.btext,
+                                styles.textContents,
+                                { color: filled ? themeContext.color.white : themeContext.color.primary },
+                            ]}
+                        >
+                            {text}
+                        </Text>
                     </>
                 </View>
-                <Icon name="chevron-right" color={otherColor} style={{}} tvParallaxProperties={undefined} />
+                <Icon
+                    name="chevron-right"
+                    color={filled ? themeContext.color.white : themeContext.color.primary}
+                    style={{}}
+                    tvParallaxProperties={undefined}
+                />
             </TouchableOpacity>
         </View>
     );
 }
 
 export default ButtonContent;
+
+ButtonContent.defaultProps = {
+    icon: undefined,
+    styles: undefined,
+};

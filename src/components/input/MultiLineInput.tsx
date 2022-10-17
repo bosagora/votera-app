@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import {
     Platform,
     StyleSheet,
@@ -39,8 +39,17 @@ interface TextInputComponentProps extends InputProps {
 </View>
 */
 const styles = StyleSheet.create({
+    bottom: {
+        alignItems: 'flex-end',
+        bottom: 0,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        left: 0,
+        paddingRight: 23,
+        position: 'absolute',
+        right: 0,
+    },
     inputContent: {
-        backgroundColor: 'rgb(242, 244, 250)',
         borderRadius: 20,
         height: 128,
         marginBottom: 21.5,
@@ -53,31 +62,16 @@ const styles = StyleSheet.create({
         outlineStyle: 'none',
         padding: 0,
     },
+    sizeCaption: { fontSize: 10, lineHeight: 20 },
     writeButton: {
         alignItems: 'center',
-        backgroundColor: 'rgb(112, 58, 222)',
         borderRadius: 21.5,
         bottom: 0,
         height: 43,
         justifyContent: 'center',
-        shadowColor: 'rgb(120,100,176)',
-        shadowOffset: {
-            height: 10,
-            width: 0,
-        },
-        shadowOpacity: 0.29,
         width: 43,
     },
-    writeContent: {
-        alignItems: 'flex-end',
-        bottom: 0,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        left: 0,
-        paddingHorizontal: 23,
-        position: 'absolute',
-        right: 0,
-    },
+    writeButtonImage: { bottom: 1, left: 1 },
 });
 
 function MultilineInput(props: TextInputComponentProps): JSX.Element {
@@ -97,12 +91,15 @@ function MultilineInput(props: TextInputComponentProps): JSX.Element {
 
     function writeBtnComponent() {
         return (
-            <View style={styles.writeContent}>
-                <Text style={{ fontSize: 10 }}>{`${value?.length || 0}/300`}</Text>
+            <View style={styles.bottom}>
+                <Text style={[globalStyle.rltext, styles.sizeCaption]}>{`${value?.length || 0}/300`}</Text>
                 {assets && (
-                    <TouchableOpacity style={styles.writeButton} onPress={onPress}>
+                    <TouchableOpacity
+                        style={[styles.writeButton, { backgroundColor: themeContext.color.primary }]}
+                        onPress={onPress}
+                    >
                         <Image
-                            style={{ bottom: 1, left: 1 }}
+                            style={styles.writeButtonImage}
                             source={assets[EnumIconAssets.PenIcon] as ImageURISource}
                         />
                     </TouchableOpacity>
@@ -113,7 +110,7 @@ function MultilineInput(props: TextInputComponentProps): JSX.Element {
 
     return (
         <View style={componentStyle}>
-            <View style={styles.inputContent}>
+            <View style={[styles.inputContent, { backgroundColor: themeContext.color.gray }]}>
                 <Input
                     // eslint-disable-next-line react/jsx-props-no-spreading
                     {...otherProps}
@@ -132,10 +129,11 @@ function MultilineInput(props: TextInputComponentProps): JSX.Element {
                     inputStyle={[
                         Platform.OS === 'android' ? { fontFamily: 'sans-serif' } : globalStyle.rtext,
                         styles.inputStyle,
+                        { color: themeContext.color.textBlack },
                         inputStyle,
                     ]}
                     inputContainerStyle={[{ borderBottomWidth: 0 }, inputContainerStyle]}
-                    placeholderTextColor={placeholderTextColor || themeContext.color.primary}
+                    placeholderTextColor={placeholderTextColor || themeContext.color.placeholder}
                     selectionColor={themeContext.color.primary}
                     autoCompleteType={undefined}
                 />

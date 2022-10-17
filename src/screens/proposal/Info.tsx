@@ -177,13 +177,7 @@ function Info(props: Props): JSX.Element {
                 </View>
                 {type === EnumProposalType.Business && (
                     <View style={{ flexDirection: 'row' }}>
-                        <Text style={styles.default}>{getString('제안기간')}</Text>
-                        <Text style={[globalStyle.ltext, styles.default, { marginLeft: 18 }]}>{assessPeriod}</Text>
-                    </View>
-                )}
-                {type === EnumProposalType.Business && (
-                    <View style={{ flexDirection: 'row' }}>
-                        <Text style={styles.default}>{getString('요청비용')}</Text>
+                        <Text style={styles.default}>{getString('요청금액')}</Text>
                         <Text
                             style={[
                                 globalStyle.btext,
@@ -243,21 +237,7 @@ function Info(props: Props): JSX.Element {
                         <Text>{getString('첨부파일')}</Text>
                     </View>
                     {files.map((file) => {
-                        return (
-                            <DownloadComponent
-                                key={`file_${file.id || ''}`}
-                                label={file.name || 'filename'}
-                                onPress={() => {
-                                    if (file) {
-                                        downloadFile(file.url, file.name)
-                                            .then((result) => {
-                                                dispatch(showSnackBar(getString('다운로드가 완료 되었습니다')));
-                                            })
-                                            .catch(console.log);
-                                    }
-                                }}
-                            />
-                        );
+                        return <DownloadComponent key={`file_${file.id || ''}`} file={file} />;
                     })}
                 </>
             ) : null}

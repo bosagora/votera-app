@@ -10,9 +10,9 @@ import { useLinkTo } from '@react-navigation/native';
 import CommonButton from '~/components/button/CommonButton';
 import { AuthContext, MetamaskStatus } from '~/contexts/AuthContext';
 import { AccessScreenProps } from '~/navigation/access/AccessParams';
-import { RootStackParams } from '~/navigation/types/RootStackParams';
 import globalStyle from '~/styles/global';
 import getString from '~/utils/locales/STRINGS';
+import { WhereType } from '~/graphql/hooks/Proposals';
 
 enum EnumIconAsset {
     FullnameLogo = 0,
@@ -35,8 +35,8 @@ function LandingScreen({ navigation }: AccessScreenProps<'Landing'>): JSX.Elemen
         metamaskStatus,
         metamaskConnect,
         metamaskSwitch,
+        isGuest,
     } = useContext(AuthContext);
-    const [routeName, setRouteName] = useState<keyof RootStackParams>();
     const [showLanding, setShowLanding] = useState(false);
     const onboarding = useRef<MetaMaskOnboarding>();
     const [assets] = useAssets(iconAssets);
@@ -79,10 +79,10 @@ function LandingScreen({ navigation }: AccessScreenProps<'Landing'>): JSX.Elemen
     }, [metamaskStatus, enrolled, user, navigation]);
 
     useEffect(() => {
-        if (routeLoaded && routeName) {
-            navigation.navigate(routeName);
+        if (routeLoaded && isGuest) {
+            navigation.navigate('RootUser', { screen: 'Home', params: { where: WhereType.PROJECT } });
         }
-    }, [routeLoaded, routeName, navigation]);
+    }, [routeLoaded, isGuest, navigation]);
 
     if (!showLanding) return null;
     return (
@@ -144,7 +144,6 @@ function LandingScreen({ navigation }: AccessScreenProps<'Landing'>): JSX.Elemen
                     onPress={() => {
                         setRouteLoaded(false);
                         setGuestMode(true);
-                        setRouteName('RootUser');
                     }}
                 />
                 <View style={{ marginBottom: 77, marginTop: 34, alignItems: 'center' }}>

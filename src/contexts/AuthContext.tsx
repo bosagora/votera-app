@@ -6,7 +6,7 @@ import { TypedDataDomain, TypedDataField } from '@ethersproject/abstract-signer'
 import { isApolloError } from '@apollo/client';
 import moment from 'moment';
 import { getLocale, setLocale } from '@utils/locales/STRINGS';
-import { AUTHCONTEXT_CONFIG } from '@config/keys';
+import { AUTHCONTEXT_CONFIG, SESSION_USER_KEY } from '@config/keys';
 import { serverChainID } from '@config/ServerConfig';
 import {
     useIsMemberLazyQuery,
@@ -16,10 +16,10 @@ import {
     useSignUpMemberMutation,
     useUpdateMemberMutation,
     SignTypeDomain,
-    useMyMembersLazyQuery,
     useMeLazyQuery,
 } from '~/graphql/generated/generated';
 import LocalStorage, { LocalStorageProps } from '~/utils/LocalStorage';
+import SessionStorage from '~/utils/SessionStorage';
 import client, { setToken, resetToken } from '~/graphql/client';
 import pushService from '~/services/FcmService';
 
@@ -189,6 +189,22 @@ async function resetUserOfLocalStorage() {
     await LocalStorage.set(localStorage);
 }
 
+async function getValidUserFromSessionStorage(): Promise<User | null> {
+    const user = await SessionStorage.getSessionByKey<User>(SESSION_USER_KEY);
+    if (!user || !user.token) {
+        return null;
+    }
+    return user;
+}
+
+async function setUserToSessionStorage(user: User) {
+    await SessionStorage.setSessionByKey(SESSION_USER_KEY, user);
+}
+
+async function resetUserOfSessionStorage() {
+    await SessionStorage.resetSessionByKey(SESSION_USER_KEY);
+}
+
 function addEnrolledMember(address: string) {
     if (localStorage.members) {
         if (localStorage.members.find((m) => m.address === address)) {
@@ -321,7 +337,6 @@ export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
     const [metamaskProvider, setMetamaskProvider] = useState<ethers.providers.Web3Provider | null>(null);
     const [isMemberQuery] = useIsMemberLazyQuery({ fetchPolicy: 'cache-and-network' });
     const [getMe] = useMeLazyQuery({ fetchPolicy: 'network-only' });
-    const [getMyMembers] = useMyMembersLazyQuery({ fetchPolicy: 'network-only' });
     const [getSignInDomainQuery] = useGetSignInDomainLazyQuery({ fetchPolicy: 'cache-and-network' });
     const [signInMemberMutation] = useSignInMemberMutation();
     const [getSignUpDomainQuery] = useGetSignUpDomainLazyQuery({ fetchPolicy: 'cache-and-network' });
@@ -341,44 +356,48 @@ export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
             localStorage = normalizeLocalStorage(await LocalStorage.get());
             updateBookmark();
 
-            if (localStorage.user.token && userConfig.keepSignIn) {
-                const storageUser = getValidUserFromLocalStorage();
-                if (storageUser && storageUser.token) {
-                    try {
-                        const response = await getMe({ context: { token: storageUser.token } });
-                        if (response.data?.meEx) {
-                            const { member } = response.data.meEx;
-                            if (member?.id === storageUser.memberId && member?.address === storageUser.address) {
-                                setToken(storageUser.token);
-                                setUserState(storageUser);
+            let storageUser = await getValidUserFromSessionStorage();
+            if (!storageUser) {
+                if (localStorage.user.token && userConfig.keepSignIn) {
+                    storageUser = getValidUserFromLocalStorage();
+                }
+            }
 
-                                const userFeed = response.data.meEx.user_feed;
-                                pushService.setUserAlarmStatus({
-                                    isMyProposalsNews: userFeed?.myProposalsNews,
-                                    isNewProposalNews: userFeed?.newProposalsNews,
-                                    isLikeProposalsNews: userFeed?.likeProposalsNews,
-                                    isMyCommentNews: userFeed?.myCommentsNews,
-                                    isEtcNews: userFeed?.etcNews,
-                                });
-                            } else {
-                                resetUserOfLocalStorage();
-                            }
-                        } else if (response.error) {
-                            console.log('response error = ', response.error);
-                            if (getErrorAuthResult(response.error) === AUTH_RESULT.AUTH_UNAUTHORIZED) {
-                                resetUserOfLocalStorage();
-                            }
+            if (storageUser && storageUser.token) {
+                try {
+                    const response = await getMe({ context: { token: storageUser.token } });
+                    if (response.data?.meEx) {
+                        const { member } = response.data.meEx;
+                        if (member?.id === storageUser.memberId && member?.address === storageUser.address) {
+                            setToken(storageUser.token);
+                            setUserState(storageUser);
+
+                            const userFeed = response.data.meEx.user_feed;
+                            pushService.setUserAlarmStatus({
+                                isMyProposalsNews: userFeed?.myProposalsNews,
+                                isNewProposalNews: userFeed?.newProposalsNews,
+                                isLikeProposalsNews: userFeed?.likeProposalsNews,
+                                isMyCommentNews: userFeed?.myCommentsNews,
+                                isEtcNews: userFeed?.etcNews,
+                            });
+                        } else {
+                            resetUserOfLocalStorage();
                         }
-                    } catch (err) {
-                        console.log('check user failed', err);
+                    } else if (response.error) {
+                        console.log('response error = ', response.error);
+                        if (getErrorAuthResult(response.error) === AUTH_RESULT.AUTH_UNAUTHORIZED) {
+                            resetUserOfLocalStorage();
+                        }
                     }
+                } catch (err) {
+                    console.log('check user failed', err);
                 }
             }
 
             setLoaded(true);
         };
         initializeAuthContext().catch(console.error);
-    }, [getMyMembers]);
+    }, [getMe]);
 
     useEffect(() => {
         switch (status) {
@@ -472,7 +491,6 @@ export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
                     myWallet: account,
                     signTime,
                 };
-                console.log('signTypedData signValue = ', signValue);
                 // eslint-disable-next-line no-underscore-dangle
                 const result = await web3provider.getSigner()._signTypedData(domain, signInType, signValue);
                 if (!result) {
@@ -525,6 +543,8 @@ export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
 
                     const updated = addEnrolledMember(loginUser.address);
 
+                    await setUserToSessionStorage(loginUser);
+
                     if (keepSession) {
                         await setUserToLocalStorage(loginUser);
                     } else if (updated) {
@@ -559,6 +579,7 @@ export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
         setFeedCount(0);
         resetToken();
 
+        await resetUserOfSessionStorage();
         await resetUserOfLocalStorage();
         await client.clearStore();
     }, []);
