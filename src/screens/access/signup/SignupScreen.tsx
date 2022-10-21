@@ -293,7 +293,7 @@ function SignupScreen({ navigation }: AccessScreenProps<'Signup'>): JSX.Element 
     const renderTabBar = useCallback(
         (props: SceneRendererProps & { navigationState: NavigationState<{ key: string; title: string }> }) => {
             return (
-                <View style={{ height: 30, flexDirection: 'row', paddingHorizontal: 20 }}>
+                <View style={{ height: 40, flexDirection: 'row', paddingHorizontal: 20 }}>
                     {props.navigationState.routes.map((route: { key: string; title: string }, i: number) => {
                         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                         const isActive = props.navigationState.index === i;

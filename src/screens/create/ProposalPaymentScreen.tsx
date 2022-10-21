@@ -38,8 +38,7 @@ const styles = StyleSheet.create({
 
 function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment'>): JSX.Element {
     const { id } = route.params;
-    const { metamaskStatus, metamaskProvider, signOut, metamaskConnect, metamaskSwitch, metamaskUpdateBalance } =
-        useContext(AuthContext);
+    const { metamaskStatus, metamaskProvider, signOut, metamaskUpdateBalance } = useContext(AuthContext);
     const { proposal, fetchProposal } = useContext(ProposalContext);
     const dispatch = useAppDispatch();
     const [assets] = useAssets(iconAssets);
@@ -237,38 +236,16 @@ function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment
         <View style={styles.container}>
             <FocusAwareStatusBar barStyle="light-content" />
             <View style={{ width: '100%' }}>
-                {metamaskStatus === MetamaskStatus.INITIALIZING && <ActivityIndicator />}
-                {metamaskStatus === MetamaskStatus.NOT_CONNECTED && (
-                    <CommonButton
-                        title={getString('메타마스크 연결하기')}
-                        buttonStyle={globalStyle.metaButton}
-                        filled
-                        onPress={metamaskConnect}
-                        raised
+                <ScrollView style={{ paddingHorizontal: 20, backgroundColor: 'white', flex: 1 }}>
+                    <PaymentInfo
+                        proposal={proposal}
+                        proposalFee={data?.proposalFee}
+                        onCallBudget={() => {
+                            callCommonsBudget(id).catch(console.log);
+                        }}
+                        loading={loading}
                     />
-                )}
-                {metamaskStatus === MetamaskStatus.CONNECTING && <ActivityIndicator />}
-                {metamaskStatus === MetamaskStatus.OTHER_CHAIN && (
-                    <CommonButton
-                        title={getString('메타마스크 체인 변경')}
-                        buttonStyle={globalStyle.metaButton}
-                        filled
-                        onPress={metamaskSwitch}
-                        raised
-                    />
-                )}
-                {metamaskStatus === MetamaskStatus.CONNECTED && (
-                    <ScrollView style={{ paddingHorizontal: 20, backgroundColor: 'white', flex: 1 }}>
-                        <PaymentInfo
-                            proposal={proposal}
-                            proposalFee={data?.proposalFee}
-                            onCallBudget={() => {
-                                callCommonsBudget(id).catch(console.log);
-                            }}
-                            loading={loading}
-                        />
-                    </ScrollView>
-                )}
+                </ScrollView>
             </View>
         </View>
     );

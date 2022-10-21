@@ -39,11 +39,12 @@ interface VoteItemProps {
     text: string;
     type: VOTE_SELECT | undefined;
     isSelect: boolean;
+    disabled: boolean;
     onPress: (type: VOTE_SELECT) => void;
 }
 
 function VoteItem(props: VoteItemProps): JSX.Element {
-    const { type, isSelect, text, onPress } = props;
+    const { type, isSelect, text, disabled, onPress } = props;
     const themeContext = useContext(ThemeContext);
     const tintColor = isSelect ? themeContext.color.white : themeContext.color.unchecked;
     const [assets] = useAssets(iconAssets);
@@ -73,6 +74,7 @@ function VoteItem(props: VoteItemProps): JSX.Element {
             onPress={() => {
                 if (type !== undefined) onPress(type);
             }}
+            disabled={disabled}
         >
             {type === VOTE_SELECT.YES && (
                 <View style={{ width: 17, height: 17, borderRadius: 9, borderWidth: 2, borderColor: tintColor }} />

@@ -1,14 +1,15 @@
-import React, { useEffect, useState, useContext } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState, useContext, useCallback } from 'react';
+import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { ThemeContext } from 'styled-components/native';
 import { Button, Text, Icon } from 'react-native-elements';
 import globalStyle from '~/styles/global';
-import { AuthContext } from '~/contexts/AuthContext';
+import { AuthContext, MetamaskStatus } from '~/contexts/AuthContext';
 import { ProposalContext } from '~/contexts/ProposalContext';
 import getString from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
 import { getCommonPeriodText } from '~/utils/time';
+import CommonButton from '~/components/button/CommonButton';
 
 const styles = StyleSheet.create({
     buttonsContainer: {
@@ -109,7 +110,7 @@ function Evaluating(props: Props): JSX.Element {
     const themeContext = useContext(ThemeContext);
     const dispatch = useAppDispatch();
     const { proposal } = useContext(ProposalContext);
-    const { isGuest } = useContext(AuthContext);
+    const { isGuest, metamaskStatus, metamaskProvider, metamaskConnect, metamaskSwitch } = useContext(AuthContext);
     const [completeness, setCompleteness] = useState<number | undefined>(undefined);
     const [realization, setRealization] = useState<number | undefined>(undefined);
     const [profitability, setProfitability] = useState<number | undefined>(undefined);
@@ -130,6 +131,113 @@ function Evaluating(props: Props): JSX.Element {
             setAllcheck(false);
         }
     }, [completeness, realization, profitability, attractiveness, expansion]);
+
+    const renderButton = useCallback(() => {
+        if (!metamaskProvider) {
+            return null;
+        }
+
+        switch (metamaskStatus) {
+            case MetamaskStatus.INITIALIZING:
+            case MetamaskStatus.CONNECTING:
+                return (
+                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-evenly' }}>
+                        <ActivityIndicator size="large" />
+                    </View>
+                );
+            case MetamaskStatus.NOT_CONNECTED:
+                return (
+                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-evenly' }}>
+                        <CommonButton
+                            title={getString('메타마스크 연결하기')}
+                            buttonStyle={globalStyle.metaButton}
+                            filled
+                            onPress={metamaskConnect}
+                            raised
+                        />
+                    </View>
+                );
+            case MetamaskStatus.OTHER_CHAIN:
+                return (
+                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-evenly' }}>
+                        <CommonButton
+                            title={getString('메타마스크 체인 변경')}
+                            buttonStyle={globalStyle.metaButton}
+                            filled
+                            onPress={metamaskSwitch}
+                            raised
+                        />
+                    </View>
+                );
+            default:
+                break;
+        }
+
+        return (
+            <>
+                <View style={{ marginTop: 63 }}>
+                    <EvalComponent evalName={getString('제안완성도')} score={completeness} onChange={setCompleteness} />
+                    <EvalComponent evalName={getString('실현가능성')} score={realization} onChange={setRealization} />
+                    <EvalComponent evalName={getString('수익성')} score={profitability} onChange={setProfitability} />
+                    <EvalComponent evalName={getString('매력도')} score={attractiveness} onChange={setAttractiveness} />
+                    <EvalComponent evalName={getString('확장가능성')} score={expansion} onChange={setExpansion} />
+                </View>
+
+                <View style={{ alignItems: 'center', marginTop: 22 }}>
+                    <Button
+                        onPress={() => {
+                            if (isGuest) {
+                                dispatch(showSnackBar(getString('둘러보기 중에는 사용할 수 없습니다')));
+                            } else if (!allCheck) {
+                                dispatch(showSnackBar(getString('필수 항목을 입력해주세요')));
+                            } else {
+                                onEvaluating([
+                                    { sequence: EnumAssess.COMPLETENESS, value: (completeness || 0) + 1 },
+                                    { sequence: EnumAssess.REALIZATION, value: (realization || 0) + 1 },
+                                    { sequence: EnumAssess.PROFITABILITY, value: (profitability || 0) + 1 },
+                                    { sequence: EnumAssess.ATTRACTIVENESS, value: (attractiveness || 0) + 1 },
+                                    { sequence: EnumAssess.EXPANSION, value: (expansion || 0) + 1 },
+                                ]);
+                            }
+                        }}
+                        icon={
+                            <Icon
+                                name="check"
+                                color={allCheck ? themeContext.color.primary : 'rgb(219,213,235)'}
+                                tvParallaxProperties={undefined}
+                            />
+                        }
+                        title={getString('평가하기')}
+                        titleStyle={[
+                            globalStyle.btext,
+                            {
+                                fontSize: 18,
+                                lineHeight: 24,
+                                color: allCheck ? themeContext.color.primary : 'rgb(219,213,235)',
+                                marginLeft: 6,
+                            },
+                        ]}
+                        type="clear"
+                    />
+                </View>
+            </>
+        );
+    }, [
+        allCheck,
+        attractiveness,
+        completeness,
+        dispatch,
+        expansion,
+        isGuest,
+        metamaskConnect,
+        metamaskProvider,
+        metamaskStatus,
+        metamaskSwitch,
+        onEvaluating,
+        profitability,
+        realization,
+        themeContext.color.primary,
+    ]);
 
     return (
         <View>
@@ -168,52 +276,7 @@ function Evaluating(props: Props): JSX.Element {
                     {getCommonPeriodText(proposal?.assessPeriod)}
                 </Text>
             </View>
-
-            <View style={{ marginTop: 63 }}>
-                <EvalComponent evalName={getString('제안완성도')} score={completeness} onChange={setCompleteness} />
-                <EvalComponent evalName={getString('실현가능성')} score={realization} onChange={setRealization} />
-                <EvalComponent evalName={getString('수익성')} score={profitability} onChange={setProfitability} />
-                <EvalComponent evalName={getString('매력도')} score={attractiveness} onChange={setAttractiveness} />
-                <EvalComponent evalName={getString('확장가능성')} score={expansion} onChange={setExpansion} />
-            </View>
-
-            <View style={{ alignItems: 'center', marginTop: 22 }}>
-                <Button
-                    onPress={() => {
-                        if (isGuest) {
-                            dispatch(showSnackBar(getString('둘러보기 중에는 사용할 수 없습니다')));
-                        } else if (!allCheck) {
-                            dispatch(showSnackBar(getString('필수 항목을 입력해주세요')));
-                        } else {
-                            onEvaluating([
-                                { sequence: EnumAssess.COMPLETENESS, value: (completeness || 0) + 1 },
-                                { sequence: EnumAssess.REALIZATION, value: (realization || 0) + 1 },
-                                { sequence: EnumAssess.PROFITABILITY, value: (profitability || 0) + 1 },
-                                { sequence: EnumAssess.ATTRACTIVENESS, value: (attractiveness || 0) + 1 },
-                                { sequence: EnumAssess.EXPANSION, value: (expansion || 0) + 1 },
-                            ]);
-                        }
-                    }}
-                    icon={
-                        <Icon
-                            name="check"
-                            color={allCheck ? themeContext.color.primary : 'rgb(219,213,235)'}
-                            tvParallaxProperties={undefined}
-                        />
-                    }
-                    title={getString('평가하기')}
-                    titleStyle={[
-                        globalStyle.btext,
-                        {
-                            fontSize: 18,
-                            lineHeight: 24,
-                            color: allCheck ? themeContext.color.primary : 'rgb(219,213,235)',
-                            marginLeft: 6,
-                        },
-                    ]}
-                    type="clear"
-                />
-            </View>
+            {renderButton()}
         </View>
     );
 }

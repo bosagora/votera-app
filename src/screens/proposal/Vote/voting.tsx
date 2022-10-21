@@ -1,13 +1,14 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useCallback } from 'react';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { ThemeContext } from 'styled-components/native';
-import { View, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Button, Text, Icon } from 'react-native-elements';
 import globalStyle from '~/styles/global';
 import ProposalCard from '~/components/proposal/ProposalCard';
 import { Post, Proposal, useGetProposalsQuery } from '~/graphql/generated/generated';
 import ShortButton from '~/components/button/ShortButton';
-import { AuthContext } from '~/contexts/AuthContext';
+import CommonButton from '~/components/button/CommonButton';
+import { AuthContext, MetamaskStatus } from '~/contexts/AuthContext';
 import { ProposalContext } from '~/contexts/ProposalContext';
 import { VOTE_SELECT } from '~/utils/votera/voterautil';
 import VoteItem, { getVoteString } from '~/components/vote/VoteItem';
@@ -23,6 +24,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingTop: 41,
     },
+    runningMessage: { fontSize: 13, lineHeight: 23, marginTop: 13 },
+    warningMessage: { fontSize: 18, lineHeight: 28, marginTop: 13 },
 });
 
 // function getVoteSelect(post: Post): VOTE_SELECT | undefined {
@@ -48,7 +51,8 @@ interface Props {
 function Voting(props: Props): JSX.Element {
     const { canVote, needVote, runVote } = props;
     const { proposal, fetchProposal } = useContext(ProposalContext);
-    const { user, isGuest } = useContext(AuthContext);
+    const { user, isGuest, metamaskStatus, metamaskProvider, metamaskConnect, metamaskSwitch } =
+        useContext(AuthContext);
     const navigation = useNavigation<MainNavigationProps<'ProposalDetail'>>();
     const themeContext = useContext(ThemeContext);
     const dispatch = useAppDispatch();
@@ -71,91 +75,141 @@ function Voting(props: Props): JSX.Element {
         }
     }, [vote, oldVote]);
 
-    const renderOtherProposals = ({ item }: { item: Proposal }) => {
-        const { proposalId } = item;
-        return (
-            <ProposalCard
-                key={`otherProposal_${item.id}`}
-                item={item}
-                onPress={() => {
-                    if (!proposalId) {
-                        dispatch(showSnackBar(getString('제안서 정보에 오류가 있습니다')));
-                        if (navigation.canGoBack()) {
-                            navigation.pop();
-                        } else {
-                            navigation.dispatch(replaceToHome());
-                        }
-                    } else {
-                        fetchProposal(proposalId);
-                        navigation.push('RootUser', { screen: 'ProposalDetail', params: { id: proposalId } });
-                    }
-                }}
-            />
-        );
-    };
+    // const renderOtherProposals = ({ item }: { item: Proposal }) => {
+    //     const { proposalId } = item;
+    //     return (
+    //         <ProposalCard
+    //             key={`otherProposal_${item.id}`}
+    //             item={item}
+    //             onPress={() => {
+    //                 if (!proposalId) {
+    //                     dispatch(showSnackBar(getString('제안서 정보에 오류가 있습니다')));
+    //                     if (navigation.canGoBack()) {
+    //                         navigation.pop();
+    //                     } else {
+    //                         navigation.dispatch(replaceToHome());
+    //                     }
+    //                 } else {
+    //                     fetchProposal(proposalId);
+    //                     navigation.push('RootUser', { screen: 'ProposalDetail', params: { id: proposalId } });
+    //                 }
+    //             }}
+    //         />
+    //     );
+    // };
 
-    if (!canVote) {
-        return (
-            <View style={styles.container}>
-                <Text style={{ marginTop: 13 }}>{getString('제안에 대한 투표가 진행 중 입니다&#46;')}</Text>
-            </View>
-        );
-    }
-
-    if (voteComplete) {
-        return (
-            <View style={styles.container}>
-                <Text style={[globalStyle.btext, { color: themeContext.color.primary, marginTop: 5 }]}>
+    const renderMessage = useCallback(() => {
+        if (!canVote) {
+            return (
+                <Text style={[globalStyle.rtext, styles.warningMessage, { color: themeContext.color.textBlack }]}>
+                    {getString('제안에 대한 투표가 진행 중 입니다&#46;')}
+                </Text>
+            );
+        }
+        if (voteComplete) {
+            return (
+                <Text style={[globalStyle.btext, styles.warningMessage, { color: themeContext.color.primary }]}>
                     {getString('투표 완료')}
                 </Text>
+            );
+        }
+        switch (vote) {
+            case VOTE_SELECT.BLANK:
+                return (
+                    <Text style={[globalStyle.rtext, styles.runningMessage, { color: themeContext.color.abstain }]}>
+                        {getString('제안에 기권합니다!')}
+                    </Text>
+                );
+            case VOTE_SELECT.YES:
+                return (
+                    <Text style={[globalStyle.rtext, styles.runningMessage, { color: themeContext.color.agree }]}>
+                        {getString('제안에 찬성합니다!')}
+                    </Text>
+                );
+            case VOTE_SELECT.NO:
+                return (
+                    <Text style={[globalStyle.rtext, styles.runningMessage, { color: themeContext.color.disagree }]}>
+                        {getString('제안에 반대합니다!')}
+                    </Text>
+                );
+            default:
+                break;
+        }
 
+        return (
+            <Text style={[globalStyle.rtext, styles.runningMessage, { color: themeContext.color.textBlack }]}>
+                {getString('제안에 대한 투표를 진행해주세요&#46;')}
+            </Text>
+        );
+    }, [
+        canVote,
+        themeContext.color.abstain,
+        themeContext.color.agree,
+        themeContext.color.disagree,
+        themeContext.color.primary,
+        themeContext.color.textBlack,
+        vote,
+        voteComplete,
+    ]);
+
+    const renderButton = useCallback(() => {
+        if (!canVote) {
+            return null;
+        }
+        if (voteComplete) {
+            return (
                 <ShortButton
                     title={getString('수정하기')}
-                    buttonStyle={{ marginTop: 17 }}
+                    buttonStyle={{ marginTop: 100 }}
                     onPress={() => {
                         setVoteComplete(false);
                     }}
                     filled
+                    titleStyle={{ fontSize: 13, lineHeight: 23 }}
                 />
+            );
+        }
+        if (!metamaskProvider) {
+            return null;
+        }
 
-                <View style={{ width: '100%', height: 1, backgroundColor: 'rgb(235,234,239)', marginTop: 38 }} />
-                {/* <View style={{ width: '100%' }}>
-                    {otherProposals.map((op) => renderOtherProposals({ item: op }))}
-                </View> */}
-            </View>
-        );
-    }
+        switch (metamaskStatus) {
+            case MetamaskStatus.INITIALIZING:
+            case MetamaskStatus.CONNECTING:
+                return (
+                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 35 }}>
+                        <ActivityIndicator />
+                    </View>
+                );
+            case MetamaskStatus.NOT_CONNECTED:
+                return (
+                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 35 }}>
+                        <CommonButton
+                            title={getString('메타마스크 연결하기')}
+                            buttonStyle={globalStyle.metaButton}
+                            filled
+                            onPress={metamaskConnect}
+                            raised
+                        />
+                    </View>
+                );
+            case MetamaskStatus.OTHER_CHAIN:
+                return (
+                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 35 }}>
+                        <CommonButton
+                            title={getString('메타마스크 체인 변경')}
+                            buttonStyle={globalStyle.metaButton}
+                            filled
+                            onPress={metamaskSwitch}
+                            raised
+                        />
+                    </View>
+                );
+            default:
+                break;
+        }
 
-    return (
-        <View style={styles.container}>
-            {vote === undefined && (
-                <Text
-                    style={[
-                        globalStyle.rtext,
-                        { fontSize: 13, lineHeight: 23, marginTop: 13, color: themeContext.color.textBlack },
-                    ]}
-                >
-                    {getString('제안에 대한 투표를 진행해주세요&#46;')}
-                </Text>
-            )}
-            {vote === VOTE_SELECT.BLANK && (
-                <Text style={{ marginTop: 13, color: themeContext.color.abstain }}>
-                    {getString('제안에 기권합니다!')}
-                </Text>
-            )}
-            {vote === VOTE_SELECT.YES && (
-                <Text style={{ marginTop: 13, color: themeContext.color.agree }}>
-                    {getString('제안에 찬성합니다!')}
-                </Text>
-            )}
-            {vote === VOTE_SELECT.NO && (
-                <Text style={{ marginTop: 13, color: themeContext.color.disagree }}>
-                    {getString('제안에 반대합니다!')}
-                </Text>
-            )}
-
-            <VoteItemGroup onPress={(type: VOTE_SELECT) => setVote(type)} vote={vote} />
-
+        return (
             <Button
                 onPress={() => {
                     if (isGuest) {
@@ -194,12 +248,47 @@ function Voting(props: Props): JSX.Element {
                 type="clear"
                 disabled={!isSelected}
             />
+        );
+    }, [
+        canVote,
+        dispatch,
+        isGuest,
+        isSelected,
+        metamaskConnect,
+        metamaskProvider,
+        metamaskStatus,
+        metamaskSwitch,
+        needVote,
+        runVote,
+        themeContext.color.primary,
+        themeContext.color.unchecked,
+        vote,
+        voteComplete,
+    ]);
+
+    return (
+        <View style={styles.container}>
+            {renderMessage()}
+
+            <VoteItemGroup
+                onPress={(type: VOTE_SELECT) => {
+                    if (metamaskStatus !== MetamaskStatus.CONNECTED) return;
+                    if (!canVote) return;
+                    if (voteComplete) return;
+                    setVote(type);
+                }}
+                vote={vote}
+                disabled={voteComplete}
+            />
+
+            {renderButton()}
+
             {/* {otherVotes?.length ? (
                 <View
                     style={{
                         width: '100%',
                         borderTopWidth: 3,
-                        borderTopColor: themeContext.color.gray,
+                        borderTopColor: themeContext.color.divider,
                         paddingTop: 30,
                         marginTop: 30,
                     }}

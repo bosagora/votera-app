@@ -1,11 +1,9 @@
 import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { View, ActivityIndicator } from 'react-native';
-import CommonButton from '~/components/button/CommonButton';
 import { AuthContext, MetamaskStatus } from '~/contexts/AuthContext';
 import { ProposalContext } from '~/contexts/ProposalContext';
 import { Enum_Proposal_Status as EnumProposalStatus, AssessResultPayload } from '~/graphql/generated/generated';
 import getString from '~/utils/locales/STRINGS';
-import globalStyle from '~/styles/global';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
 import Evaluating, { AssessResult } from './evaluating';
@@ -24,7 +22,7 @@ function AssessScreen(props: Props): JSX.Element {
     const { assessResultData, onLayout, onSubmitAssess, onChangeStatus } = props;
     const dispatch = useAppDispatch();
     const { proposal, fetchProposal } = useContext(ProposalContext);
-    const { metamaskStatus, isGuest, signOut, metamaskConnect, metamaskSwitch } = useContext(AuthContext);
+    const { metamaskStatus, isGuest, signOut } = useContext(AuthContext);
     const [needEvaluation, setNeedEvaluation] = useState(false);
 
     useEffect(() => {
@@ -91,30 +89,6 @@ function AssessScreen(props: Props): JSX.Element {
         return <ActivityIndicator />;
     }
 
-    const renderOtherChain = () => {
-        if (needEvaluation) {
-            return (
-                <View style={globalStyle.center}>
-                    <CommonButton
-                        title={getString('메타마스크 체인 변경')}
-                        buttonStyle={globalStyle.metaButton}
-                        filled
-                        onPress={metamaskSwitch}
-                        raised
-                    />
-                </View>
-            );
-        }
-        return <EvaluationResult assessResultData={assessResultData} />;
-    };
-
-    const renderConnected = () => {
-        if (needEvaluation) {
-            return <Evaluating onEvaluating={submitResponse} />;
-        }
-        return <EvaluationResult assessResultData={assessResultData} />;
-    };
-
     if (isGuest) {
         return (
             <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)}>
@@ -122,24 +96,16 @@ function AssessScreen(props: Props): JSX.Element {
             </View>
         );
     }
-
+    if (needEvaluation) {
+        return (
+            <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)}>
+                <Evaluating onEvaluating={submitResponse} />
+            </View>
+        );
+    }
     return (
         <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)}>
-            {metamaskStatus === MetamaskStatus.INITIALIZING && <ActivityIndicator size="large" />}
-            {metamaskStatus === MetamaskStatus.NOT_CONNECTED && (
-                <View style={globalStyle.center}>
-                    <CommonButton
-                        title={getString('메타마스크 연결하기')}
-                        buttonStyle={globalStyle.metaButton}
-                        filled
-                        onPress={metamaskConnect}
-                        raised
-                    />
-                </View>
-            )}
-            {metamaskStatus === MetamaskStatus.CONNECTING && <ActivityIndicator size="large" />}
-            {metamaskStatus === MetamaskStatus.OTHER_CHAIN && renderOtherChain()}
-            {metamaskStatus === MetamaskStatus.CONNECTED && renderConnected()}
+            <EvaluationResult assessResultData={assessResultData} />
         </View>
     );
 }

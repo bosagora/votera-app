@@ -1,5 +1,5 @@
-import React, { useContext, useState, useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useContext, useState, useEffect, useCallback } from 'react';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { ThemeContext } from 'styled-components/native';
 import { Text } from 'react-native-elements';
 import { BigNumber } from 'ethers';
@@ -9,6 +9,7 @@ import globalStyle from '~/styles/global';
 import CommonButton from '~/components/button/CommonButton';
 import getString from '~/utils/locales/STRINGS';
 import { afterCalc } from '~/utils/time';
+import { AuthContext, MetamaskStatus } from '~/contexts/AuthContext';
 
 const styles = StyleSheet.create({
     metaButton: {
@@ -87,6 +88,7 @@ interface VoteResultProps {
 function VoteResult(props: VoteResultProps): JSX.Element {
     const { data, runWithdraw } = props;
     const themeContext = useContext(ThemeContext);
+    const { metamaskStatus, metamaskProvider, metamaskConnect, metamaskSwitch } = useContext(AuthContext);
     const [graphMaxWidth, setGraphMaxWidth] = useState(0);
     const [total, setTotal] = useState(0);
     const [participated, setParticipated] = useState(0);
@@ -125,14 +127,17 @@ function VoteResult(props: VoteResultProps): JSX.Element {
         }
     };
 
-    const calcWidth = (value?: string | null) => {
-        if (!value) return 0;
-        const v = BigNumber.from(value);
-        if (!graphMaxWidth || v.isZero()) return 0;
-        return (graphMaxWidth * v.toNumber()) / participated;
-    };
+    const calcWidth = useCallback(
+        (value?: string | null) => {
+            if (!value) return 0;
+            const v = BigNumber.from(value);
+            if (!graphMaxWidth || v.isZero()) return 0;
+            return (graphMaxWidth * v.toNumber()) / participated;
+        },
+        [graphMaxWidth, participated],
+    );
 
-    const renderVoteResult = (): JSX.Element | null => {
+    const renderVoteResult = useCallback((): JSX.Element | null => {
         if (!isValidVoteResult(data?.voteProposalState)) {
             return null;
         }
@@ -283,9 +288,21 @@ function VoteResult(props: VoteResultProps): JSX.Element {
                 </View>
             </>
         );
-    };
+    }, [
+        calcWidth,
+        data?.voteProposalState,
+        data?.voteResult,
+        graphMaxWidth,
+        participated,
+        themeContext.color.abstain,
+        themeContext.color.agree,
+        themeContext.color.disagree,
+        themeContext.color.gray,
+        themeContext.color.primary,
+        total,
+    ]);
 
-    const renderWithdraw = () => {
+    const renderWithdraw = useCallback(() => {
         if (!data?.isProposer) {
             return null;
         }
@@ -350,6 +367,44 @@ function VoteResult(props: VoteResultProps): JSX.Element {
                     );
                 }
             }
+            if (!metamaskProvider) {
+                return null;
+            }
+            switch (metamaskStatus) {
+                case MetamaskStatus.INITIALIZING:
+                case MetamaskStatus.CONNECTING:
+                    return (
+                        <View style={styles.withdrawContainer}>
+                            <ActivityIndicator />
+                        </View>
+                    );
+                case MetamaskStatus.NOT_CONNECTED:
+                    return (
+                        <View style={styles.withdrawContainer}>
+                            <CommonButton
+                                title={getString('메타마스크 연결하기')}
+                                buttonStyle={globalStyle.metaButton}
+                                filled
+                                onPress={metamaskConnect}
+                                raised
+                            />
+                        </View>
+                    );
+                case MetamaskStatus.OTHER_CHAIN:
+                    return (
+                        <View style={styles.withdrawContainer}>
+                            <CommonButton
+                                title={getString('메타마스크 체인 변경')}
+                                buttonStyle={globalStyle.metaButton}
+                                filled
+                                onPress={metamaskSwitch}
+                                raised
+                            />
+                        </View>
+                    );
+                default:
+                    break;
+            }
             return (
                 <View style={styles.withdrawContainer}>
                     <CommonButton
@@ -383,7 +438,19 @@ function VoteResult(props: VoteResultProps): JSX.Element {
             );
         }
         return null;
-    };
+    }, [
+        data?.canWithdrawAt,
+        data?.isProposer,
+        data?.voteProposalState,
+        errorMessage,
+        metamaskConnect,
+        metamaskProvider,
+        metamaskStatus,
+        metamaskSwitch,
+        runWithdraw,
+        runningTx,
+        themeContext.color.error,
+    ]);
 
     return (
         <View style={{ backgroundColor: 'white' }}>

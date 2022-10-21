@@ -26,15 +26,7 @@ interface Props {
 function CreateScreen(props: Props): JSX.Element {
     const { onChangeStatus, onLayout } = props;
     const { proposal } = useContext(ProposalContext);
-    const {
-        metamaskStatus,
-        metamaskProvider,
-        isGuest,
-        signOut,
-        metamaskConnect,
-        metamaskSwitch,
-        metamaskUpdateBalance,
-    } = useContext(AuthContext);
+    const { metamaskStatus, metamaskProvider, isGuest, signOut, metamaskUpdateBalance } = useContext(AuthContext);
     const dispatch = useAppDispatch();
 
     const [getProposalFee, { data, refetch }] = useGetProposalFeeLazyQuery({
@@ -187,38 +179,16 @@ function CreateScreen(props: Props): JSX.Element {
 
     return (
         <View onLayout={(event) => onLayout(event.nativeEvent.layout.height)}>
-            {metamaskStatus === MetamaskStatus.INITIALIZING && <ActivityIndicator />}
-            {metamaskStatus === MetamaskStatus.NOT_CONNECTED && (
-                <CommonButton
-                    title={getString('메타마스크 연결하기')}
-                    buttonStyle={globalStyle.metaButton}
-                    filled
-                    onPress={metamaskConnect}
-                    raised
+            <View style={{ paddingHorizontal: 20, backgroundColor: 'white', flex: 1 }}>
+                <PaymentInfo
+                    proposal={proposal}
+                    proposalFee={data?.proposalFee}
+                    onCallBudget={() => {
+                        callCommonsBudget(proposal?.proposalId || '').catch(console.log);
+                    }}
+                    loading={loading}
                 />
-            )}
-            {metamaskStatus === MetamaskStatus.CONNECTING && <ActivityIndicator />}
-            {metamaskStatus === MetamaskStatus.OTHER_CHAIN && (
-                <CommonButton
-                    title={getString('메타마스크 체인 변경')}
-                    buttonStyle={globalStyle.metaButton}
-                    filled
-                    onPress={metamaskSwitch}
-                    raised
-                />
-            )}
-            {metamaskStatus === MetamaskStatus.CONNECTED && (
-                <View style={{ paddingHorizontal: 20, backgroundColor: 'white', flex: 1 }}>
-                    <PaymentInfo
-                        proposal={proposal}
-                        proposalFee={data?.proposalFee}
-                        onCallBudget={() => {
-                            callCommonsBudget(proposal?.proposalId || '').catch(console.log);
-                        }}
-                        loading={loading}
-                    />
-                </View>
-            )}
+            </View>
         </View>
     );
 }

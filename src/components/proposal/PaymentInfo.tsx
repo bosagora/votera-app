@@ -8,7 +8,7 @@ import {
     Enum_Fee_Status as EnumFeeStatus,
     Enum_Proposal_Type as EnumProposalType,
 } from '~/graphql/generated/generated';
-import { AuthContext } from '~/contexts/AuthContext';
+import { AuthContext, MetamaskStatus } from '~/contexts/AuthContext';
 import globalStyle from '~/styles/global';
 import getString from '~/utils/locales/STRINGS';
 import { StringWeiAmountFormat } from '~/utils/votera/voterautil';
@@ -35,7 +35,7 @@ interface PaymentInfoProps {
 function PaymentInfo(props: PaymentInfoProps): JSX.Element {
     const { proposal, proposalFee, onCallBudget, loading } = props;
     const themeContext = useContext(ThemeContext);
-    const { metamaskProvider } = useContext(AuthContext);
+    const { metamaskStatus, metamaskProvider, metamaskConnect, metamaskSwitch } = useContext(AuthContext);
     const [maxWidth, setMaxWidth] = useState(0);
     const [clientSize, setClientSize] = useState([0, 0]);
     const [hidden, setHidden] = useState(true);
@@ -52,11 +52,43 @@ function PaymentInfo(props: PaymentInfoProps): JSX.Element {
 
     const renderButton = useCallback(() => {
         if (!proposalFee?.destination || !metamaskProvider) {
-            return (
-                <View style={{ flex: 1, justifyContent: 'center' }}>
-                    <Text>{getString('입금 정보 확인 중 오류가 발생했습니다&#46;')}</Text>
-                </View>
-            );
+            return null;
+        }
+
+        switch (metamaskStatus) {
+            case MetamaskStatus.INITIALIZING:
+            case MetamaskStatus.CONNECTING:
+                return (
+                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-evenly' }}>
+                        <ActivityIndicator />
+                    </View>
+                );
+            case MetamaskStatus.NOT_CONNECTED:
+                return (
+                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-evenly' }}>
+                        <CommonButton
+                            title={getString('메타마스크 연결하기')}
+                            buttonStyle={globalStyle.metaButton}
+                            filled
+                            onPress={metamaskConnect}
+                            raised
+                        />
+                    </View>
+                );
+            case MetamaskStatus.OTHER_CHAIN:
+                return (
+                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-evenly' }}>
+                        <CommonButton
+                            title={getString('메타마스크 체인 변경')}
+                            buttonStyle={globalStyle.metaButton}
+                            filled
+                            onPress={metamaskSwitch}
+                            raised
+                        />
+                    </View>
+                );
+            default:
+                break;
         }
 
         switch (proposalFee?.status) {
@@ -117,7 +149,10 @@ function PaymentInfo(props: PaymentInfoProps): JSX.Element {
         }
     }, [
         loading,
+        metamaskConnect,
         metamaskProvider,
+        metamaskStatus,
+        metamaskSwitch,
         onCallBudget,
         proposalFee?.destination,
         proposalFee?.status,

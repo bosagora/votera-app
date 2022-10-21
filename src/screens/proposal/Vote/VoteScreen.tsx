@@ -24,16 +24,7 @@ interface Props {
 function VoteScreen(props: Props): JSX.Element {
     const { onLayout, onSubmitBallot } = props;
     const { proposal, fetchProposal } = useContext(ProposalContext);
-    const {
-        user,
-        isGuest,
-        metamaskStatus,
-        metamaskProvider,
-        signOut,
-        metamaskConnect,
-        metamaskSwitch,
-        metamaskUpdateBalance,
-    } = useContext(AuthContext);
+    const { user, isGuest, metamaskStatus, metamaskProvider, signOut, metamaskUpdateBalance } = useContext(AuthContext);
     const [isValidator, setIsValidator] = useState(false);
     const [needVote, setNeedVote] = useState(false);
     const [voteProposalState, setVoteProposalState] = useState<EnumVoteProposalState>();
@@ -55,35 +46,37 @@ function VoteScreen(props: Props): JSX.Element {
         }
     }, [proposal?.proposalId, user?.memberId, getVoteStatus]);
 
-    useEffect(() => {
-        let tm: NodeJS.Timer;
-        if (proposal?.status === EnumProposalStatus.PendingVote || proposal?.status === EnumProposalStatus.Vote) {
-            tm = setInterval(() => {
-                const now = Date.now() / 1000;
-                if (proposal.status === EnumProposalStatus.PendingVote) {
-                    if (proposal.vote_start && now > proposal.vote_start) {
-                        fetchProposal(proposal.proposalId || '');
-                        refetchVoteStatus().catch(console.log);
-                    }
-                } else if (proposal.vote_end && now > proposal.vote_end) {
-                    fetchProposal(proposal.proposalId || '');
-                    refetchVoteStatus().catch(console.log);
-                }
-            }, 10000);
-        }
-        return () => {
-            if (tm !== undefined) {
-                clearInterval(tm);
-            }
-        };
-    }, [
-        proposal?.status,
-        proposal?.vote_end,
-        proposal?.vote_start,
-        proposal?.proposalId,
-        fetchProposal,
-        refetchVoteStatus,
-    ]);
+    // useEffect(() => {
+    //     let tm: NodeJS.Timer;
+    //     if (proposal?.status === EnumProposalStatus.PendingVote || proposal?.status === EnumProposalStatus.Vote) {
+    //         tm = setInterval(() => {
+    //             const now = Date.now() / 1000;
+    //             if (proposal.status === EnumProposalStatus.PendingVote) {
+    //                 if (proposal.vote_start && now > proposal.vote_start) {
+    //                     fetchProposal(proposal.proposalId || '');
+    //                     refetchVoteStatus().catch(console.log);
+    //                 }
+    //             } else if (proposal.status === EnumProposalStatus.Vote) {
+    //                 if (proposal.vote_end && now > proposal.vote_end) {
+    //                     fetchProposal(proposal.proposalId || '');
+    //                     refetchVoteStatus().catch(console.log);
+    //                 }
+    //             }
+    //         }, 60000);
+    //     }
+    //     return () => {
+    //         if (tm !== undefined) {
+    //             clearInterval(tm);
+    //         }
+    //     };
+    // }, [
+    //     proposal?.status,
+    //     proposal?.vote_end,
+    //     proposal?.vote_start,
+    //     proposal?.proposalId,
+    //     fetchProposal,
+    //     refetchVoteStatus,
+    // ]);
 
     useEffect(() => {
         if (voteStatusData?.voteStatus) {
@@ -158,87 +151,53 @@ function VoteScreen(props: Props): JSX.Element {
         voteStatusData?.voteStatus,
     ]);
 
-    if (proposal?.status === EnumProposalStatus.PendingVote) {
-        return (
-            <View onLayout={(event) => onLayout(event.nativeEvent.layout.height)}>
-                <PendingVote />
-            </View>
-        );
-    }
-
     if (metamaskStatus === MetamaskStatus.UNAVAILABLE) {
         // redirect to landing page for installing metamassk
         signOut();
         return <ActivityIndicator />;
     }
 
-    const renderOtherChain = () => {
-        if (needVote) {
+    if (loading) {
+        return (
+            <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)}>
+                <ActivityIndicator />
+            </View>
+        );
+    }
+    if (voteProposalState === undefined) {
+        return <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)} />;
+    }
+    switch (voteProposalState) {
+        case EnumVoteProposalState.None:
             return (
-                <View style={globalStyle.center}>
-                    <CommonButton
-                        title={getString('메타마스크 체인 변경')}
-                        buttonStyle={globalStyle.metaButton}
-                        filled
-                        onPress={metamaskSwitch}
-                        raised
-                    />
+                <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)}>
+                    <PendingVote />
                 </View>
             );
-        }
-        if (loading || voteProposalState === undefined) {
-            return <ActivityIndicator />;
-        }
-        if (voteProposalState === EnumVoteProposalState.None) {
-            return <PendingVote />;
-        }
-        if (voteProposalState === EnumVoteProposalState.Running) {
-            return <Voting runVote={runVote} canVote={false} needVote={needVote} />;
-        }
-        return (
-            <VoteResult
-                data={voteStatusData?.voteStatus}
-                runWithdraw={() => {
-                    return Promise.resolve(getString('메타마스크 네트워크를 변경해주세요&#46;'));
-                }}
-            />
-        );
-    };
-
-    const renderConnected = () => {
-        if (loading || voteProposalState === undefined) {
-            return <ActivityIndicator />;
-        }
-        if (voteProposalState === EnumVoteProposalState.None) {
-            return <PendingVote />;
-        }
-        if (voteProposalState === EnumVoteProposalState.Running) {
-            return <Voting runVote={runVote} canVote={isValidator} needVote={needVote} />;
-        }
-        return <VoteResult data={voteStatusData?.voteStatus} runWithdraw={runWithdraw} />;
-    };
-
-    if (isGuest) {
-        return <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)}>{renderConnected()}</View>;
+        case EnumVoteProposalState.Running:
+            return (
+                <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)}>
+                    <Voting runVote={runVote} canVote={isValidator} needVote={needVote} />
+                </View>
+            );
+        default:
+            break;
     }
 
     return (
         <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)}>
-            {metamaskStatus === MetamaskStatus.INITIALIZING && <ActivityIndicator size="large" />}
-            {metamaskStatus === MetamaskStatus.NOT_CONNECTED && (
-                <View style={globalStyle.center}>
-                    <CommonButton
-                        title={getString('메타마스크 연결하기')}
-                        buttonStyle={globalStyle.metaButton}
-                        filled
-                        onPress={metamaskConnect}
-                        raised
-                    />
-                </View>
-            )}
-            {metamaskStatus === MetamaskStatus.CONNECTING && <ActivityIndicator size="large" />}
-            {metamaskStatus === MetamaskStatus.OTHER_CHAIN && renderOtherChain()}
-            {metamaskStatus === MetamaskStatus.CONNECTED && renderConnected()}
+            <VoteResult
+                data={voteStatusData?.voteStatus}
+                runWithdraw={async () => {
+                    if (metamaskStatus === MetamaskStatus.OTHER_CHAIN) {
+                        return getString('메타마스크 네트워크를 변경해주세요&#46;');
+                    }
+                    if (metamaskStatus !== MetamaskStatus.CONNECTED) {
+                        return getString('메타마스크와 연결되지 않았습니다&#46;');
+                    }
+                    return runWithdraw();
+                }}
+            />
         </View>
     );
 }
