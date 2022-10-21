@@ -45,7 +45,7 @@ function AssessAvg(props: AssessAvgProps): JSX.Element {
     const showTotalAvg = () => {
         const total = avgs.reduce((pv, cv) => pv + Number(cv), 0);
         if (total === 0) return 0;
-        return total / 5;
+        return (total / 5).toFixed(1);
     };
 
     return (
