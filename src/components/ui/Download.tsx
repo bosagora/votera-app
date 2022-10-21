@@ -4,6 +4,7 @@ import { Icon, Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import { showSnackBar } from '~/state/features/snackBar';
 import { useAppDispatch } from '~/state/hooks';
+import globalStyle from '~/styles/global';
 import { AttachmentFile, downloadFile } from '~/utils/attach';
 import getString from '~/utils/locales/STRINGS';
 
@@ -19,7 +20,7 @@ function DownloadComponent(props: DownloadProps) {
     if (!file) return null;
     return (
         <TouchableOpacity
-            style={{ flexDirection: 'row', alignItems: 'center' }}
+            style={globalStyle.flexRowAlignCenter}
             onPress={() => {
                 downloadFile(file.url, file.name)
                     .then((result) => {
@@ -29,7 +30,12 @@ function DownloadComponent(props: DownloadProps) {
             }}
         >
             <Icon name="file-download" color={themeContext.color.primary} tvParallaxProperties={undefined} />
-            <Text style={{ marginLeft: 10, color: themeContext.color.primary, lineHeight: 26 }}>
+            <Text
+                style={[
+                    globalStyle.rtext,
+                    { marginLeft: 10, color: themeContext.color.primary, fontSize: 13, lineHeight: 26 },
+                ]}
+            >
                 {file.name || 'filename'}
             </Text>
         </TouchableOpacity>

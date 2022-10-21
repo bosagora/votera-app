@@ -14,6 +14,7 @@ declare module 'styled-components/native' {
             agree: string;
             disagree: string;
             abstain: string;
+            unchecked: string;
             disabled: string;
             boxBorder: string;
             system: string;
@@ -21,6 +22,7 @@ declare module 'styled-components/native' {
             gray: string;
             placeholder: string;
             separator: string;
+            divider: string;
         };
     }
 }

@@ -12,6 +12,10 @@ const styles = StyleSheet.create({
     contentContainer: {
         flexGrow: 1,
     },
+    dateBox: {
+        alignItems: 'center',
+        position: 'absolute',
+    },
     navBar: {
         alignItems: 'center',
         backgroundColor: 'transparent',
@@ -32,8 +36,8 @@ const styles = StyleSheet.create({
     titleContainer: {
         alignItems: 'center',
         flex: 1,
-        justifyContent: 'space-around',
-        width: '80%',
+        justifyContent: 'center',
+        width: '70%',
     },
     titleText: {
         color: 'white',
@@ -49,6 +53,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         height: 23,
         justifyContent: 'center',
+        position: 'absolute',
         width: 64,
     },
     typeText: { color: 'white', fontSize: 10, lineHeight: 20 },

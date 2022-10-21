@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useState, useEffect } from 'react';
+import React, { useCallback, useContext, useState, useEffect, useMemo } from 'react';
 import { View, ScrollView, ActivityIndicator } from 'react-native';
 import { Button, Text, Icon } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
@@ -27,6 +27,7 @@ function AccountInfo({ navigation, route }: MainScreenProps<'AccountInfo'>): JSX
     const [newName, setNewName] = useState<string>(user?.username || (isGuest ? 'Guest' : getString('User 없음')));
     const [nameError, setNameError] = useState(false);
     const [isEqual, setIsEqual] = useState(true);
+    const [width, setWidth] = useState(0);
     const linkTo = useLinkTo();
 
     const [checkUsername, { loading }] = useCheckUsernameLazyQuery({
@@ -96,16 +97,17 @@ function AccountInfo({ navigation, route }: MainScreenProps<'AccountInfo'>): JSX
         [changeVoterName, dispatch, isGuest, user?.memberId],
     );
 
-    const debounceNameCheck = useCallback(
-        debounce((username: string) => {
-            if (username.length > 0 && username !== user?.username) {
-                checkUsername({
-                    variables: {
-                        username,
-                    },
-                }).catch(console.log);
-            }
-        }, DEBOUNCER_TIME),
+    const debounceNameCheck = useMemo(
+        () =>
+            debounce((username: string) => {
+                if (username.length > 0 && username !== user?.username) {
+                    checkUsername({
+                        variables: {
+                            username,
+                        },
+                    }).catch(console.log);
+                }
+            }, DEBOUNCER_TIME),
         [checkUsername, user?.username],
     );
 
@@ -116,7 +118,12 @@ function AccountInfo({ navigation, route }: MainScreenProps<'AccountInfo'>): JSX
     }, [debounceNameCheck]);
 
     return (
-        <View style={{ flex: 1, backgroundColor: 'white' }}>
+        <View
+            style={{ flex: 1, backgroundColor: themeContext.color.white }}
+            onLayout={(event) => {
+                setWidth(event.nativeEvent.layout.width);
+            }}
+        >
             <FocusAwareStatusBar barStyle="dark-content" backgroundColor="white" />
             <ScrollView
                 contentContainerStyle={{ paddingVertical: 50 }}
@@ -152,7 +159,7 @@ function AccountInfo({ navigation, route }: MainScreenProps<'AccountInfo'>): JSX
                                 debounceNameCheck(text);
                             }
                         }}
-                        inputStyle={globalStyle.gbtext}
+                        inputStyle={[globalStyle.gbtext, { width: width - 100 }]}
                         searchValue={newName}
                         value={newName}
                         koreanInput
@@ -188,7 +195,7 @@ function AccountInfo({ navigation, route }: MainScreenProps<'AccountInfo'>): JSX
                 )}
                 {loading && <ActivityIndicator size="large" />}
 
-                <View style={{ height: 1, backgroundColor: 'rgb(235,234,239)', marginVertical: 30 }} />
+                <View style={{ height: 1, backgroundColor: themeContext.color.divider, marginVertical: 30 }} />
             </ScrollView>
         </View>
     );

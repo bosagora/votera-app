@@ -11,7 +11,8 @@ import globalStyle from '~/styles/global';
 import getString from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
 import { selectDatePicker } from '~/state/features/selectDatePicker';
-import { MainScreenProps } from '~/navigation/main/MainParams';
+import { MainScreenProps, replaceToHome } from '~/navigation/main/MainParams';
+import ShortButton from '~/components/button/ShortButton';
 
 LocaleConfig.locales.ko = {
     monthNames: ['일월', '이월', '삼월', '사월', '오월', '유월', '칠월', '팔월', '구월', '시월', '십일월', '십이월'],
@@ -22,6 +23,17 @@ LocaleConfig.locales.ko = {
 LocaleConfig.defaultLocale = 'ko';
 
 const styles = StyleSheet.create({
+    button: {
+        backgroundColor: 'white',
+        borderRadius: 47,
+        height: 32,
+        marginRight: 23,
+        padding: 0,
+        width: 63,
+    },
+    buttonTitle: {
+        fontSize: 14,
+    },
     calendarCaption: {
         fontSize: 8,
         left: 0,
@@ -66,7 +78,11 @@ function CalendarScreen({ navigation, route }: MainScreenProps<'Calendar'>): JSX
         return (
             <Button
                 onPress={() => {
-                    navigation.pop();
+                    if (navigation.canGoBack()) {
+                        navigation.pop();
+                    } else {
+                        navigation.dispatch(replaceToHome());
+                    }
                 }}
                 icon={<Icon name="chevron-left" tvParallaxProperties={undefined} />}
                 type="clear"
@@ -76,16 +92,22 @@ function CalendarScreen({ navigation, route }: MainScreenProps<'Calendar'>): JSX
 
     const headerRight = useCallback(() => {
         return (
-            <Button
+            <ShortButton
                 title={getString('완료')}
                 onPress={() => {
                     if (startSelected && endSelected) {
                         dispatch(selectDatePicker({ startDate: startSelected, endDate: endSelected }));
-                        navigation.pop();
+                        if (navigation.canGoBack()) {
+                            navigation.pop();
+                        } else {
+                            navigation.dispatch(replaceToHome());
+                        }
                     }
                 }}
                 disabled={!startSelected || !endSelected}
-                type="clear"
+                buttonStyle={styles.button}
+                titleStyle={styles.buttonTitle}
+                disabledStyle={styles.button}
             />
         );
     }, [startSelected, endSelected, dispatch, navigation]);
@@ -94,6 +116,7 @@ function CalendarScreen({ navigation, route }: MainScreenProps<'Calendar'>): JSX
         navigation.setOptions({
             title: getString('투표기간 선택'),
             headerTitleStyle: globalStyle.headerTitle,
+            headerTitleAlign: 'center',
             headerLeft,
             headerRight,
             headerShown: true,

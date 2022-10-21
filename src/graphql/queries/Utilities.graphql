@@ -26,3 +26,9 @@ query VoteraConfiguration {
         withdrawDelayPeriod
     }
 }
+
+mutation UpdateReceipt($input: UpdateReceiptInput!) {
+    updateReceipt(input: $input) {
+        status
+    }
+}

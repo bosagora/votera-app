@@ -17,16 +17,11 @@ export function WeiAmountToString(amount: BigNumber | undefined | null, comma = 
     return comma ? commify(value) : value;
 }
 
-export function RoundDecimalPoint(amount: string, unit: number): string {
-    const index = amount.lastIndexOf('.');
-    if (index < 0 || unit < 0) {
-        return amount;
-    }
-    const decimalUnit = amount.length - index - 1;
-    if (decimalUnit <= unit) {
-        return amount;
-    }
-    return unit === 0 ? amount.slice(0, index) : amount.slice(0, index + 1 + unit);
+export function RoundDecimalPoint(amount: string, unit: number, comma = false): string {
+    const value = Number(amount.replace(',', ''))
+        .toFixed(unit)
+        .replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1');
+    return comma ? commify(value) : value;
 }
 
 export function StringToWeiAmount(amount: string | null | undefined): BigNumber {

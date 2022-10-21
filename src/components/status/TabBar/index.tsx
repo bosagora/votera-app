@@ -22,7 +22,10 @@ function TabBarContainer(
             indicatorStyle={{ backgroundColor: themeContext.color.primary }}
             renderLabel={({ route, focused }) => (
                 <Text
-                    style={[globalStyle.btext, { fontSize: 13, color: focused ? themeContext.color.primary : 'black' }]}
+                    style={[
+                        globalStyle.btext,
+                        { fontSize: 13, lineHeight: 21, color: focused ? themeContext.color.primary : 'black' },
+                    ]}
                 >
                     {route.title}
                 </Text>

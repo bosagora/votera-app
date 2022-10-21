@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import React, { useEffect, useState, useContext, useCallback } from 'react';
+import React, { useEffect, useState, useContext, useCallback, useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Text, Divider, Icon, Button } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
@@ -197,6 +197,7 @@ function Reply(props: ReplyProps): JSX.Element {
                         })
                         .catch(console.log);
                 }}
+                maxInput={300}
             />
             <Button
                 onPress={closeReply}
@@ -229,11 +230,12 @@ function OpinionCard(props: OpinionCardProps): JSX.Element {
     const [cardWidth, setCardWidth] = useState(0);
     const { restore, report } = useReport();
 
-    const handler = useCallback(
-        debounce((toValue: boolean) => {
-            runToggleLike({ isLike: toValue, postId: post.id }).catch(console.log);
-        }, 300),
-        [post],
+    const handler = useMemo(
+        () =>
+            debounce((toValue: boolean) => {
+                runToggleLike({ isLike: toValue, postId: post.id }).catch(console.log);
+            }, 300),
+        [post.id, runToggleLike],
     );
 
     useEffect(() => {

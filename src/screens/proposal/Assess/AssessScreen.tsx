@@ -1,43 +1,31 @@
 import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { View, ActivityIndicator } from 'react-native';
-import { BigNumber } from 'ethers';
 import CommonButton from '~/components/button/CommonButton';
 import { AuthContext, MetamaskStatus } from '~/contexts/AuthContext';
 import { ProposalContext } from '~/contexts/ProposalContext';
-import {
-    Enum_Proposal_Status as EnumProposalStatus,
-    useSubmitAssessMutation,
-    AssessResultPayload,
-} from '~/graphql/generated/generated';
+import { Enum_Proposal_Status as EnumProposalStatus, AssessResultPayload } from '~/graphql/generated/generated';
 import getString from '~/utils/locales/STRINGS';
-import VoteraVote from '~/utils/votera/VoteraVote';
+import globalStyle from '~/styles/global';
+import { useAppDispatch } from '~/state/hooks';
+import { showSnackBar } from '~/state/features/snackBar';
 import Evaluating, { AssessResult } from './evaluating';
 import PendingAssess from './pendingAssess';
 import EvaluationResult from './result';
-import globalStyle from '~/styles/global';
 
 interface Props {
     // proposalId: string;
     assessResultData: AssessResultPayload;
     onLayout: (h: number) => void;
-    refetchAssess: () => void;
+    onSubmitAssess: (data: AssessResult[]) => Promise<void>;
     onChangeStatus: () => void;
 }
 
 function AssessScreen(props: Props): JSX.Element {
-    const { assessResultData, onLayout, refetchAssess, onChangeStatus } = props;
-    const { proposal, isJoined, joinProposal, fetchProposal } = useContext(ProposalContext);
-    const {
-        metamaskStatus,
-        metamaskProvider,
-        isGuest,
-        signOut,
-        metamaskConnect,
-        metamaskSwitch,
-        metamaskUpdateBalance,
-    } = useContext(AuthContext);
+    const { assessResultData, onLayout, onSubmitAssess, onChangeStatus } = props;
+    const dispatch = useAppDispatch();
+    const { proposal, fetchProposal } = useContext(ProposalContext);
+    const { metamaskStatus, isGuest, signOut, metamaskConnect, metamaskSwitch } = useContext(AuthContext);
     const [needEvaluation, setNeedEvaluation] = useState(false);
-    const [submitAssess] = useSubmitAssessMutation();
 
     useEffect(() => {
         setNeedEvaluation(!!assessResultData?.needEvaluation);
@@ -73,51 +61,20 @@ function AssessScreen(props: Props): JSX.Element {
     }, [proposal, onChangeStatus, fetchProposal]);
 
     const submitResponse = useCallback(
-        async (data: AssessResult[]) => {
-            if (!needEvaluation || !proposal?.proposalId || !metamaskProvider) {
+        (data: AssessResult[]) => {
+            if (!needEvaluation) {
                 return;
             }
-            try {
-                if (!isJoined) await joinProposal();
-                const values = data.map((d) => BigNumber.from(d.value));
-                const voteraVote = new VoteraVote(proposal?.voteraVoteAddress || '', metamaskProvider.getSigner());
-                const tx = await voteraVote.submitAssess(proposal.proposalId, values, {});
-
-                const content = data.map((d) => ({
-                    __typename: 'ComponentPostScaleAnswer',
-                    value: d.value,
-                    sequence: d.sequence,
-                }));
-
-                await submitAssess({
-                    variables: {
-                        input: {
-                            data: {
-                                proposalId: proposal.proposalId || '',
-                                content,
-                                transactionHash: tx.hash,
-                            },
-                        },
-                    },
+            onSubmitAssess(data)
+                .then(() => {
+                    setNeedEvaluation(false);
+                })
+                .catch((err) => {
+                    dispatch(showSnackBar(getString('평가 처리 중 오류가 발생헀습니다&#46;')));
+                    console.log(err);
                 });
-                metamaskUpdateBalance();
-                refetchAssess();
-                setNeedEvaluation(false);
-            } catch (e) {
-                console.log('Create Assess error : ', e);
-            }
         },
-        [
-            isJoined,
-            joinProposal,
-            metamaskProvider,
-            metamaskUpdateBalance,
-            needEvaluation,
-            proposal?.proposalId,
-            proposal?.voteraVoteAddress,
-            refetchAssess,
-            submitAssess,
-        ],
+        [dispatch, needEvaluation, onSubmitAssess],
     );
 
     if (proposal?.status === EnumProposalStatus.PendingAssess) {
@@ -153,13 +110,7 @@ function AssessScreen(props: Props): JSX.Element {
 
     const renderConnected = () => {
         if (needEvaluation) {
-            return (
-                <Evaluating
-                    onEvaluating={(data) => {
-                        submitResponse(data).catch(console.log);
-                    }}
-                />
-            );
+            return <Evaluating onEvaluating={submitResponse} />;
         }
         return <EvaluationResult assessResultData={assessResultData} />;
     };

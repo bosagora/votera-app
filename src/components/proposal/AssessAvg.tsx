@@ -1,11 +1,19 @@
-import { BigNumber } from 'ethers';
 import React, { useContext, useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
+import { BigNumber } from 'ethers';
 import { AssessResultPayload } from '~/graphql/generated/generated';
 import globalStyle from '~/styles/global';
 import getString from '~/utils/locales/STRINGS';
+
+const styles = StyleSheet.create({
+    averageCount: { fontSize: 13, lineHeight: 23, marginLeft: 5 },
+    averageLabel: { fontSize: 13, lineHeight: 21 },
+    averageText: { fontSize: 35, lineHeight: 25 },
+    label: { fontSize: 13, lineHeight: 23 },
+    value: { fontSize: 13, lineHeight: 23 },
+});
 
 interface AssessAvgProps {
     assessResultData: AssessResultPayload;
@@ -14,13 +22,12 @@ interface AssessAvgProps {
 function AssessAvg(props: AssessAvgProps): JSX.Element {
     const { assessResultData } = props;
     const themeContext = useContext(ThemeContext);
-    const defaultStyle = { lineHeight: 25 };
 
     const [avgs, setAvgs] = useState<string[]>(['0', '0', '0', '0', '0']);
     const [nodeCount, setNodeCount] = useState(0);
 
     useEffect(() => {
-        if (assessResultData) {
+        if (assessResultData?.assessParticipantSize) {
             const total = BigNumber.from(assessResultData.assessParticipantSize).toNumber();
             const values = ['0', '0', '0', '0', '0'];
             if (assessResultData.assessData && total > 0) {
@@ -43,39 +50,41 @@ function AssessAvg(props: AssessAvgProps): JSX.Element {
 
     return (
         <View style={{ flexDirection: 'row' }}>
-            <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-                <Text style={[globalStyle.gbtext, { fontSize: 37, color: themeContext.color.primary }]}>
+            <View style={[{ flex: 1 }, globalStyle.center]}>
+                <Text style={[globalStyle.gbtext, styles.averageText, { color: themeContext.color.primary }]}>
                     {showTotalAvg()}
                 </Text>
                 <View style={{ flexDirection: 'row', marginTop: 10 }}>
-                    <Text style={[globalStyle.ltext, { color: themeContext.color.primary }]}>
+                    <Text style={[globalStyle.ltext, styles.averageLabel, { color: themeContext.color.primary }]}>
                         {getString('참여한 검증자 수')}
                     </Text>
-                    <Text style={[globalStyle.mtext, { marginLeft: 5, color: themeContext.color.primary }]}>
+                    <Text style={[globalStyle.mtext, styles.averageCount, { color: themeContext.color.primary }]}>
                         {nodeCount}
                     </Text>
                 </View>
             </View>
             <View style={{ flex: 1 }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text style={[globalStyle.ltext, defaultStyle]}>{getString('제안완성도')}</Text>
-                    <Text style={globalStyle.mtext}>{avgs[0]}</Text>
-                </View>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text style={[globalStyle.ltext, defaultStyle]}>{getString('실현가능성')}</Text>
-                    <Text style={globalStyle.mtext}>{avgs[1]}</Text>
-                </View>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text style={[globalStyle.ltext, defaultStyle]}>{getString('수익성')}</Text>
-                    <Text style={globalStyle.mtext}>{avgs[2]}</Text>
-                </View>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text style={[globalStyle.ltext, defaultStyle]}>{getString('매력도')}</Text>
-                    <Text style={globalStyle.mtext}>{avgs[3]}</Text>
-                </View>
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text style={[globalStyle.ltext, defaultStyle]}>{getString('확장가능성')}</Text>
-                    <Text style={globalStyle.mtext}>{avgs[4]}</Text>
+                <View style={{ width: 120 }}>
+                    <View style={globalStyle.flexRowBetween}>
+                        <Text style={[globalStyle.ltext, styles.label]}>{getString('제안완성도')}</Text>
+                        <Text style={[globalStyle.gmtext, styles.value]}>{avgs[0]}</Text>
+                    </View>
+                    <View style={globalStyle.flexRowBetween}>
+                        <Text style={[globalStyle.ltext, styles.label]}>{getString('실현가능성')}</Text>
+                        <Text style={[globalStyle.gmtext, styles.value]}>{avgs[1]}</Text>
+                    </View>
+                    <View style={globalStyle.flexRowBetween}>
+                        <Text style={[globalStyle.ltext, styles.label]}>{getString('수익성')}</Text>
+                        <Text style={[globalStyle.gmtext, styles.value]}>{avgs[2]}</Text>
+                    </View>
+                    <View style={globalStyle.flexRowBetween}>
+                        <Text style={[globalStyle.ltext, styles.label]}>{getString('매력도')}</Text>
+                        <Text style={[globalStyle.gmtext, styles.value]}>{avgs[3]}</Text>
+                    </View>
+                    <View style={globalStyle.flexRowBetween}>
+                        <Text style={[globalStyle.ltext, styles.label]}>{getString('확장가능성')}</Text>
+                        <Text style={[globalStyle.gmtext, styles.value]}>{avgs[4]}</Text>
+                    </View>
                 </View>
             </View>
         </View>

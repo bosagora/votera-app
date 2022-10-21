@@ -21,12 +21,6 @@ enum EnumIconAssets {
 // eslint-disable-next-line global-require, import/extensions
 const iconAssets = [require('@assets/icons/penIconSvg.png')];
 
-interface TextInputComponentProps extends InputProps {
-    // eslint-disable-next-line react/require-default-props
-    onlyRead: boolean;
-    onPress: () => void;
-    componentStyle?: StyleProp<ViewStyle>;
-}
 /*
  <View style={{ backgroundColor: 'white' }}>
     <MultiInputBox
@@ -50,6 +44,7 @@ const styles = StyleSheet.create({
         right: 0,
     },
     inputContent: {
+        borderBottomWidth: 0,
         borderRadius: 20,
         height: 128,
         marginBottom: 21.5,
@@ -58,6 +53,7 @@ const styles = StyleSheet.create({
     },
     inputStyle: {
         fontSize: 13,
+        height: '100%',
         lineHeight: 21,
         outlineStyle: 'none',
         padding: 0,
@@ -74,6 +70,14 @@ const styles = StyleSheet.create({
     writeButtonImage: { bottom: 1, left: 1 },
 });
 
+interface TextInputComponentProps extends InputProps {
+    // eslint-disable-next-line react/require-default-props
+    onlyRead: boolean;
+    onPress: () => void;
+    componentStyle?: StyleProp<ViewStyle>;
+    maxInput?: number;
+}
+
 function MultilineInput(props: TextInputComponentProps): JSX.Element {
     const themeContext = useContext(ThemeContext);
     const {
@@ -81,10 +85,11 @@ function MultilineInput(props: TextInputComponentProps): JSX.Element {
         componentStyle,
         inputStyle,
         inputContainerStyle,
-        placeholderTextColor,
+        placeholderTextColor = themeContext.color.placeholder,
         onChangeText,
         onlyRead,
         onPress,
+        maxInput,
         ...otherProps
     } = props;
     const [assets] = useAssets(iconAssets);
@@ -92,7 +97,9 @@ function MultilineInput(props: TextInputComponentProps): JSX.Element {
     function writeBtnComponent() {
         return (
             <View style={styles.bottom}>
-                <Text style={[globalStyle.rltext, styles.sizeCaption]}>{`${value?.length || 0}/300`}</Text>
+                <Text style={[globalStyle.rltext, styles.sizeCaption]}>
+                    {maxInput !== undefined && maxInput > 0 ? `${value?.length || 0}/${maxInput}` : ''}
+                </Text>
                 {assets && (
                     <TouchableOpacity
                         style={[styles.writeButton, { backgroundColor: themeContext.color.primary }]}
@@ -110,34 +117,40 @@ function MultilineInput(props: TextInputComponentProps): JSX.Element {
 
     return (
         <View style={componentStyle}>
-            <View style={[styles.inputContent, { backgroundColor: themeContext.color.gray }]}>
-                <Input
-                    // eslint-disable-next-line react/jsx-props-no-spreading
-                    {...otherProps}
-                    value={value}
-                    onChangeText={(text) => {
-                        if (onChangeText) onChangeText(text);
-                    }}
-                    disabled={onlyRead}
-                    multiline
-                    renderErrorMessage={false}
-                    allowFontScaling={false}
-                    autoCorrect={false}
-                    autoCapitalize="none"
-                    // style={{ minHeight: 0, paddingTop: 0 }}
-                    // containerStyle={{ paddingHorizontal: 0, paddingVertical: 0 }}
-                    inputStyle={[
-                        Platform.OS === 'android' ? { fontFamily: 'sans-serif' } : globalStyle.rtext,
-                        styles.inputStyle,
-                        { color: themeContext.color.textBlack },
-                        inputStyle,
-                    ]}
-                    inputContainerStyle={[{ borderBottomWidth: 0 }, inputContainerStyle]}
-                    placeholderTextColor={placeholderTextColor || themeContext.color.placeholder}
-                    selectionColor={themeContext.color.primary}
-                    autoCompleteType={undefined}
-                />
-            </View>
+            <Input
+                // eslint-disable-next-line react/jsx-props-no-spreading
+                {...otherProps}
+                value={value}
+                onChangeText={(text) => {
+                    if (maxInput !== undefined && maxInput > 0) {
+                        if (text.length > maxInput) {
+                            if (onChangeText) onChangeText(text.slice(0, maxInput));
+                            return;
+                        }
+                    }
+                    if (onChangeText) onChangeText(text);
+                }}
+                disabled={onlyRead}
+                multiline
+                renderErrorMessage={false}
+                allowFontScaling={false}
+                autoCorrect={false}
+                autoCapitalize="none"
+                inputStyle={[
+                    Platform.OS === 'android' ? { fontFamily: 'sans-serif' } : globalStyle.rtext,
+                    styles.inputStyle,
+                    { color: themeContext.color.textBlack },
+                    inputStyle,
+                ]}
+                inputContainerStyle={[
+                    styles.inputContent,
+                    { backgroundColor: themeContext.color.gray },
+                    inputContainerStyle,
+                ]}
+                placeholderTextColor={placeholderTextColor}
+                selectionColor={themeContext.color.primary}
+                autoCompleteType={undefined}
+            />
             {!onlyRead && writeBtnComponent()}
         </View>
     );
@@ -147,4 +160,5 @@ export default MultilineInput;
 
 MultilineInput.defaultProps = {
     componentStyle: undefined,
+    maxInput: 0,
 };

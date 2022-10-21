@@ -5,7 +5,7 @@ import { Button, Icon, Text } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAssets } from 'expo-asset';
 import { useLinkTo } from '@react-navigation/native';
-import globalStyle from '~/styles/global';
+import globalStyle, { TOP_NAV_HEIGHT } from '~/styles/global';
 import { MainScreenProps } from '~/navigation/main/MainParams';
 import FeedCard from '~/components/feed/FeedCard';
 import { getFeed, getNavigationType } from '~/utils/feed/feedUtils';
@@ -113,18 +113,19 @@ function Feed({ route, navigation }: MainScreenProps<'Feed'>): JSX.Element {
                 type="clear"
             />
         );
-    }, [navigation]);
+    }, [linkTo, navigation]);
 
     const headerBackground = useCallback(() => {
-        if (!assets) return null;
         return (
-            <Image
-                style={{
-                    height: 55 + insets.top,
-                    width: '100%',
-                }}
-                source={assets[EnumIconAsset.Background] as ImageURISource}
-            />
+            <>
+                {assets && (
+                    <Image
+                        style={{ height: TOP_NAV_HEIGHT + insets.top, width: '100%' }}
+                        source={assets[EnumIconAsset.Background] as ImageURISource}
+                    />
+                )}
+                <View style={globalStyle.headerBackground} />
+            </>
         );
     }, [assets, insets.top]);
 
@@ -169,9 +170,10 @@ function Feed({ route, navigation }: MainScreenProps<'Feed'>): JSX.Element {
                         updateFeed(id).catch(console.log);
                         setFeedCount(feedCount > 0 ? feedCount - 1 : 0);
                     }
-                    const linkUrl = getNavigationType(type, navigationParams || undefined);
-                    if (linkUrl) {
-                        linkTo(linkUrl);
+                    const stackAction = getNavigationType(type, navigationParams || undefined);
+                    if (stackAction) {
+                        // linkTo(linkUrl);
+                        navigation.dispatch(stackAction);
                     }
                 }}
             />

@@ -1,8 +1,9 @@
 import React, { useContext, useState, useCallback } from 'react';
-import { View, Image, FlatList, Alert, ListRenderItemInfo, ImageURISource, Platform } from 'react-native';
+import { View, Image, FlatList, Alert, ListRenderItemInfo, ImageURISource, Platform, StyleSheet } from 'react-native';
 import { Button, Text, Icon } from 'react-native-elements';
+import { ThemeContext } from 'styled-components/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useFocusEffect, useLinkTo } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useAssets } from 'expo-asset';
 import ProposalCard from '~/components/proposal/ProposalCard';
 import {
@@ -10,8 +11,8 @@ import {
     Enum_Proposal_Type as EnumProposalType,
     Proposal,
 } from '~/graphql/generated/generated';
-import { MainScreenProps } from '~/navigation/main/MainParams';
-import globalStyle from '~/styles/global';
+import { MainScreenProps, replaceToHome } from '~/navigation/main/MainParams';
+import globalStyle, { TOP_NAV_HEIGHT } from '~/styles/global';
 import LocalStorage from '~/utils/LocalStorage';
 import ListFooterButton from '~/components/button/ListFooterButton';
 import getString from '~/utils/locales/STRINGS';
@@ -25,36 +26,44 @@ enum EnumIconAsset {
 // eslint-disable-next-line global-require, import/extensions
 const iconAssets = [require('@assets/images/header/bg.png')];
 
+const styles = StyleSheet.create({
+    container: { flex: 1 },
+    countBar: { paddingLeft: 21, paddingRight: 17, paddingTop: 30, zIndex: 1 },
+    countLabel: { fontSize: 13, lineHeight: 21 },
+    countNumber: { fontSize: 13, lineHeight: 21, marginLeft: 7 },
+    item: { paddingLeft: 21, paddingRight: 23 },
+});
+
 function TempProposalListScreen({ navigation, route }: MainScreenProps<'TempProposalList'>): JSX.Element {
+    const themeContext = useContext(ThemeContext);
     const insets = useSafeAreaInsets();
     const dispatch = useAppDispatch();
     const [proposals, setProposals] = useState<Proposal[]>();
     const [proposalCount, setProposalCount] = useState<number>();
     const [assets] = useAssets(iconAssets);
-    const linkTo = useLinkTo();
 
     const headerLeft = useCallback(() => {
         return (
             <Button
                 onPress={() => {
                     if (navigation.canGoBack()) {
-                        navigation.goBack();
+                        navigation.pop();
                     } else {
-                        linkTo('/home');
+                        navigation.dispatch(replaceToHome());
                     }
                 }}
                 icon={<Icon name="chevron-left" color="white" tvParallaxProperties={undefined} />}
                 type="clear"
             />
         );
-    }, [navigation, linkTo]);
+    }, [navigation]);
 
     const headerBackground = useCallback(() => {
         return (
             <>
                 {assets && (
                     <Image
-                        style={{ height: 65 + insets.top, width: '100%' }}
+                        style={{ height: TOP_NAV_HEIGHT + insets.top, width: '100%' }}
                         source={assets[EnumIconAsset.Background] as ImageURISource}
                     />
                 )}
@@ -68,6 +77,7 @@ function TempProposalListScreen({ navigation, route }: MainScreenProps<'TempProp
             headerShown: true,
             title: getString('임시저장 제안'),
             headerTitleStyle: [globalStyle.headerTitle, { color: 'white' }],
+            headerTitleAlign: 'center',
             headerLeft,
             headerBackground,
         });
@@ -114,23 +124,28 @@ function TempProposalListScreen({ navigation, route }: MainScreenProps<'TempProp
 
     const renderCountBar = useCallback(() => {
         return (
-            <View style={{ paddingHorizontal: 20, paddingTop: 30, backgroundColor: 'white' }}>
-                <Text style={[globalStyle.ltext, { fontSize: 10 }]}>
-                    {getString('작성중인 제안 #N').replace('#N', proposalCount?.toString() || '0')}
-                </Text>
+            <View style={[globalStyle.flexRowBetween, styles.countBar]}>
+                <View style={globalStyle.flexRowAlignCenter}>
+                    <Text style={[globalStyle.ltext, styles.countLabel, { color: themeContext.color.textBlack }]}>
+                        {getString('작성중인 제안')}
+                    </Text>
+                    <Text style={[globalStyle.ltext, styles.countNumber, { color: themeContext.color.textBlack }]}>
+                        {proposalCount?.toString() || '0'}
+                    </Text>
+                </View>
             </View>
         );
-    }, [proposalCount]);
+    }, [proposalCount, themeContext.color.textBlack]);
 
     const renderProposals = ({ item }: ListRenderItemInfo<Proposal>) => {
         return (
-            <View style={{ paddingHorizontal: 22, backgroundColor: 'white' }}>
+            <View style={styles.item}>
                 <ProposalCard
                     item={item}
                     temp
                     savedTime={item.createdAt as number}
                     onPress={() => {
-                        linkTo(`/createproposal/${item.id}`);
+                        navigation.push('RootUser', { screen: 'CreateProposal', params: { tempId: item.id }});
                     }}
                     onDelete={() => {
                         console.log(`onDelete id=${item.id}`);
@@ -179,7 +194,7 @@ function TempProposalListScreen({ navigation, route }: MainScreenProps<'TempProp
 
     return (
         <FlatList
-            style={{ flex: 1 }}
+            style={[styles.container, { backgroundColor: themeContext.color.white }]}
             data={proposals}
             renderItem={renderProposals}
             keyExtractor={(item) => item.id}

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import React, { useContext } from 'react';
-import { View } from 'react-native';
+import { View, StyleSheet, StyleProp, ViewStyle, ColorValue } from 'react-native';
 import { Text, Icon } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import {
@@ -8,12 +8,11 @@ import {
     Enum_Proposal_Status as EnumProposalStatus,
 } from '~/graphql/generated/generated';
 import getString from '~/utils/locales/STRINGS';
+import globalStyle from '~/styles/global';
 
-interface HeaderProps {
-    status: EnumProposalStatus;
-    type: EnumProposalType;
-    temp: boolean;
-}
+const styles = StyleSheet.create({
+    label: { fontSize: 11, lineHeight: 19 },
+});
 /*
 <ProgressMark status="VOTING" type="BUSINESS" />
 <ProgressMark status="IN_PROGRESS" type="SYSTEM" />
@@ -23,46 +22,64 @@ interface HeaderProps {
 
 export const getProposalStatusString = (status: EnumProposalStatus | undefined) => {
     switch (status) {
-        case 'CREATED':
+        case EnumProposalStatus.Created:
             return getString('결제 대기중');
-        case 'PENDING_ASSESS':
+        case EnumProposalStatus.PendingAssess:
             return getString('사전평가 준비중');
-        case 'ASSESS':
+        case EnumProposalStatus.Assess:
             return getString('사전평가중');
-        case 'PENDING_VOTE':
-            return getString('투표 준비중');
-        case 'VOTE':
+        case EnumProposalStatus.PendingVote:
+            return getString('논의중');
+        case EnumProposalStatus.Vote:
             return getString('투표중');
-        case 'REJECT':
-            return getString('사전평가 탈락');
-        case 'CLOSED':
+        case EnumProposalStatus.Reject:
+            return getString('탈락');
+        case EnumProposalStatus.Closed:
             return getString('결과보기');
         default:
             return '';
     }
 };
 
-function HeaderInfo(props: HeaderProps): JSX.Element {
-    const { status, type, temp } = props;
+interface ProgressMarkProps {
+    status: EnumProposalStatus;
+    type: EnumProposalType;
+    temp?: boolean;
+    transparent?: boolean;
+    style?: StyleProp<ViewStyle> | undefined;
+}
+
+function ProgressMark(props: ProgressMarkProps): JSX.Element {
+    const { status, type, temp, transparent, style } = props;
     const themeContext = useContext(ThemeContext);
+    let color: ColorValue | undefined;
+
+    if (transparent) {
+        color = 'white';
+    } else {
+        switch (type) {
+            case EnumProposalType.Business:
+                color = themeContext.color.business;
+                break;
+            case EnumProposalType.System:
+            default:
+                color = themeContext.color.system;
+                break;
+        }
+    }
 
     return (
-        <View style={{ flexDirection: 'row' }}>
-            <Text
-                style={{
-                    fontSize: 11,
-                    color: type === EnumProposalType.Business ? themeContext.color.business : themeContext.color.system,
-                }}
-            >
+        <View style={[{ flexDirection: 'row' }, style]}>
+            <Text style={[globalStyle.mtext, styles.label, { color }]}>
                 {temp ? getString('작성중') : getProposalStatusString(status)}
             </Text>
-            {status === 'CLOSED' && (
+            {status === EnumProposalStatus.Closed && (
                 <Icon
                     type="font-awesome"
                     size={14}
                     name="angle-right"
-                    style={{ paddingLeft: 9 }}
-                    color={type === EnumProposalType.Business ? themeContext.color.business : themeContext.color.system}
+                    style={{ paddingLeft: 8 }}
+                    color={color}
                     tvParallaxProperties={undefined}
                 />
             )}
@@ -70,4 +87,10 @@ function HeaderInfo(props: HeaderProps): JSX.Element {
     );
 }
 
-export default HeaderInfo;
+export default ProgressMark;
+
+ProgressMark.defaultProps = {
+    style: undefined,
+    temp: false,
+    transparent: false,
+};

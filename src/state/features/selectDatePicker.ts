@@ -13,7 +13,7 @@ const selectDatePickerSlice = createSlice({
     name: 'selectDatePicker',
     initialState,
     reducers: {
-        showDatePicker: (state) => {
+        resetDatePicker: (state) => {
             state.startDate = undefined;
             state.endDate = undefined;
         },
@@ -24,7 +24,7 @@ const selectDatePickerSlice = createSlice({
     },
 });
 
-export const { showDatePicker, selectDatePicker } = selectDatePickerSlice.actions;
+export const { resetDatePicker, selectDatePicker } = selectDatePickerSlice.actions;
 
 export const selectDatePickerState = (state: RootState) => state.selectDatePicker;
 

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useCallback } from 'react';
+import React, { useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { View, ScrollView, Switch } from 'react-native';
 import { Button, Text, Icon } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
@@ -33,31 +33,32 @@ function Alarm({ navigation, route }: MainScreenProps<'Alarm'>): JSX.Element {
         setFeedStatus(pushService.getUserAlarmStatus());
     }, []);
 
-    const updateAlarm = useCallback(
-        debounce(async () => {
-            const alarmStatus = pushService.getUserAlarmStatus();
-            const result = await updateAlarmMutate({
-                variables: {
-                    input: {
-                        where: {
-                            id: user?.userId || '',
-                        },
-                        data: {
-                            alarmStatus: {
-                                myProposalsNews: alarmStatus.isMyProposalsNews,
-                                likeProposalsNews: alarmStatus.isLikeProposalsNews,
-                                newProposalsNews: alarmStatus.isNewProposalNews,
-                                myCommentsNews: alarmStatus.isMyCommentNews,
-                                etcNews: alarmStatus.isEtcNews,
+    const updateAlarm = useMemo(
+        () =>
+            debounce(async () => {
+                const alarmStatus = pushService.getUserAlarmStatus();
+                const result = await updateAlarmMutate({
+                    variables: {
+                        input: {
+                            where: {
+                                id: user?.userId || '',
+                            },
+                            data: {
+                                alarmStatus: {
+                                    myProposalsNews: alarmStatus.isMyProposalsNews,
+                                    likeProposalsNews: alarmStatus.isLikeProposalsNews,
+                                    newProposalsNews: alarmStatus.isNewProposalNews,
+                                    myCommentsNews: alarmStatus.isMyCommentNews,
+                                    etcNews: alarmStatus.isEtcNews,
+                                },
                             },
                         },
                     },
-                },
-            });
-            if (!result.data?.updateUserAlarmStatus?.userFeed?.id) {
-                dispatch(showSnackBar(getString('사용자 설정 오류로 변경 실패')));
-            }
-        }, 500),
+                });
+                if (!result.data?.updateUserAlarmStatus?.userFeed?.id) {
+                    dispatch(showSnackBar(getString('사용자 설정 오류로 변경 실패')));
+                }
+            }, 500),
         [dispatch, updateAlarmMutate, user?.userId],
     );
 

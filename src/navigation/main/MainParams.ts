@@ -1,6 +1,6 @@
 import { DrawerNavigationProp, DrawerScreenProps } from '@react-navigation/drawer';
 import { StackNavigationProp, StackScreenProps } from '@react-navigation/stack';
-import { CompositeNavigationProp, CompositeScreenProps } from '@react-navigation/native';
+import { CompositeNavigationProp, CompositeScreenProps, StackActions } from '@react-navigation/native';
 import { RootStackParams } from '../types/RootStackParams';
 import { WhereType } from '~/graphql/hooks/Proposals';
 
@@ -38,3 +38,7 @@ export type MainNavigationProps<T extends keyof MainDrawerParams> = CompositeNav
     DrawerNavigationProp<MainDrawerParams, T>,
     StackNavigationProp<RootStackParams>
 >;
+
+export function replaceToHome() {
+    return StackActions.replace('RootUser', { screen: 'Home', params: { where: WhereType.PROJECT } });
+}

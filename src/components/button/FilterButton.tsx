@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { StyleProp, ViewStyle, View, TouchableOpacity } from 'react-native';
 import { Text, Icon } from 'react-native-elements';
 import { FlatList } from 'react-native-gesture-handler';
+import { ThemeContext } from 'styled-components/native';
 import globalStyle from '~/styles/global';
 import { FeedFilterType, OpinionFilterType, ProposalFilterType } from '~/types/filterType';
 import getString from '~/utils/locales/STRINGS';
@@ -21,6 +22,7 @@ interface FilterButtonProps {
 function FilterButton(props: FilterButtonProps): JSX.Element {
     const { filterType, currentFilter, setFilter, style } = props;
     const dispatch = useAppDispatch();
+    const themeContext = useContext(ThemeContext);
     const [filterOnComponent, setFilterOnComponent] = useState<UNION_FILTER_BUTTON_TYPE>();
 
     const renderFilterCard = ({ item }: { item: UNION_FILTER_BUTTON_TYPE }) => {
@@ -33,7 +35,11 @@ function FilterButton(props: FilterButtonProps): JSX.Element {
                     dispatch(hideBottomSheet());
                 }}
             >
-                <Text>{getString(item)}</Text>
+                <Text
+                    style={[globalStyle.rtext, { fontSize: 13, lineHeight: 21, color: themeContext.color.textBlack }]}
+                >
+                    {getString(item)}
+                </Text>
             </TouchableOpacity>
         );
     };
@@ -71,7 +77,11 @@ function FilterButton(props: FilterButtonProps): JSX.Element {
             }}
         >
             <View style={[globalStyle.flexRowBetween, style]}>
-                <Text style={{ fontSize: 13 }}>{getString(filterOnComponent as string)}</Text>
+                <Text
+                    style={[globalStyle.rtext, { fontSize: 13, lineHeight: 21, color: themeContext.color.textBlack }]}
+                >
+                    {getString(filterOnComponent as string)}
+                </Text>
                 <Icon
                     name="keyboard-arrow-down"
                     color="darkgray"

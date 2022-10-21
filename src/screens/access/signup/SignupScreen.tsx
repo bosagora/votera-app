@@ -8,7 +8,7 @@ import { useAssets } from 'expo-asset';
 import { useIsValidatorLazyQuery } from '~/graphql/generated/generated';
 import { AccessScreenProps } from '~/navigation/access/AccessParams';
 import { AuthContext, MetamaskStatus, User } from '~/contexts/AuthContext';
-import globalStyle from '~/styles/global';
+import globalStyle, { TOP_NAV_HEIGHT } from '~/styles/global';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
 import FocusAwareStatusBar from '~/components/statusbar/FocusAwareStatusBar';
@@ -176,12 +176,16 @@ function SignupScreen({ navigation }: AccessScreenProps<'Signup'>): JSX.Element 
             <Button
                 onPress={() => {
                     if (index === 0 || index === findIndex('guide')) {
-                        navigation.goBack();
+                        if (navigation.canGoBack()) {
+                            navigation.goBack();
+                        } else {
+                            navigation.replace('Landing');
+                        }
                     } else {
                         setIndex(index - 1);
                     }
                 }}
-                icon={<Icon name="chevron-left" tvParallaxProperties={undefined} />}
+                icon={<Icon color="white" name="chevron-left" tvParallaxProperties={undefined} />}
                 type="clear"
             />
         );
@@ -192,7 +196,7 @@ function SignupScreen({ navigation }: AccessScreenProps<'Signup'>): JSX.Element 
             <>
                 {assets && (
                     <Image
-                        style={{ height: 65 + insets.top, width: '100%' }}
+                        style={{ height: TOP_NAV_HEIGHT + insets.top, width: '100%' }}
                         source={assets[EnumIconAsset.Background] as ImageURISource}
                     />
                 )}
@@ -205,6 +209,7 @@ function SignupScreen({ navigation }: AccessScreenProps<'Signup'>): JSX.Element 
         navigation.setOptions({
             headerTitle: getString('계정만들기'),
             headerTitleStyle: [globalStyle.headerTitle, { color: 'white' }],
+            headerTitleAlign: 'center',
             headerLeft,
             headerRight,
             headerBackground,

@@ -19,7 +19,6 @@ const styles = StyleSheet.create({
     contents: {
         alignItems: 'center',
         backgroundColor: 'rgb(252, 251, 255)',
-        borderColor: 'rgb(112, 58, 222)',
         borderRadius: 25,
         borderWidth: 2,
         flexDirection: 'row',
@@ -27,12 +26,12 @@ const styles = StyleSheet.create({
         paddingLeft: 10,
     },
     input: {
-        color: 'rgb(112, 58, 222)',
         fontSize: 14,
         outlineStyle: 'none',
     },
     inputContainerStyle: {
         borderBottomWidth: 0,
+        flex: 1,
     },
 });
 
@@ -51,7 +50,7 @@ function TextInputComponent(props: TextInputComponentProps): JSX.Element {
     const {
         inputStyle,
         inputContainerStyle,
-        placeholderTextColor,
+        placeholderTextColor = themeContext.color.placeholder,
         placeholderText,
         searchValue,
         onChangeText,
@@ -98,9 +97,9 @@ function TextInputComponent(props: TextInputComponentProps): JSX.Element {
                     allowFontScaling={false}
                     autoCorrect={false}
                     autoCapitalize="none"
-                    inputStyle={[globalStyle.btext, styles.input, inputStyle]}
+                    inputStyle={[globalStyle.btext, styles.input, { color: themeContext.color.primary }, inputStyle]}
                     inputContainerStyle={[styles.inputContainerStyle]}
-                    placeholderTextColor={themeContext.color.placeholder}
+                    placeholderTextColor={placeholderTextColor}
                     placeholder={placeholderText}
                     rightIcon={changed ? subComponent : undefined}
                     autoCompleteType={undefined}
@@ -109,7 +108,7 @@ function TextInputComponent(props: TextInputComponentProps): JSX.Element {
         );
     }
     return (
-        <View style={[styles.contents, style]}>
+        <View style={[styles.contents, { borderColor }, style]}>
             <Input
                 // eslint-disable-next-line react/jsx-props-no-spreading
                 {...otherProps}
@@ -120,10 +119,10 @@ function TextInputComponent(props: TextInputComponentProps): JSX.Element {
                 allowFontScaling={false}
                 autoCorrect={false}
                 autoCapitalize="none"
-                inputStyle={[globalStyle.btext, styles.input, inputStyle]}
+                inputStyle={[globalStyle.btext, styles.input, { color: themeContext.color.primary }, inputStyle]}
                 inputContainerStyle={[styles.inputContainerStyle]}
                 placeholder={placeholderText}
-                placeholderTextColor={themeContext.color.placeholder}
+                placeholderTextColor={placeholderTextColor}
                 selectionColor={themeContext.color.primary}
                 rightIcon={subComponent}
                 autoCompleteType={undefined}

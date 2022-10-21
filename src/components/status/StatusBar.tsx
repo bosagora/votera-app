@@ -30,7 +30,7 @@ function StatusBar(props: StatusBarProps): JSX.Element {
         <View style={[globalStyle.flexRowBetween, { flex: 1 }]}>
             <View style={globalStyle.flexRowAlignCenter}>
                 <StatusMark type={type} transparent={false} />
-                <ProgressMark status={status} type={type} temp={temp} />
+                <ProgressMark style={{ marginLeft: 10 }} status={status} type={type} temp={temp} />
             </View>
             {!temp && <DdayMark deadline={deadline} type={type} />}
         </View>

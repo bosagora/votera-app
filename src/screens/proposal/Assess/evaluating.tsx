@@ -18,12 +18,14 @@ const styles = StyleSheet.create({
     },
     evalButton: {
         alignItems: 'center',
-        borderColor: 'rgb(222, 212, 248)',
         borderRadius: 10,
-        borderWidth: 2,
         height: 30,
         justifyContent: 'center',
         width: 29,
+    },
+    evalLabel: {
+        fontSize: 12,
+        lineHeight: 51,
     },
 });
 
@@ -61,16 +63,23 @@ function EvalComponent(props: EvalProps): JSX.Element {
                 <TouchableOpacity
                     style={[
                         styles.evalButton,
-                        {
-                            borderWidth: isSelect ? 0 : 2,
-                            backgroundColor: isSelect ? themeContext.color.primary : 'white',
-                        },
+                        isSelect
+                            ? { borderWidth: 0, backgroundColor: themeContext.color.primary }
+                            : {
+                                  borderWidth: 2,
+                                  borderColor: themeContext.color.boxBorder,
+                                  backgroundColor: themeContext.color.white,
+                              },
                     ]}
-                    key={`button_${i}`}
+                    key={`button_${evalName}_${i}`}
                     onPress={() => onChange(i)}
                 >
                     <Text
-                        style={[globalStyle.rmtext, { fontSize: 14, color: isSelect ? 'white' : 'rgb(219,213,235)' }]}
+                        style={[
+                            globalStyle.rmtext,
+                            styles.evalLabel,
+                            { color: isSelect ? 'white' : 'rgb(219,213,235)' },
+                        ]}
                     >
                         {i + 1}
                     </Text>
@@ -78,11 +87,13 @@ function EvalComponent(props: EvalProps): JSX.Element {
             );
         }
         setButtons(newButtons);
-    }, [onChange, score, themeContext.color.primary]);
+    }, [evalName, onChange, score, themeContext.color.boxBorder, themeContext.color.primary, themeContext.color.white]);
 
     return (
         <View style={{ marginBottom: 24 }}>
-            <Text>{evalName}</Text>
+            <Text style={[globalStyle.rtext, { fontSize: 13, lineHeight: 24, color: themeContext.color.black }]}>
+                {evalName}
+            </Text>
             <View style={styles.buttonsContainer}>{buttons}</View>
         </View>
     );
@@ -123,19 +134,37 @@ function Evaluating(props: Props): JSX.Element {
     return (
         <View>
             <View style={{ alignItems: 'center' }}>
-                <Text style={[globalStyle.btext, { fontSize: 20, color: themeContext.color.primary }]}>
+                <Text style={[globalStyle.btext, { fontSize: 18, lineHeight: 28, color: themeContext.color.primary }]}>
                     {getString('제안 적합도 평가하기')}
                 </Text>
-                {/* <Text style={[globalStyle.ltext, { textAlign: 'center', lineHeight: 25, marginTop: 11.5 }]}>
-                    {getString(
-                        '해당 제안을 평가해주세요&#46;\n평가 점수가 합격 기준을 통과해야\n정식제안으로 오픈됩니다&#46;',
-                    )}
-                </Text> */}
+                <Text
+                    style={[
+                        globalStyle.ltext,
+                        {
+                            textAlign: 'center',
+                            fontSize: 13,
+                            lineHeight: 23,
+                            marginTop: 12,
+                            color: themeContext.color.black,
+                        },
+                    ]}
+                >
+                    {getString('해당 제안을 평가해주세요&#46;\n평가된 평균점수가 ')}
+                    <Text style={{ color: themeContext.color.primary }}>{getString('7점 이상일 경우')}</Text>
+                    {getString('에 한해\n정식제안으로 오픈됩니다&#46;')}
+                </Text>
             </View>
 
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 28 }}>
-                <Text>{getString('평가기간')}</Text>
-                <Text style={[globalStyle.ltext, { marginLeft: 19 }]}>
+                <Text style={[globalStyle.rtext, { fontSize: 13, lineHeight: 24, color: themeContext.color.black }]}>
+                    {getString('평가기간')}
+                </Text>
+                <Text
+                    style={[
+                        globalStyle.ltext,
+                        { fontSize: 13, lineHeight: 24, color: themeContext.color.black, marginLeft: 19 },
+                    ]}
+                >
                     {getCommonPeriodText(proposal?.assessPeriod)}
                 </Text>
             </View>
@@ -176,7 +205,8 @@ function Evaluating(props: Props): JSX.Element {
                     titleStyle={[
                         globalStyle.btext,
                         {
-                            fontSize: 20,
+                            fontSize: 18,
+                            lineHeight: 24,
                             color: allCheck ? themeContext.color.primary : 'rgb(219,213,235)',
                             marginLeft: 6,
                         },

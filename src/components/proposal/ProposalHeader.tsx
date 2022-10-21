@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import React from 'react';
+import React, { useContext } from 'react';
 import { View } from 'react-native';
 import { Text } from 'react-native-elements';
-
+import { ThemeContext } from 'styled-components/native';
 import globalStyle from '~/styles/global';
 import { ProposalFilterType } from '~/types/filterType';
 import getString from '~/utils/locales/STRINGS';
@@ -16,6 +16,7 @@ interface ProposalHeaderProps {
 
 function ProposalHeader(props: ProposalHeaderProps): JSX.Element {
     const { username, currentFilter, setFilter } = props;
+    const themeContext = useContext(ThemeContext);
     return (
         <View
             style={[
@@ -23,14 +24,19 @@ function ProposalHeader(props: ProposalHeaderProps): JSX.Element {
                 {
                     backgroundColor: 'white',
                     paddingTop: 23,
-                    paddingHorizontal: 22,
                     zIndex: 1, // in order to show filterButton
                 },
             ]}
         >
             <View style={{ paddingLeft: 15, flexDirection: 'row' }}>
-                <Text style={[globalStyle.btext, { textAlignVertical: 'center' }]}>{username}</Text>
-                <Text>{getString(' 님 환영합니다!')}</Text>
+                <Text style={[globalStyle.btext, { fontSize: 13, lineHeight: 21, color: themeContext.color.black }]}>
+                    {username}
+                </Text>
+                <Text
+                    style={[globalStyle.rtext, { fontSize: 13, lineHeight: 21, color: themeContext.color.textBlack }]}
+                >
+                    {getString(' 님 환영합니다!')}
+                </Text>
             </View>
             <FilterButton
                 filterType={ProposalFilterType}

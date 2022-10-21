@@ -35,10 +35,8 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     resultRowBackground: {
-        backgroundColor: 'rgb(242,244,250)',
         flex: 1,
         height: 13,
-        marginHorizontal: 21,
     },
     resultRowWrapper: {
         alignItems: 'center',
@@ -65,7 +63,7 @@ function selectResultText(state?: EnumVoteProposalState | null) {
         case EnumVoteProposalState.Running:
             return getString('투표중');
         default:
-            return getString('투표 준비중');
+            return getString('논의중');
     }
 }
 
@@ -143,11 +141,16 @@ function VoteResult(props: VoteResultProps): JSX.Element {
             <>
                 <View style={styles.resultContainer}>
                     <View style={styles.resultRowWrapper}>
-                        <Text style={[globalStyle.mtext, { color: themeContext.color.agree }]}>
+                        <Text
+                            style={[
+                                globalStyle.mtext,
+                                { fontSize: 13, lineHeight: 55, width: 40, color: themeContext.color.agree },
+                            ]}
+                        >
                             {getString('찬성')}
                         </Text>
                         <View
-                            style={styles.resultRowBackground}
+                            style={[styles.resultRowBackground, { backgroundColor: themeContext.color.gray }]}
                             onLayout={(event) => {
                                 const { width } = event.nativeEvent.layout;
                                 if (!graphMaxWidth) setGraphMaxWidth(width);
@@ -162,15 +165,31 @@ function VoteResult(props: VoteResultProps): JSX.Element {
                                 }}
                             />
                         </View>
-                        <Text style={[globalStyle.mtext, { color: themeContext.color.agree }]}>
+                        <Text
+                            style={[
+                                globalStyle.mtext,
+                                {
+                                    fontSize: 12,
+                                    lineHeight: 55,
+                                    width: 50,
+                                    textAlign: 'right',
+                                    color: themeContext.color.agree,
+                                },
+                            ]}
+                        >
                             {data?.voteResult ? data.voteResult[1] : '0'}
                         </Text>
                     </View>
                     <View style={styles.resultRowWrapper}>
-                        <Text style={[globalStyle.mtext, { color: themeContext.color.disagree }]}>
+                        <Text
+                            style={[
+                                globalStyle.mtext,
+                                { fontSize: 13, lineHeight: 55, width: 40, color: themeContext.color.disagree },
+                            ]}
+                        >
                             {getString('반대')}
                         </Text>
-                        <View style={styles.resultRowBackground}>
+                        <View style={[styles.resultRowBackground, { backgroundColor: themeContext.color.gray }]}>
                             <View
                                 style={{
                                     position: 'absolute',
@@ -180,13 +199,31 @@ function VoteResult(props: VoteResultProps): JSX.Element {
                                 }}
                             />
                         </View>
-                        <Text style={[globalStyle.mtext, { color: themeContext.color.disagree }]}>
+                        <Text
+                            style={[
+                                globalStyle.mtext,
+                                {
+                                    fontSize: 12,
+                                    lineHeight: 55,
+                                    width: 50,
+                                    textAlign: 'right',
+                                    color: themeContext.color.disagree,
+                                },
+                            ]}
+                        >
                             {data?.voteResult ? data.voteResult[2] : '0'}
                         </Text>
                     </View>
                     <View style={styles.resultRowWrapper}>
-                        <Text style={[globalStyle.mtext, { color: themeContext.color.abstain }]}>기권</Text>
-                        <View style={styles.resultRowBackground}>
+                        <Text
+                            style={[
+                                globalStyle.mtext,
+                                { fontSize: 13, lineHeight: 55, width: 40, color: themeContext.color.abstain },
+                            ]}
+                        >
+                            {getString('기권')}
+                        </Text>
+                        <View style={[styles.resultRowBackground, { backgroundColor: themeContext.color.gray }]}>
                             <View
                                 style={{
                                     position: 'absolute',
@@ -196,20 +233,53 @@ function VoteResult(props: VoteResultProps): JSX.Element {
                                 }}
                             />
                         </View>
-                        <Text style={[globalStyle.mtext, { color: themeContext.color.abstain }]}>
+                        <Text
+                            style={[
+                                globalStyle.mtext,
+                                {
+                                    fontSize: 12,
+                                    lineHeight: 55,
+                                    width: 50,
+                                    textAlign: 'right',
+                                    color: themeContext.color.abstain,
+                                },
+                            ]}
+                        >
                             {data?.voteResult ? data.voteResult[0] : '0'}
                         </Text>
                     </View>
                 </View>
 
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 40 }}>
-                    <Text style={{ color: themeContext.color.primary }}>{getString('투표에 참여한 검증자 수')}</Text>
-                    <Text style={{ color: themeContext.color.primary, marginLeft: 9 }}>{participated}</Text>
+                    <Text
+                        style={[globalStyle.rtext, { fontSize: 13, lineHeight: 23, color: themeContext.color.primary }]}
+                    >
+                        {getString('투표에 참여한 검증자 수')}
+                    </Text>
+                    <Text
+                        style={[
+                            globalStyle.gmtext,
+                            { fontSize: 12, lineHeight: 56, marginLeft: 9, color: themeContext.color.primary },
+                        ]}
+                    >
+                        {participated}
+                    </Text>
                 </View>
 
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 5 }}>
-                    <Text style={{ color: themeContext.color.primary }}>{getString('총 검증자 수')}</Text>
-                    <Text style={{ color: themeContext.color.primary, marginLeft: 9 }}>{total}</Text>
+                    <Text
+                        style={[globalStyle.rtext, { fontSize: 13, lineHeight: 23, color: themeContext.color.primary }]}
+                    >
+                        {getString('총 검증자 수')}
+                    </Text>
+                    <Text
+                        style={[
+                            globalStyle.gmtext,
+                            { fontSize: 12, lineHeight: 9, marginLeft: 9, color: themeContext.color.primary },
+                        ]}
+                    >
+                        {total}
+                    </Text>
                 </View>
             </>
         );
@@ -326,7 +396,12 @@ function VoteResult(props: VoteResultProps): JSX.Element {
                     paddingVertical: 30,
                 }}
             >
-                <Text style={[globalStyle.btext, { fontSize: 33, color: selectResultColor(data?.voteProposalState) }]}>
+                <Text
+                    style={[
+                        globalStyle.btext,
+                        { fontSize: 31, lineHeight: 29, color: selectResultColor(data?.voteProposalState) },
+                    ]}
+                >
                     {selectResultText(data?.voteProposalState)}
                 </Text>
                 {renderVoteResult()}

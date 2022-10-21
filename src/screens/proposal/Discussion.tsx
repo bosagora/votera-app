@@ -130,6 +130,7 @@ function Discussion(props: DiscussionProps): JSX.Element {
                         })
                         .catch(console.log);
                 }}
+                maxInput={300}
             />
             <View style={styles.filterRow}>
                 <TouchableOpacity

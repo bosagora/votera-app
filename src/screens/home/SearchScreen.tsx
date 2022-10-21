@@ -29,6 +29,7 @@ function Search({ navigation, route }: MainScreenProps<'Search'>): JSX.Element {
     const themeContext = useContext(ThemeContext);
     const [searchValue, setSearchValue] = useState<string>('');
     const [proposals, setProposals] = useState<Proposal[]>([]);
+    const [width, setWidth] = useState(0);
     const [getProposals, { data: proposalsResponse }] = useGetProposalsLazyQuery({ fetchPolicy: 'no-cache' });
     const [isSearched, setIsSearched] = useState<boolean>(false);
     const [searchHistory, setSearchHistory] = useState<string[]>([]);
@@ -104,7 +105,8 @@ function Search({ navigation, route }: MainScreenProps<'Search'>): JSX.Element {
                 item={info.item}
                 onPress={() => {
                     fetchProposal(proposalId);
-                    linkTo(`/detail/${proposalId}`);
+                    navigation.push('RootUser', { screen: 'ProposalDetail', params: { id: proposalId }});
+                    // linkTo(`/detail/${proposalId}`);
                 }}
             />
         );
@@ -113,8 +115,11 @@ function Search({ navigation, route }: MainScreenProps<'Search'>): JSX.Element {
     function renderHistoryComponent() {
         return (
             <View style={{ paddingHorizontal: 23, paddingTop: 30, flexDirection: 'column' }}>
-                <Text style={{ color: 'rgb(232, 111, 222)', fontSize: 11 }}>{getString('최근검색어')}</Text>
+                <Text style={[globalStyle.rtext, { fontSize: 11, lineHeight: 19, color: themeContext.color.abstain }]}>
+                    {getString('최근검색어')}
+                </Text>
                 <FlatList
+                    style={{ paddingTop: 20 }}
                     keyExtractor={(item, index) => `searchHistory_${index}`}
                     scrollEnabled={false}
                     extraData={searchHistory}
@@ -129,19 +134,30 @@ function Search({ navigation, route }: MainScreenProps<'Search'>): JSX.Element {
                                     },
                                 ]}
                             >
-                                <Button
-                                    title={item}
-                                    buttonStyle={{ justifyContent: 'flex-start' }}
-                                    containerStyle={{ flex: 1 }}
+                                <TouchableOpacity
+                                    style={{ flex: 1 }}
                                     onPress={() => {
                                         setSearchValue(item);
                                         runSearch(item);
                                     }}
-                                    useForeground
-                                    type="clear"
-                                />
+                                >
+                                    <Text
+                                        style={[
+                                            globalStyle.rtext,
+                                            { fontSize: 13, lineHeight: 33, color: themeContext.color.textBlack },
+                                        ]}
+                                    >
+                                        {item}
+                                    </Text>
+                                </TouchableOpacity>
                                 <Button
-                                    icon={<Icon name="close" color="lightgray" tvParallaxProperties={undefined} />}
+                                    icon={
+                                        <Icon
+                                            name="close"
+                                            color={themeContext.color.textBlack}
+                                            tvParallaxProperties={undefined}
+                                        />
+                                    }
                                     onPress={() => {
                                         const currentHistory = [...searchHistory];
                                         currentHistory.splice(index, 1);
@@ -156,9 +172,14 @@ function Search({ navigation, route }: MainScreenProps<'Search'>): JSX.Element {
                         );
                     }}
                     ListEmptyComponent={
-                        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
-                            <Icon name="search" color="gray" tvParallaxProperties={undefined} />
-                            <Text style={{ fontSize: 13, color: themeContext.color.disabled, marginLeft: 6 }}>
+                        <View style={globalStyle.flexRowCenter}>
+                            <Icon name="search" color={themeContext.color.disabled} tvParallaxProperties={undefined} />
+                            <Text
+                                style={[
+                                    globalStyle.rtext,
+                                    { fontSize: 13, lineHeight: 33, color: themeContext.color.disabled, marginLeft: 6 },
+                                ]}
+                            >
                                 {getString('검색 내역이 없습니다')}
                             </Text>
                         </View>
@@ -167,15 +188,26 @@ function Search({ navigation, route }: MainScreenProps<'Search'>): JSX.Element {
             </View>
         );
     }
+
     function renderSearchedComponent() {
         return (
             <FlatList
                 ListHeaderComponent={
                     <View style={{ paddingTop: 30, flexDirection: 'row' }}>
-                        <Text>
+                        <Text
+                            style={[
+                                globalStyle.rtext,
+                                { fontSize: 13, lineHeight: 23, color: themeContext.color.textBlack },
+                            ]}
+                        >
                             &apos;{searchValue}&apos; {getString('검색 결과')}{' '}
                         </Text>
-                        <Text style={{ color: themeContext.color.primary, paddingLeft: 19 }}>
+                        <Text
+                            style={[
+                                globalStyle.ltext,
+                                { fontSize: 13, lineHeight: 23, color: themeContext.color.primary, marginLeft: 19 },
+                            ]}
+                        >
                             {getString('#N 개').replace('#N', (proposals?.length || 0).toString())}
                         </Text>
                     </View>
@@ -185,19 +217,14 @@ function Search({ navigation, route }: MainScreenProps<'Search'>): JSX.Element {
                 data={proposals || []}
                 renderItem={renderProposals}
                 ListEmptyComponent={
-                    <View
-                        style={[
-                            globalStyle.flexRowBetween,
-                            {
-                                paddingTop: 30,
-                                flexDirection: 'row',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                            },
-                        ]}
-                    >
-                        <Icon name="search" color="gray" tvParallaxProperties={undefined} />
-                        <Text style={{ color: 'rgb(182, 175, 198)', paddingLeft: 6 }}>
+                    <View style={globalStyle.flexRowCenter}>
+                        <Icon name="search" color={themeContext.color.disabled} tvParallaxProperties={undefined} />
+                        <Text
+                            style={[
+                                globalStyle.rtext,
+                                { fontSize: 13, lineHeight: 33, color: themeContext.color.disabled, marginLeft: 6 },
+                            ]}
+                        >
                             {getString('검색 결과가 없습니다&#46;')}
                         </Text>
                     </View>
@@ -240,7 +267,12 @@ function Search({ navigation, route }: MainScreenProps<'Search'>): JSX.Element {
     }, [navigation, headerTitle, headerLeft]);
 
     return (
-        <View style={{ flex: 1, backgroundColor: 'white' }}>
+        <View
+            style={{ flex: 1, backgroundColor: themeContext.color.white }}
+            onLayout={(event) => {
+                setWidth(event.nativeEvent.layout.width);
+            }}
+        >
             <FocusAwareStatusBar barStyle="dark-content" backgroundColor="white" />
             <View style={{ paddingHorizontal: 23, paddingTop: 30 }}>
                 <SearchInput
@@ -259,7 +291,11 @@ function Search({ navigation, route }: MainScreenProps<'Search'>): JSX.Element {
                                     style={{ width: 28, height: 28, justifyContent: 'center', alignItems: 'center' }}
                                     onPress={() => runSearch()}
                                 >
-                                    <Icon name="search" color="purple" tvParallaxProperties={undefined} />
+                                    <Icon
+                                        name="search"
+                                        color={themeContext.color.primary}
+                                        tvParallaxProperties={undefined}
+                                    />
                                 </TouchableOpacity>
                                 <Icon
                                     onPress={() => {
@@ -277,6 +313,7 @@ function Search({ navigation, route }: MainScreenProps<'Search'>): JSX.Element {
                     }
                     onSubmitEditing={(e) => runSearch(e.nativeEvent.text)}
                     placeholderText={getString('검색어를 입력해주세요')}
+                    inputStyle={{ width: width - 136 }}
                 />
             </View>
             {!isSearched && renderHistoryComponent()}

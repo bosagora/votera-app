@@ -1,3 +1,4 @@
+import { StackActions } from '@react-navigation/native';
 import {
     Enum_Feeds_Type as EnumFeedsType,
     ComponentFeedCotentContent,
@@ -77,13 +78,16 @@ export const getNavigationType = (type: EnumFeedsType, navigationParams: Compone
 
     switch (type) {
         case EnumFeedsType.NewProposalNotice:
-            return `/notice/${activityId || ''}`;
+            // return `/notice/${activityId || ''}`;
+            return StackActions.push('RootUser', { screen: 'Notice', params: { id: activityId || '' } });
         case EnumFeedsType.NewProposal:
         case EnumFeedsType.VotingStart:
         case EnumFeedsType.VotingClosed:
-            return `/detail/${proposalId || ''}`;
+            // return `/detail/${proposalId || ''}`;
+            return StackActions.push('RootUser', { screen: 'ProposalDetail', params: { id: proposalId || '' } });
         case EnumFeedsType.NewOpinionComment:
-            return `/detail/${proposalId || ''}`;
+            // return `/detail/${proposalId || ''}`;
+            return StackActions.push('RootUser', { screen: 'ProposalDetail', params: { id: proposalId || '' } });
         default:
             return undefined;
     }

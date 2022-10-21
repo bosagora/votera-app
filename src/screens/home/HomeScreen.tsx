@@ -195,7 +195,7 @@ function HomeScreen({ navigation, route }: MainScreenProps<'Home'>): JSX.Element
                             <TouchableOpacity
                                 style={[
                                     styles.tabButton,
-                                    { borderBottomColor: isFocused ? 'rgb(112,58,222)' : 'transparent' },
+                                    { borderBottomColor: isFocused ? themeContext.color.primary : 'transparent' },
                                 ]}
                                 onPress={onPress}
                                 key={`tab_${tabRoute.key}`}
@@ -203,7 +203,11 @@ function HomeScreen({ navigation, route }: MainScreenProps<'Home'>): JSX.Element
                                 <Text
                                     style={[
                                         globalStyle.btext,
-                                        { fontSize: 13, color: isFocused ? 'rgb(112,58,222)' : '#000000' },
+                                        {
+                                            fontSize: 13,
+                                            lineHeight: 17,
+                                            color: isFocused ? themeContext.color.primary : themeContext.color.black,
+                                        },
                                     ]}
                                 >
                                     {tabRoute.title}
@@ -214,7 +218,7 @@ function HomeScreen({ navigation, route }: MainScreenProps<'Home'>): JSX.Element
                 </View>
             );
         },
-        [],
+        [themeContext.color.black, themeContext.color.primary],
     );
 
     const renderScene = useCallback((props: SceneRendererProps & { route: { key: string; title: string } }) => {

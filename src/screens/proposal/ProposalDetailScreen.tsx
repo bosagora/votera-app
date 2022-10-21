@@ -2,9 +2,9 @@ import React, { useContext, useRef, useState, useCallback, useEffect } from 'rea
 import { View, Animated, Dimensions, NativeScrollEvent } from 'react-native';
 import { Button, Text, Icon } from 'react-native-elements';
 import { TabView, SceneRendererProps } from 'react-native-tab-view';
-import { useLinkTo } from '@react-navigation/native';
+import { BigNumber } from 'ethers';
 import TabBarContainer from '~/components/status/TabBar';
-import { MainScreenProps } from '~/navigation/main/MainParams';
+import { MainScreenProps, replaceToHome } from '~/navigation/main/MainParams';
 import FocusAwareStatusBar from '~/components/statusbar/FocusAwareStatusBar';
 import globalStyle from '~/styles/global';
 import ReactNativeParallaxHeader from '~/components/ui/RNParallax';
@@ -22,11 +22,20 @@ import {
     useActivityPostsLazyQuery,
     useListAssessValidatorsLazyQuery,
     useListBallotValidatorsLazyQuery,
+    useSubmitAssessMutation,
+    useRecordBallotMutation,
+    useSubmitBallotMutation,
+    useUpdateReceiptMutation,
     Validator,
 } from '~/graphql/generated/generated';
 import { OpinionFilterType } from '~/types/filterType';
 import { ProposalContext } from '~/contexts/ProposalContext';
 import getString from '~/utils/locales/STRINGS';
+import isCloseToBottom from '~/utils';
+import VoteraVote from '~/utils/votera/VoteraVote';
+import { VOTE_SELECT } from '~/utils/votera/voterautil';
+import { useAppDispatch } from '~/state/hooks';
+import { showSnackBar } from '~/state/features/snackBar';
 import Info from './Info';
 import Discussion from './Discussion';
 import styles, { HEADER_HEIGHT } from './styles';
@@ -34,7 +43,7 @@ import CreateScreen from './Create/CreateScreen';
 import AssessScreen from './Assess/AssessScreen';
 import VoteScreen from './Vote/VoteScreen';
 import ValidatorScreen from './Validator/ValidatorScreen';
-import isCloseToBottom from '~/utils';
+import { AssessResult } from './Assess/evaluating';
 
 const FETCH_INIT_LIMIT = 10;
 const FETCH_MORE_LIMIT = 10;
@@ -120,10 +129,11 @@ function isBallotValidatorStatus(status?: EnumProposalStatus) {
 function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDetail'>): JSX.Element {
     const { id } = route.params;
     const scroll = useRef(new Animated.Value(0)).current;
+    const dispatch = useAppDispatch();
     const [discussionAId, setDiscussionAId] = useState('');
     const [noticeAId, setNoticeAId] = useState('');
-    const { proposal, fetchProposal, createActivityComment } = useContext(ProposalContext);
-    const { user, isGuest } = useContext(AuthContext);
+    const { proposal, isJoined, joinProposal, fetchProposal, createActivityComment } = useContext(ProposalContext);
+    const { user, isGuest, metamaskProvider, metamaskUpdateBalance } = useContext(AuthContext);
     const [index, setIndex] = useState(0);
     const [routes, setRoutes] = useState(selectRoute(proposal?.status));
     const [commentsCount, setCommentsCount] = useState(0);
@@ -133,7 +143,6 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
     const [total, setTotal] = useState(0);
     const [participated, setParticipated] = useState(0);
     const [validators, setValidators] = useState<Validator[]>([]);
-    const linkTo = useLinkTo();
 
     const [sceneHeight, setSceneHeight] = useState<HeightType>('auto');
     const [tab0Height, setTab0Height] = useState<HeightType>('auto');
@@ -157,6 +166,10 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
             fetchPolicy: 'cache-and-network',
             notifyOnNetworkStatusChange: true,
         });
+    const [submitAssess] = useSubmitAssessMutation();
+    const [submitBallot] = useSubmitBallotMutation();
+    const [recordBallot] = useRecordBallotMutation();
+    const [updateReceipt] = useUpdateReceiptMutation();
 
     useEffect(() => {
         if (!proposal) {
@@ -291,6 +304,160 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
         setTab3Height('auto');
     }, [proposal, fetchProposal]);
 
+    const onSubmitAssess = useCallback(
+        async (data: AssessResult[]) => {
+            if (!proposal?.proposalId || !metamaskProvider) {
+                return;
+            }
+
+            if (!isJoined) await joinProposal();
+            const values = data.map((d) => BigNumber.from(d.value));
+            const voteraVote = new VoteraVote(proposal?.voteraVoteAddress || '', metamaskProvider.getSigner());
+            const tx = await voteraVote.submitAssess(proposal.proposalId, values, {});
+
+            const content = data.map((d) => ({
+                __typename: 'ComponentPostScaleAnswer',
+                value: d.value,
+                sequence: d.sequence,
+            }));
+
+            const submitResult = await submitAssess({
+                variables: {
+                    input: {
+                        data: {
+                            proposalId: proposal.proposalId || '',
+                            content,
+                            transactionHash: tx.hash,
+                        },
+                    },
+                },
+            });
+            if (!submitResult.data?.submitAssess?.post) {
+                throw new Error('invalid submitAssess result');
+            }
+
+            await refetchAssess();
+
+            updateReceipt({
+                variables: {
+                    input: {
+                        data: {
+                            hash: tx.hash,
+                        },
+                    },
+                },
+            })
+                .then((response) => {
+                    if (response.data?.updateReceipt?.status !== 0) {
+                        metamaskUpdateBalance();
+                        getValidators();
+                    }
+                })
+                .catch(console.log);
+        },
+        [
+            getValidators,
+            isJoined,
+            joinProposal,
+            metamaskProvider,
+            metamaskUpdateBalance,
+            proposal?.proposalId,
+            proposal?.voteraVoteAddress,
+            refetchAssess,
+            submitAssess,
+            updateReceipt,
+        ],
+    );
+
+    const onSubmitBallot = useCallback(
+        async (vote: VOTE_SELECT): Promise<boolean> => {
+            if (!proposal?.proposalId) {
+                dispatch(showSnackBar(getString('Proposal 정보가 잘못 입력되었습니다&#46;')));
+                return false;
+            }
+            if (!metamaskProvider) {
+                dispatch(showSnackBar(getString('메타마스크와 연결되지 않았습니다&#46;')));
+                return false;
+            }
+
+            if (!isJoined) await joinProposal();
+
+            const submitResult = await submitBallot({
+                variables: {
+                    input: {
+                        data: {
+                            proposalId: proposal.proposalId,
+                            address: user?.address || '',
+                            choice: vote,
+                        },
+                    },
+                },
+            });
+            if (!submitResult?.data?.submitBallot) {
+                dispatch(showSnackBar(getString('투표 처리 중 오류가 발생했습니다&#46;')));
+                return false;
+            }
+            const { signature, commitment } = submitResult.data.submitBallot;
+            if (!signature || !commitment) {
+                dispatch(showSnackBar(getString('투표 처리 중 오류가 발생했습니다&#46;')));
+                return false;
+            }
+
+            const voteraVote = new VoteraVote(proposal?.voteraVoteAddress || '', metamaskProvider.getSigner());
+            const tx = await voteraVote.submitBallot(proposal.proposalId, commitment, signature, {});
+
+            const recordResult = await recordBallot({
+                variables: {
+                    input: {
+                        data: {
+                            proposalId: proposal.proposalId,
+                            commitment,
+                            address: user?.address || '',
+                            transactionHash: tx.hash,
+                        },
+                    },
+                },
+            });
+            if (!recordResult.data?.recordBallot?.ballot) {
+                dispatch(showSnackBar(getString('투표 처리 중 오류가 발생했습니다&#46;')));
+                return false;
+            }
+
+            updateReceipt({
+                variables: {
+                    input: {
+                        data: {
+                            hash: tx.hash,
+                        },
+                    },
+                },
+            })
+                .then((response) => {
+                    if (response.data?.updateReceipt?.status !== 0) {
+                        metamaskUpdateBalance();
+                        getValidators();
+                    }
+                })
+                .catch(console.log);
+
+            return true;
+        },
+        [
+            dispatch,
+            getValidators,
+            isJoined,
+            joinProposal,
+            metamaskProvider,
+            metamaskUpdateBalance,
+            proposal?.proposalId,
+            proposal?.voteraVoteAddress,
+            recordBallot,
+            submitBallot,
+            updateReceipt,
+            user?.address,
+        ],
+    );
+
     const setCurrentTabHeight = (newHeight: HeightType) => {
         const deviceHeight = Dimensions.get('window').height;
         const tabHeight = newHeight !== 'auto' && newHeight < deviceHeight ? deviceHeight : newHeight;
@@ -324,9 +491,14 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
             outputRange: [1, 1, 0],
             extrapolate: 'clamp',
         });
+        const pos = scroll.interpolate({
+            inputRange: [-20, 0, 250 - HEADER_HEIGHT],
+            outputRange: [22, 22, 0],
+            extrapolate: 'clamp',
+        });
         return (
             <View style={styles.titleContainer}>
-                <Animated.View style={[styles.typeBox, { opacity }]}>
+                <Animated.View style={[styles.typeBox, { opacity }, { top: pos }]}>
                     <Text style={[globalStyle.mtext, styles.typeText]}>
                         {proposal?.type === EnumProposalType.Business ? getString('사업제안') : getString('시스템제안')}
                     </Text>
@@ -334,13 +506,13 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
                 <Text style={[globalStyle.btext, styles.titleText]} numberOfLines={3}>
                     {proposal?.name}
                 </Text>
-                <Animated.View style={{ alignItems: 'center', opacity }}>
+                <Animated.View style={[styles.dateBox, { opacity }, { bottom: pos }]}>
                     {proposal?.type === EnumProposalType.Business && (
                         <Period
                             type={getString('평가 기간')}
                             typeStyle={styles.periodText}
                             periodStyle={styles.period}
-                            color="white"
+                            top
                             created={proposal?.assessPeriod?.begin as string}
                             deadline={proposal?.assessPeriod?.end as string}
                         />
@@ -350,7 +522,7 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
                         type={getString('투표 기간')}
                         typeStyle={styles.periodText}
                         periodStyle={styles.period}
-                        color="white"
+                        top
                         created={proposal?.votePeriod?.begin as string}
                         deadline={proposal?.votePeriod?.end as string}
                     />
@@ -372,16 +544,16 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
                     <Button
                         onPress={() => {
                             if (navigation.canGoBack()) {
-                                navigation.goBack();
+                                navigation.pop();
                             } else {
-                                linkTo('/home');
+                                navigation.dispatch(replaceToHome());
                             }
                         }}
                         icon={<Icon name="chevron-left" color="white" tvParallaxProperties={undefined} />}
                         type="clear"
                     />
 
-                    <DdayMark color="white" deadline={proposal?.votePeriod?.end as string} type={proposal?.type} />
+                    <DdayMark top deadline={proposal?.votePeriod?.end as string} type={proposal?.type} />
                 </View>
             </Animated.View>
         );
@@ -437,7 +609,9 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
                             onLayout={(height) => {
                                 setTab1Height(height);
                             }}
-                            moveToNotice={() => linkTo(`/notice/${noticeAId}`)}
+                            moveToNotice={() => {
+                                navigation.push('RootUser', { screen: 'Notice', params: { id: noticeAId } });
+                            }}
                         />
                     );
                 }
@@ -466,12 +640,7 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
                                 setTab2Height(value);
                             }}
                             onChangeStatus={onChangeStatus}
-                            refetchAssess={() => {
-                                if (refetchAssess) {
-                                    refetchAssess().catch(console.log);
-                                }
-                                getValidators();
-                            }}
+                            onSubmitAssess={onSubmitAssess}
                         />
                     );
                 }
@@ -480,9 +649,7 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
                         onLayout={(value) => {
                             setTab2Height(value);
                         }}
-                        onRefresh={() => {
-                            getValidators();
-                        }}
+                        onSubmitBallot={onSubmitBallot}
                     />
                 );
             case 'validator':

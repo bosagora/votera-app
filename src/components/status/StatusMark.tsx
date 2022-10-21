@@ -1,72 +1,63 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import React from 'react';
+import React, { useContext } from 'react';
 import { View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { Text } from 'react-native-elements';
+import { ThemeContext } from 'styled-components/native';
+import { Enum_Proposal_Type as EnumProposalType } from '~/graphql/generated/generated';
 import globalStyle from '~/styles/global';
 import getString from '~/utils/locales/STRINGS';
 
-interface HeaderProps {
-    type: string;
-    transparent: boolean;
-}
-/*
-<View style={{ justifyContent: 'center', alignItems: 'center' }}>
-    <StatusMark type="BUSINESS" transparent={false} />
-    <StatusMark type="SYSTEM" transparent={false} />
-    <StatusMark type="SYSTEM" transparent />
-    <StatusMark type="BUSINESS" transparent />
-</View>
-*/
-
 const styles = StyleSheet.create({
-    businessContents: {
-        backgroundColor: 'rgb(29, 197, 220)',
-    },
     contents: {
         alignItems: 'center',
-        backgroundColor: 'rgb(29, 197, 220)',
         borderRadius: 6,
-        height: 24,
+        height: 22,
         justifyContent: 'center',
-        marginRight: 10,
-        paddingHorizontal: 8,
-        paddingVertical: 3,
+        paddingHorizontal: 5,
     },
-    systemContents: {
-        backgroundColor: 'rgb(242, 145, 229)',
-    },
+    labelText: { color: 'white', fontSize: 10, lineHeight: 20 },
     transparentContents: {
+        alignItems: 'center',
         backgroundColor: 'transparent',
         borderColor: 'white',
+        borderRadius: 6,
         borderStyle: 'solid',
         borderWidth: 1,
+        height: 22,
+        justifyContent: 'center',
+        paddingHorizontal: 5,
     },
 });
 
+interface HeaderProps {
+    type: EnumProposalType;
+    transparent: boolean;
+}
+
 function StatusMark(props: HeaderProps): JSX.Element {
     const { type, transparent } = props;
+    const themeContext = useContext(ThemeContext);
     let componentStyle: StyleProp<ViewStyle> = [];
-    let markText;
 
-    switch (type) {
-        case 'BUSINESS':
-            componentStyle = [...componentStyle, styles.businessContents];
-            markText = getString('사업 제안');
-            break;
-        case 'SYSTEM':
-            componentStyle = [...componentStyle, styles.systemContents];
-            markText = getString('시스템 제안');
-            break;
-        default:
-            break;
-    }
     if (transparent) {
-        componentStyle = [...componentStyle, styles.transparentContents];
+        componentStyle = styles.transparentContents;
+    } else {
+        switch (type) {
+            case EnumProposalType.Business:
+                componentStyle = [styles.contents, { backgroundColor: themeContext.color.business }];
+                break;
+            case EnumProposalType.System:
+            default:
+                componentStyle = [styles.contents, { backgroundColor: themeContext.color.system }];
+                break;
+        }
     }
 
     return (
-        <View style={[styles.contents, ...componentStyle]}>
-            <Text style={[globalStyle.mtext, { color: 'white', fontSize: 12 }]}>{markText}</Text>
+        <View style={componentStyle}>
+            <Text style={[globalStyle.mtext, styles.labelText]}>
+                {type === EnumProposalType.Business ? getString('사업제안') : getString('시스템제안')}
+            </Text>
         </View>
     );
 }

@@ -267,12 +267,12 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
                         <Text style={[globalStyle.rtext, styles.itemStatus]}>
                             {item.assessUpdate ? getString('평가완료') : getString('미평가')}
                         </Text>
-                        {item.assessUpdate && (
-                            <Text style={[globalStyle.ltext, { color: themeContext.color.textBlack }, styles.itemDate]}>
-                                {getValidatorDateString(item.assessUpdate)}
-                            </Text>
-                        )}
                     </View>
+                    {item.assessUpdate && (
+                        <Text style={[globalStyle.ltext, { color: themeContext.color.textBlack }, styles.itemDate]}>
+                            {getValidatorDateString(item.assessUpdate)}
+                        </Text>
+                    )}
                 </View>
             );
         },
@@ -371,12 +371,12 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
                         <Text style={[globalStyle.rtext, styles.itemStatus]}>
                             {item.ballotUpdate ? getString('투표완료') : getString('미투표')}
                         </Text>
-                        {item.ballotUpdate && (
-                            <Text style={[globalStyle.ltext, { color: themeContext.color.textBlack }, styles.itemDate]}>
-                                {getValidatorDateString(item.ballotUpdate)}
-                            </Text>
-                        )}
                     </View>
+                    {item.ballotUpdate && (
+                        <Text style={[globalStyle.ltext, { color: themeContext.color.textBlack }, styles.itemDate]}>
+                            {getValidatorDateString(item.ballotUpdate)}
+                        </Text>
+                    )}
                 </View>
             );
         },
@@ -510,12 +510,12 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                         ) : (
                             <Text style={[globalStyle.rtext, styles.itemStatus]}>{getString('미투표')}</Text>
                         )}
-                        {item.ballotUpdate && (
-                            <Text style={[globalStyle.ltext, { color: themeContext.color.textBlack }, styles.itemDate]}>
-                                {getValidatorDateString(item.ballotUpdate)}
-                            </Text>
-                        )}
                     </View>
+                    {item.ballotUpdate && (
+                        <Text style={[globalStyle.ltext, { color: themeContext.color.textBlack }, styles.itemDate]}>
+                            {getValidatorDateString(item.ballotUpdate)}
+                        </Text>
+                    )}
                 </View>
             );
         },

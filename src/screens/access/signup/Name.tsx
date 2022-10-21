@@ -1,4 +1,4 @@
-import React, { useContext, useCallback, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useMemo } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import { ThemeContext } from 'styled-components/native';
 import { Icon, Text } from 'react-native-elements';
@@ -39,18 +39,19 @@ function NameScreen(props: NameScreenProps): JSX.Element {
         },
     });
 
-    const debounceNameCheck = useCallback(
-        debounce((username: string) => {
-            if (username.length > 0) {
-                checkUsername({
-                    variables: {
-                        username,
-                    },
-                }).catch(console.log);
-            } else {
-                onChangeName('', true);
-            }
-        }, DEBOUNCER_TIME),
+    const debounceNameCheck = useMemo(
+        () =>
+            debounce((username: string) => {
+                if (username.length > 0) {
+                    checkUsername({
+                        variables: {
+                            username,
+                        },
+                    }).catch(console.log);
+                } else {
+                    onChangeName('', true);
+                }
+            }, DEBOUNCER_TIME),
         [checkUsername, onChangeName],
     );
 

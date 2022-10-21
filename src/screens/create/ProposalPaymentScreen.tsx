@@ -4,8 +4,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Icon } from 'react-native-elements';
 import { useAssets } from 'expo-asset';
 import { BigNumber } from 'ethers';
-import { useLinkTo } from '@react-navigation/native';
-import globalStyle from '~/styles/global';
+// import { useLinkTo } from '@react-navigation/native';
+import globalStyle, { TOP_NAV_HEIGHT } from '~/styles/global';
 import CommonButton from '~/components/button/CommonButton';
 import {
     useGetProposalFeeLazyQuery,
@@ -44,7 +44,7 @@ function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment
     const dispatch = useAppDispatch();
     const [assets] = useAssets(iconAssets);
     const insets = useSafeAreaInsets();
-    const linkTo = useLinkTo();
+    // const linkTo = useLinkTo();
 
     const [getProposalFee, { data, refetch }] = useGetProposalFeeLazyQuery({
         fetchPolicy: 'cache-and-network',
@@ -71,11 +71,15 @@ function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment
                 }}
                 onPress={() => {
                     fetchProposal(id);
-                    linkTo(`/detail/${id}`);
+                    navigation.replace('RootUser', {
+                        screen: 'ProposalDetail',
+                        params: { id },
+                    });
+                    // linkTo(`/detail/${id}`);
                 }}
             />
         );
-    }, [fetchProposal, linkTo, id]);
+    }, [fetchProposal, id, navigation]);
 
     const headerLeft = useCallback(() => {
         return <Icon name="chevron-left" color="transparent" tvParallaxProperties={undefined} />;
@@ -86,19 +90,11 @@ function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment
             <>
                 {assets && (
                     <Image
-                        style={{ height: 65 + insets.top, width: '100%' }}
+                        style={{ height: TOP_NAV_HEIGHT + insets.top, width: '100%' }}
                         source={assets[EnumIconAsset.Background] as ImageURISource}
                     />
                 )}
-                <View
-                    style={{
-                        backgroundColor: 'white',
-                        height: 10,
-                        borderTopLeftRadius: 10,
-                        borderTopRightRadius: 10,
-                        top: -10,
-                    }}
-                />
+                <View style={globalStyle.headerBackground} />
             </>
         );
     }, [assets, insets.top]);
@@ -107,6 +103,7 @@ function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment
         navigation.setOptions({
             title: getString('수수료 납입'),
             headerTitleStyle: [globalStyle.headerTitle, { color: 'white' }],
+            headerTitleAlign: 'center',
             headerLeft,
             headerRight,
             headerBackground,
@@ -177,6 +174,8 @@ function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment
                     console.log('checkProposalFee call error = ', err);
                     dispatch(showSnackBar(getString('입금 정보 확인 중 오류가 발생했습니다&#46;')));
                 });
+
+                metamaskUpdateBalance(tx.hash);
             } catch (err) {
                 const revertMessage = getRevertMessage(err);
                 if (revertMessage) {
@@ -195,22 +194,24 @@ function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment
                 }
             }
         },
-        [checkProposalFee, data, dispatch, metamaskProvider],
+        [checkProposalFee, data, dispatch, metamaskProvider, metamaskUpdateBalance],
     );
 
     useEffect(() => {
+        let tmid: NodeJS.Timeout | undefined;
+
         if (checkProposalFeeData?.checkProposalFee) {
             if (checkProposalFeeData.checkProposalFee.status === EnumFeeStatus.Paid) {
                 dispatch(showSnackBar(getString('입금이 확인되었습니다&#46;')));
                 navigation.replace('RootUser', { screen: 'ProposalDetail', params: { id } });
             } else {
                 if (checkProposalFeeData.checkProposalFee.status === EnumFeeStatus.Mining) {
-                    setTimeout(() => {
+                    tmid = setTimeout(() => {
                         refetchCheckProposalFee().catch((err) => {
                             console.log('refetchCheckProposalFee error ', err);
                             dispatch(showSnackBar(getString('입금 정보 확인 중 오류가 발생했습니다&#46;')));
                         });
-                    }, 1000);
+                    }, 10000);
                 } else {
                     dispatch(showSnackBar(getString('입금 정보 확인 중 오류가 발생했습니다&#46;')));
                 }
@@ -220,9 +221,11 @@ function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment
                     dispatch(showSnackBar(getString('입금 정보 확인 중 오류가 발생했습니다&#46;')));
                 });
             }
-            metamaskUpdateBalance();
         }
-    }, [checkProposalFeeData, dispatch, id, metamaskUpdateBalance, navigation, refetch, refetchCheckProposalFee]);
+        return () => {
+            clearTimeout(tmid);
+        };
+    }, [checkProposalFeeData, dispatch, id, navigation, refetch, refetchCheckProposalFee]);
 
     if (metamaskStatus === MetamaskStatus.UNAVAILABLE) {
         // redirect to landing page for installing metamask
@@ -233,7 +236,7 @@ function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment
     return (
         <View style={styles.container}>
             <FocusAwareStatusBar barStyle="light-content" />
-            <View>
+            <View style={{ width: '100%' }}>
                 {metamaskStatus === MetamaskStatus.INITIALIZING && <ActivityIndicator />}
                 {metamaskStatus === MetamaskStatus.NOT_CONNECTED && (
                     <CommonButton

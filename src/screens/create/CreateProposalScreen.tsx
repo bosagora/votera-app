@@ -8,8 +8,7 @@ import { DocumentResult } from 'expo-document-picker';
 import { useAssets } from 'expo-asset';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BigNumber } from 'ethers';
-import { useLinkTo } from '@react-navigation/native';
-import globalStyle from '~/styles/global';
+import globalStyle, { TOP_NAV_HEIGHT } from '~/styles/global';
 import RadioButton from '~/components/button/radio';
 import TextInputComponent from '~/components/input/SingleLineInput';
 import DatePicker, { Day } from '~/components/input/DatePicker';
@@ -39,9 +38,9 @@ import getString from '~/utils/locales/STRINGS';
 import { useAppDispatch, useAppSelector } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
 import { showLoadingAniModal, hideLoadingAniModal } from '~/state/features/loadingAniModal';
-import { selectDatePickerState } from '~/state/features/selectDatePicker';
+import { selectDatePickerState, resetDatePicker } from '~/state/features/selectDatePicker';
 import { getDefaultAssessPeriod, PreviewProposal } from '~/types/proposalType';
-import { MainScreenProps } from '~/navigation/main/MainParams';
+import { MainScreenProps, replaceToHome } from '~/navigation/main/MainParams';
 import { savePreviewToSession } from '~/utils/votera/preview';
 import { isValidBusinessVoteDate } from '~/utils/time';
 
@@ -176,7 +175,7 @@ RowWrapper.defaultProps = {
 function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>): JSX.Element {
     const { tempId } = route.params || {};
     const dispatch = useAppDispatch();
-    const { user, isGuest, enrolled, metamaskStatus, metamaskConnect } = useContext(AuthContext);
+    const { user, isGuest, enrolled, metamaskStatus, metamaskAccount, metamaskConnect } = useContext(AuthContext);
     const { fetchProposal, createProposal } = useContext(ProposalContext);
     const themeContext = useContext(ThemeContext);
     const insets = useSafeAreaInsets();
@@ -193,7 +192,6 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
     const [createError, setCreateError] = useState<{ errorName: string } | undefined>();
     const [assets] = useAssets(iconAssets);
     const pickedDate = useAppSelector(selectDatePickerState);
-    const linkTo = useLinkTo();
 
     const [uploadAttachment] = useUploadFileMutation();
 
@@ -202,12 +200,12 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
         setTitle('');
         setDescription('');
         setProposalType(EnumProposalType.Business);
-        setDate({});
         setLogoImage(undefined);
         setMainImage(undefined);
         setUploadFiles([]);
         setAmount(undefined);
-    }, []);
+        dispatch(resetDatePicker());
+    }, [dispatch]);
 
     useEffect(() => {
         let cancel = false;
@@ -259,7 +257,11 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
                     return;
                 }
                 if (!enrolled) {
-                    dispatch(showSnackBar(getString('제안자의 노드 정보가 올바르지 않습니다')));
+                    if (metamaskStatus === MetamaskStatus.OTHER_CHAIN) {
+                        dispatch(showSnackBar(getString('메타마스크가 다른 네트워크에 연결되어 있습니다&#46;')));
+                    } else {
+                        dispatch(showSnackBar(getString('제안자의 노드 정보가 올바르지 않습니다')));
+                    }
                     return;
                 }
 
@@ -345,7 +347,7 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
                     proposalData.assessPeriod = getDefaultAssessPeriod();
                 }
                 const proposalResponse = await createProposal(proposalData, {
-                    where: proposalType === EnumProposalType.Business ? OpenWhere : ProjectWhere,
+                    where: proposalType === EnumProposalType.Business ? OpenWhere(metamaskAccount) : ProjectWhere,
                     sort: 'createdAt:desc',
                 });
                 /*
@@ -368,9 +370,9 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
                 resetData();
                 if (!proposalResponse?.proposalId) {
                     if (navigation.canGoBack()) {
-                        navigation.goBack();
+                        navigation.pop();
                     } else {
-                        linkTo('/home');
+                        navigation.dispatch(replaceToHome());
                     }
                     return;
                 }
@@ -395,12 +397,13 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
             user?.address,
             user?.memberId,
             createProposal,
+            metamaskAccount,
             itemId,
             resetData,
             fetchProposal,
             navigation,
+            metamaskStatus,
             uploadAttachment,
-            linkTo,
         ],
     );
 
@@ -410,16 +413,16 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
                 onPress={() => {
                     resetData();
                     if (navigation.canGoBack()) {
-                        navigation.goBack();
+                        navigation.pop();
                     } else {
-                        linkTo('/home');
+                        navigation.dispatch(replaceToHome());
                     }
                 }}
                 icon={<Icon name="chevron-left" color="white" tvParallaxProperties={undefined} />}
                 type="clear"
             />
         );
-    }, [navigation, linkTo, resetData]);
+    }, [navigation, resetData]);
 
     const headerRight = useCallback(() => {
         if (metamaskStatus === MetamaskStatus.CONNECTING) {
@@ -485,7 +488,7 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
             <>
                 {assets && (
                     <Image
-                        style={{ height: 65 + insets.top, width: '100%' }}
+                        style={{ height: TOP_NAV_HEIGHT + insets.top, width: '100%' }}
                         source={assets[EnumIconAsset.Background] as ImageURISource}
                     />
                 )}
@@ -498,6 +501,7 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
         navigation.setOptions({
             title: getString('제안 작성'),
             headerTitleStyle: [globalStyle.headerTitle, { color: 'white' }],
+            headerTitleAlign: 'center',
             headerLeft,
             headerRight,
             headerBackground,
@@ -506,13 +510,11 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
     }, [headerBackground, headerLeft, headerRight, navigation]);
 
     useEffect(() => {
-        if (pickedDate && pickedDate.startDate && pickedDate.endDate) {
-            setDate({
-                startDate: pickedDate.startDate,
-                endDate: pickedDate.endDate,
-            });
-        }
-    }, [pickedDate]);
+        setDate({
+            startDate: pickedDate.startDate,
+            endDate: pickedDate.endDate,
+        });
+    }, [pickedDate.startDate, pickedDate.endDate]);
 
     useEffect(() => {
         let cancel = false;
@@ -550,7 +552,7 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
         };
         savePreviewToSession(previewData)
             .then(() => {
-                linkTo('/preview');
+                navigation.push('RootUser', { screen: 'ProposalPreview' });
             })
             .catch(console.log);
     };
@@ -588,7 +590,7 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
                             onChange={(index: number) => {
                                 const changedType = index === 0 ? EnumProposalType.Business : EnumProposalType.System;
                                 if (changedType !== proposalType) {
-                                    setDate({});
+                                    dispatch(resetDatePicker());
                                 }
                                 setProposalType(changedType);
                             }}
@@ -603,7 +605,13 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
                         subTitle={`${title.length}/${TITLE_MAX_LENGTH}`}
                     >
                         <TextInputComponent
-                            onChangeText={(text: string) => setTitle(text)}
+                            onChangeText={(text: string) => {
+                                if (text.length > TITLE_MAX_LENGTH) {
+                                    setTitle(text.slice(0, TITLE_MAX_LENGTH));
+                                } else {
+                                    setTitle(text);
+                                }
+                            }}
                             value={title}
                             // koreanInput
                             placeholder={getString('제안 제목을 입력해주세요&#46;')}
@@ -612,7 +620,6 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
                     </RowWrapper>
                     <RowWrapper label={getString('투표 기간')} mandatory>
                         <DatePicker
-                            // onChange={(d) => setDate(d)}
                             onNavigate={(param) => {
                                 navigation.push('RootUser', {
                                     screen: 'Calendar',

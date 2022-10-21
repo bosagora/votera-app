@@ -1,7 +1,7 @@
-import React, { useRef, useState, useContext, useCallback } from 'react';
+import React, { useRef, useState, useCallback } from 'react';
 import { Animated, View } from 'react-native';
 import { Button, Text, Icon } from 'react-native-elements';
-import { useFocusEffect, useLinkTo } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import FocusAwareStatusBar from '~/components/statusbar/FocusAwareStatusBar';
 import globalStyle from '~/styles/global';
 import {
@@ -15,7 +15,7 @@ import DdayMark from '~/components/status/DdayMark';
 import getString from '~/utils/locales/STRINGS';
 import styles, { HEADER_HEIGHT } from '../proposal/styles';
 import { getDefaultAssessPeriod, PreviewProposal } from '~/types/proposalType';
-import { MainScreenProps } from '~/navigation/main/MainParams';
+import { MainScreenProps, replaceToHome } from '~/navigation/main/MainParams';
 import { loadPreviewFromSession } from '~/utils/votera/preview';
 import Info from '../proposal/Info';
 
@@ -23,7 +23,6 @@ function ProposalPreviewScreen({ navigation, route }: MainScreenProps<'ProposalP
     const scroll = useRef(new Animated.Value(0)).current;
     const [assessPeriod, setAssessPeriod] = useState<ComponentCommonPeriodInput>();
     const [preview, setPreview] = useState<PreviewProposal>();
-    const linkTo = useLinkTo();
 
     useFocusEffect(
         useCallback(() => {
@@ -33,9 +32,9 @@ function ProposalPreviewScreen({ navigation, route }: MainScreenProps<'ProposalP
                 if (mounted) {
                     if (!data) {
                         if (navigation.canGoBack()) {
-                            navigation.goBack();
+                            navigation.pop();
                         } else {
-                            linkTo('/home');
+                            navigation.dispatch(replaceToHome());
                         }
                         return;
                     }
@@ -51,7 +50,7 @@ function ProposalPreviewScreen({ navigation, route }: MainScreenProps<'ProposalP
             return () => {
                 mounted = false;
             };
-        }, [navigation, linkTo]),
+        }, [navigation]),
     );
 
     React.useLayoutEffect(() => {
@@ -92,7 +91,7 @@ function ProposalPreviewScreen({ navigation, route }: MainScreenProps<'ProposalP
                             type={getString('평가기간')}
                             typeStyle={{ fontSize: 14 }}
                             periodStyle={{ fontSize: 13 }}
-                            color="white"
+                            top
                             created={assessPeriod?.begin as string}
                             deadline={assessPeriod?.end as string}
                         />
@@ -103,7 +102,7 @@ function ProposalPreviewScreen({ navigation, route }: MainScreenProps<'ProposalP
                             type={getString('투표기간')}
                             typeStyle={{ fontSize: 14 }}
                             periodStyle={{ fontSize: 13 }}
-                            color="white"
+                            top
                             created={preview.votePeriod.begin}
                             deadline={preview.votePeriod.end}
                         />
@@ -126,16 +125,16 @@ function ProposalPreviewScreen({ navigation, route }: MainScreenProps<'ProposalP
                     <Button
                         onPress={() => {
                             if (navigation.canGoBack()) {
-                                navigation.goBack();
+                                navigation.pop();
                             } else {
-                                linkTo('/home');
+                                navigation.dispatch(replaceToHome());
                             }
                         }}
                         icon={<Icon name="chevron-left" color="white" tvParallaxProperties={undefined} />}
                         type="clear"
                     />
 
-                    <DdayMark color="white" deadline={preview?.votePeriod?.end} type={preview?.type} />
+                    <DdayMark top deadline={preview?.votePeriod?.end} type={preview?.type} />
                 </View>
             </Animated.View>
         );

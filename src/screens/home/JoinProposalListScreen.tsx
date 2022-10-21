@@ -1,15 +1,14 @@
 import React, { useContext, useEffect, useState, useCallback } from 'react';
-import { View, Image, FlatList, ListRenderItemInfo, ImageURISource } from 'react-native';
+import { View, Image, FlatList, ListRenderItemInfo, ImageURISource, StyleSheet } from 'react-native';
 import { Button, Text, Icon } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAssets } from 'expo-asset';
-import { useLinkTo } from '@react-navigation/native';
 import FilterButton from '~/components/button/FilterButton';
 import ProposalCard from '~/components/proposal/ProposalCard';
 import { Proposal, useGetMemberRolesLazyQuery } from '~/graphql/generated/generated';
-import { MainScreenProps } from '~/navigation/main/MainParams';
-import globalStyle from '~/styles/global';
+import { MainScreenProps, replaceToHome } from '~/navigation/main/MainParams';
+import globalStyle, { TOP_NAV_HEIGHT } from '~/styles/global';
 import { ProposalFilterType } from '~/types/filterType';
 import { ProposalContext } from '~/contexts/ProposalContext';
 import ListFooterButton from '~/components/button/ListFooterButton';
@@ -27,6 +26,14 @@ enum EnumIconAsset {
 
 // eslint-disable-next-line global-require, import/extensions
 const iconAssets = [require('@assets/images/header/bg.png')];
+
+const styles = StyleSheet.create({
+    container: { flex: 1 },
+    countBar: { paddingLeft: 21, paddingRight: 17, paddingTop: 30, zIndex: 1 },
+    countLabel: { fontSize: 13, lineHeight: 21 },
+    countNumber: { fontSize: 13, lineHeight: 21, marginLeft: 7 },
+    item: { paddingLeft: 21, paddingRight: 23 },
+});
 
 function getJoinProposalVariables(filter: ProposalFilterType, memberId?: string) {
     return {
@@ -48,7 +55,6 @@ function JoinProposalListScreen({ navigation, route }: MainScreenProps<'JoinProp
     const { user } = useContext(AuthContext);
     const [pullRefresh, setPullRefresh] = useState(false);
     const [assets] = useAssets(iconAssets);
-    const linkTo = useLinkTo();
 
     const [getJoinProposals, { data: resMemberRolesData, fetchMore: joinFetchMore, loading: joinLoading, client }] =
         useGetMemberRolesLazyQuery({
@@ -64,23 +70,23 @@ function JoinProposalListScreen({ navigation, route }: MainScreenProps<'JoinProp
             <Button
                 onPress={() => {
                     if (navigation.canGoBack()) {
-                        navigation.goBack();
+                        navigation.pop();
                     } else {
-                        linkTo('/home');
+                        navigation.dispatch(replaceToHome());
                     }
                 }}
                 icon={<Icon name="chevron-left" color="white" tvParallaxProperties={undefined} />}
                 type="clear"
             />
         );
-    }, [navigation, linkTo]);
+    }, [navigation]);
 
     const headerBackground = useCallback(() => {
         return (
             <>
                 {assets && (
                     <Image
-                        style={{ height: 65 + insets.top, width: '100%' }}
+                        style={{ height: TOP_NAV_HEIGHT + insets.top, width: '100%' }}
                         source={assets[EnumIconAsset.Background] as ImageURISource}
                     />
                 )}
@@ -93,6 +99,7 @@ function JoinProposalListScreen({ navigation, route }: MainScreenProps<'JoinProp
         navigation.setOptions({
             title: getString('내가 참여한 제안'),
             headerTitleStyle: [globalStyle.headerTitle, { color: 'white' }],
+            headerTitleAlign: 'center',
             headerLeft,
             headerBackground,
             headerShown: true,
@@ -118,20 +125,15 @@ function JoinProposalListScreen({ navigation, route }: MainScreenProps<'JoinProp
 
     const renderCountBar = useCallback(() => {
         return (
-            <View
-                style={[
-                    globalStyle.flexRowBetween,
-                    {
-                        paddingHorizontal: 20,
-                        paddingTop: 30,
-                        backgroundColor: 'white',
-                        zIndex: 1,
-                    },
-                ]}
-            >
-                <Text style={[globalStyle.ltext, { fontSize: 10 }]}>
-                    {getString('참여한 제안 #N').replace('#N', proposalCount?.toString() || '0')}
-                </Text>
+            <View style={[globalStyle.flexRowBetween, styles.countBar]}>
+                <View style={globalStyle.flexRowAlignCenter}>
+                    <Text style={[globalStyle.ltext, styles.countLabel, { color: themeContext.color.textBlack }]}>
+                        {getString('참여한 제안')}
+                    </Text>
+                    <Text style={[globalStyle.ltext, styles.countNumber, { color: themeContext.color.textBlack }]}>
+                        {proposalCount?.toString() || '0'}
+                    </Text>
+                </View>
                 <FilterButton
                     filterType={ProposalFilterType}
                     currentFilter={filter}
@@ -141,21 +143,21 @@ function JoinProposalListScreen({ navigation, route }: MainScreenProps<'JoinProp
                 />
             </View>
         );
-    }, [filter, proposalCount]);
+    }, [filter, proposalCount, themeContext.color.textBlack]);
 
     const renderProposals = ({ item }: ListRenderItemInfo<Proposal>) => {
         const { proposalId } = item;
         if (!proposalId) return null;
 
         return (
-            <View style={{ paddingHorizontal: 22, backgroundColor: 'white' }}>
+            <View style={styles.item}>
                 <ProposalCard
                     item={item}
                     temp={false}
                     onPress={() => {
                         if (item.proposalId) {
                             fetchProposal(item.proposalId);
-                            linkTo(`/detail/${item.proposalId}`);
+                            navigation.push('RootUser', { screen: 'ProposalDetail', params: { id: item.proposalId } });
                         } else {
                             dispatch(showSnackBar(getString('제안서 정보가 올바르지 않습니다')));
                         }
@@ -167,7 +169,7 @@ function JoinProposalListScreen({ navigation, route }: MainScreenProps<'JoinProp
 
     return (
         <FlatList
-            style={{ flex: 1 }}
+            style={[styles.container, { backgroundColor: themeContext.color.white }]}
             data={proposals}
             renderItem={renderProposals}
             keyExtractor={(item) => item.id}
@@ -199,8 +201,8 @@ function JoinProposalListScreen({ navigation, route }: MainScreenProps<'JoinProp
             ListHeaderComponentStyle={{ zIndex: 1 }}
             ListFooterComponent={<ListFooterButton onPress={() => console.log('click')} />}
             ListEmptyComponent={
-                <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', height: 120 }}>
-                    <Text style={{ fontSize: 13, color: themeContext.color.disabled, marginLeft: 6 }}>
+                <View style={[globalStyle.flexRowCenter, { height: 120 }]}>
+                    <Text style={[globalStyle.rtext, { fontSize: 13, color: themeContext.color.disabled }]}>
                         {getString('참여한 제안이 없습니다&#46;')}
                     </Text>
                 </View>

@@ -13,6 +13,7 @@ const theme: DefaultTheme = {
         agree: 'rgb(29,197,220)',
         disagree: 'rgb(240,109,63)',
         abstain: 'rgb(232,111,222)',
+        unchecked: 'rgb(219,213,235)',
         disabled: 'rgb(182,175,198)',
         boxBorder: 'rgb(222,212,248)',
         system: 'rgb(242,145,229)',
@@ -20,6 +21,7 @@ const theme: DefaultTheme = {
         gray: 'rgb(242,244,250)',
         placeholder: 'rgb(182,175,198)',
         separator: 'rgb(220,217,227)',
+        divider: 'rgb(235,234,239)',
     },
 };
 

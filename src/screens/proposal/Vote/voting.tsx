@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { ThemeContext } from 'styled-components/native';
 import { View, StyleSheet } from 'react-native';
-import { useLinkTo, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { Button, Text, Icon } from 'react-native-elements';
 import globalStyle from '~/styles/global';
 import ProposalCard from '~/components/proposal/ProposalCard';
@@ -16,7 +16,7 @@ import VoteHistoryComponent from './voteHIstoryComponent';
 import getString from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
-import { MainNavigationProps } from '~/navigation/main/MainParams';
+import { MainNavigationProps, replaceToHome } from '~/navigation/main/MainParams';
 
 const styles = StyleSheet.create({
     container: {
@@ -52,22 +52,21 @@ function Voting(props: Props): JSX.Element {
     const navigation = useNavigation<MainNavigationProps<'ProposalDetail'>>();
     const themeContext = useContext(ThemeContext);
     const dispatch = useAppDispatch();
-    const linkTo = useLinkTo();
 
-    const [vote, setVote] = useState<VOTE_SELECT | undefined>(undefined);
+    const [vote, setVote] = useState<VOTE_SELECT>();
     const [oldVote, setOldVote] = useState<VOTE_SELECT>();
     const [isSelected, setIsSelected] = useState(false);
     const [voteComplete, setVoteComplete] = useState(!needVote);
     const [otherProposals, setOtherProposals] = useState<Proposal[]>([]);
 
     useEffect(() => {
-        if (oldVote) {
+        if (oldVote !== undefined) {
             if (oldVote !== vote) {
                 setIsSelected(true);
             } else {
                 setIsSelected(false);
             }
-        } else if (vote) {
+        } else if (vote !== undefined) {
             setIsSelected(true);
         }
     }, [vote, oldVote]);
@@ -82,13 +81,13 @@ function Voting(props: Props): JSX.Element {
                     if (!proposalId) {
                         dispatch(showSnackBar(getString('제안서 정보에 오류가 있습니다')));
                         if (navigation.canGoBack()) {
-                            navigation.goBack();
+                            navigation.pop();
                         } else {
-                            linkTo('/home');
+                            navigation.dispatch(replaceToHome());
                         }
                     } else {
                         fetchProposal(proposalId);
-                        linkTo(`/detail/${proposalId}`);
+                        navigation.push('RootUser', { screen: 'ProposalDetail', params: { id: proposalId } });
                     }
                 }}
             />
@@ -130,7 +129,14 @@ function Voting(props: Props): JSX.Element {
     return (
         <View style={styles.container}>
             {vote === undefined && (
-                <Text style={{ marginTop: 13 }}>{getString('제안에 대한 투표를 진행해주세요&#46;')}</Text>
+                <Text
+                    style={[
+                        globalStyle.rtext,
+                        { fontSize: 13, lineHeight: 23, marginTop: 13, color: themeContext.color.textBlack },
+                    ]}
+                >
+                    {getString('제안에 대한 투표를 진행해주세요&#46;')}
+                </Text>
             )}
             {vote === VOTE_SELECT.BLANK && (
                 <Text style={{ marginTop: 13, color: themeContext.color.abstain }}>
@@ -149,6 +155,7 @@ function Voting(props: Props): JSX.Element {
             )}
 
             <VoteItemGroup onPress={(type: VOTE_SELECT) => setVote(type)} vote={vote} />
+
             <Button
                 onPress={() => {
                     if (isGuest) {
@@ -173,14 +180,14 @@ function Voting(props: Props): JSX.Element {
                     globalStyle.btext,
                     {
                         fontSize: 20,
-                        color: isSelected ? themeContext.color.primary : themeContext.color.disabled,
+                        color: isSelected ? themeContext.color.primary : themeContext.color.unchecked,
                         marginLeft: 6,
                     },
                 ]}
                 icon={
                     <Icon
                         name="check"
-                        color={isSelected ? themeContext.color.primary : themeContext.color.disabled}
+                        color={isSelected ? themeContext.color.primary : themeContext.color.unchecked}
                         tvParallaxProperties={undefined}
                     />
                 }

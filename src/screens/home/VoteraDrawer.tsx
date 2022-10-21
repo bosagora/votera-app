@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { View, TouchableOpacity, Platform, useWindowDimensions, StyleSheet } from 'react-native';
 import { DrawerContentScrollView, DrawerContentComponentProps } from '@react-navigation/drawer';
-import { useLinkTo } from '@react-navigation/native';
+import { useLinkTo, StackActions } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemeContext } from 'styled-components/native';
 import { Button, Text, Icon } from 'react-native-elements';
@@ -58,7 +58,8 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
     const insets = useSafeAreaInsets();
     const themeContext = useContext(ThemeContext);
     const dispatch = useAppDispatch();
-    const { user, isGuest, metamaskAccount, metamaskBalance, setGuestMode, signOut } = useContext(AuthContext);
+    const { user, isGuest, metamaskAccount, metamaskBalance, setGuestMode, signOut, metamaskUpdateBalance } =
+        useContext(AuthContext);
     const [isValidator, setIsValidator] = useState(false);
     const [publicKey, setPublicKey] = useState<string | null>();
     const [balance, setBalance] = useState<string>();
@@ -100,12 +101,16 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
             setIsValidator(false);
             setPublicKey(undefined);
         }
+        metamaskUpdateBalance();
+    }, [metamaskAccount, metamaskUpdateBalance, isValidatorQuery]);
+
+    useEffect(() => {
         if (metamaskBalance) {
-            setBalance(RoundDecimalPoint(WeiAmountToString(metamaskBalance, true), 4));
+            setBalance(RoundDecimalPoint(WeiAmountToString(metamaskBalance), 4, true));
         } else {
             setBalance(undefined);
         }
-    }, [metamaskAccount, metamaskBalance, isValidatorQuery]);
+    }, [metamaskBalance]);
 
     useEffect(() => {
         if (data?.isValidator) {
@@ -190,7 +195,7 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                                 {user?.username || (isGuest ? 'Guest' : getString('User 없음'))}
                             </Text>
                         </View>
-                        {isValidator ? (
+                        {isValidator && !isGuest ? (
                             <View style={[styles.boxValidator, { backgroundColor: themeContext.color.primary }]}>
                                 <Text
                                     style={[globalStyle.btext, { color: themeContext.color.white }, styles.validator]}
@@ -325,7 +330,8 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                             // Guest 모드일 때 어떻게 ?
                             dispatch(showSnackBar(getString('둘러보기 중에는 사용할 수 없습니다')));
                         } else {
-                            linkTo('/list-join');
+                            navigation.dispatch(StackActions.push('RootUser', { screen: 'JoinProposalList' }));
+                            // linkTo('/list-join');
                         }
                     }}
                 >
@@ -341,7 +347,15 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                     <Text style={[globalStyle.btext, styles.menuLabel]}>{getString('제안 작성')}</Text>
                     <TouchableOpacity
                         style={[globalStyle.flexRowBetween, styles.subMenu]}
-                        onPress={() => linkTo(`/createproposal/${Date.now().toString()}`)}
+                        onPress={() => {
+                            navigation.dispatch(
+                                StackActions.push('RootUser', {
+                                    screen: 'CreateProposal',
+                                    params: { tempId: Date.now().toString() },
+                                }),
+                            );
+                            // linkTo(`/createproposal/${Date.now().toString()}`);
+                        }}
                     >
                         <Text style={[globalStyle.rtext, styles.subLabel]}>{getString('신규제안 작성')}</Text>
                         <View style={[globalStyle.center, styles.menuRightIcon]}>
@@ -350,7 +364,10 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={[globalStyle.flexRowBetween, styles.subMenu]}
-                        onPress={() => linkTo('/list-temp')}
+                        onPress={() => {
+                            navigation.dispatch(StackActions.push('RootUser', { screen: 'TempProposalList' }));
+                            // linkTo('/list-temp');
+                        }}
                     >
                         <Text style={[globalStyle.rtext, styles.subLabel]}>{getString('임시저장 제안')}</Text>
                         <View style={[globalStyle.center, styles.menuRightIcon]}>
@@ -363,7 +380,8 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                             if (isGuest) {
                                 dispatch(showSnackBar(getString('둘러보기 중에는 사용할 수 없습니다')));
                             } else {
-                                linkTo('/list-mine');
+                                navigation.dispatch(StackActions.push('RootUser', { screen: 'MyProposalList' }));
+                                // linkTo('/list-mine');
                             }
                         }}
                     >

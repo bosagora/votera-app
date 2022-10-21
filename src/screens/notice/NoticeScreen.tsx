@@ -3,9 +3,8 @@ import { View, Image, FlatList, RefreshControl, ImageURISource, ActivityIndicato
 import { Button, Icon, Text } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAssets } from 'expo-asset';
-import { useLinkTo } from '@react-navigation/native';
-import globalStyle from '~/styles/global';
-import { MainScreenProps } from '~/navigation/main/MainParams';
+import globalStyle, { TOP_NAV_HEIGHT } from '~/styles/global';
+import { MainScreenProps, replaceToHome } from '~/navigation/main/MainParams';
 import { Enum_Post_Type as EnumPostType, Post, PostStatus, useActivityPostsQuery } from '~/graphql/generated/generated';
 import NoticeCard from '~/components/notice/NoticeCard';
 import FocusAwareStatusBar from '~/components/statusbar/FocusAwareStatusBar';
@@ -48,7 +47,6 @@ function NoticeScreen({ navigation, route }: MainScreenProps<'Notice'>): JSX.Ele
     const [pullRefresh, setPullRefresh] = useState(false);
     const scrollViewRef = useRef<FlatList<any>>(null);
     const [assets] = useAssets(iconAssets);
-    const linkTo = useLinkTo();
 
     const {
         data: noticeQueryData,
@@ -71,34 +69,40 @@ function NoticeScreen({ navigation, route }: MainScreenProps<'Notice'>): JSX.Ele
             <Button
                 onPress={() => {
                     if (navigation.canGoBack()) {
-                        navigation.goBack();
+                        navigation.pop();
                     } else {
-                        linkTo('/home');
+                        navigation.dispatch(replaceToHome());
                     }
                 }}
                 icon={<Icon name="chevron-left" color="white" tvParallaxProperties={undefined} />}
                 type="clear"
             />
         );
-    }, [navigation, linkTo]);
+    }, [navigation]);
 
     const headerRight = useCallback(() => {
         return isCreator ? (
             <Button
-                onPress={() => linkTo(`/createnotice/${route.params.id}`)}
+                onPress={() => {
+                    navigation.push('RootUser', { screen: 'CreateNotice', params: { id: route.params.id } });
+                }}
                 icon={<Icon name="add" color="white" tvParallaxProperties={undefined} />}
                 type="clear"
             />
         ) : null;
-    }, [isCreator, linkTo, route.params.id]);
+    }, [isCreator, navigation, route.params.id]);
 
     const headerBackground = useCallback(() => {
-        if (!assets) return null;
         return (
-            <Image
-                style={{ height: 55 + insets.top, width: '100%' }}
-                source={assets[EnumIconAsset.Background] as ImageURISource}
-            />
+            <>
+                {assets && (
+                    <Image
+                        style={{ height: TOP_NAV_HEIGHT + insets.top, width: '100%' }}
+                        source={assets[EnumIconAsset.Background] as ImageURISource}
+                    />
+                )}
+                <View style={globalStyle.headerBackground} />
+            </>
         );
     }, [assets, insets.top]);
 
@@ -107,6 +111,7 @@ function NoticeScreen({ navigation, route }: MainScreenProps<'Notice'>): JSX.Ele
             headerShown: true,
             title: getString('공지사항'),
             headerTitleStyle: [globalStyle.headerTitle, { color: 'white' }],
+            headerTitleAlign: 'center',
             headerLeft,
             headerRight,
             headerBackground,

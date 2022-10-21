@@ -25,6 +25,11 @@ const globalStyle = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
+    flexRowCenter: {
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'center',
+    },
     gbtext: {
         fontFamily: 'GmarketSansTTFBold',
     },
@@ -175,6 +180,7 @@ const globalStyle = StyleSheet.create({
 
 export const MAX_WIDTH = 1070;
 export const DRAWER_WIDTH = 768;
+export const TOP_NAV_HEIGHT = 75;
 
 export function isLargeScreen(width: number) {
     return width >= DRAWER_WIDTH;

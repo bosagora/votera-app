@@ -4,6 +4,7 @@ import { ThemeContext } from 'styled-components/native';
 import DropDownPicker from 'react-native-dropdown-picker';
 import { FeedFilterType, OpinionFilterType, ProposalFilterType } from '~/types/filterType';
 import getString from '~/utils/locales/STRINGS';
+import globalStyle from '~/styles/global';
 
 const styles = StyleSheet.create({
     container: { alignItems: 'flex-end', width: 140 },
@@ -63,7 +64,12 @@ function FilterButton(props: FilterButtonProps): JSX.Element {
             showTickIcon={false}
             disableBorderRadius={false}
             listItemContainerStyle={styles.listItemContainer}
-            selectedItemLabelStyle={{ color: themeContext.color.primary }}
+            labelStyle={[globalStyle.rtext, { fontSize: 13, lineHeight: 24, color: themeContext.color.textBlack }]}
+            listItemLabelStyle={[globalStyle.rtext, { fontSize: 13, lineHeight: 24, color: themeContext.color.black }]}
+            selectedItemLabelStyle={[
+                globalStyle.rtext,
+                { fontSize: 13, lineHeight: 24, color: themeContext.color.primary },
+            ]}
             dropDownContainerStyle={styles.dropDownContainer}
         />
     );

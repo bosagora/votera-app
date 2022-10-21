@@ -45,11 +45,11 @@ interface VoteItemProps {
 function VoteItem(props: VoteItemProps): JSX.Element {
     const { type, isSelect, text, onPress } = props;
     const themeContext = useContext(ThemeContext);
-    const tintColor = isSelect ? 'white' : themeContext.color.disabled;
+    const tintColor = isSelect ? themeContext.color.white : themeContext.color.unchecked;
     const [assets] = useAssets(iconAssets);
 
     const voteBackgroundColor = () => {
-        if (!isSelect) return 'white';
+        if (!isSelect) return themeContext.color.white;
         switch (type) {
             case VOTE_SELECT.YES:
                 return themeContext.color.agree;
@@ -66,7 +66,7 @@ function VoteItem(props: VoteItemProps): JSX.Element {
                 styles.container,
                 {
                     backgroundColor: voteBackgroundColor(),
-                    borderColor: themeContext.color.disabled,
+                    borderColor: tintColor,
                     borderWidth: isSelect ? 0 : 2,
                 },
             ]}
@@ -81,7 +81,9 @@ function VoteItem(props: VoteItemProps): JSX.Element {
             {type === VOTE_SELECT.BLANK && assets && (
                 <Image style={{ tintColor }} source={assets[EnumIconAsset.Abstain] as ImageURISource} />
             )}
-            <Text style={[globalStyle.btext, { color: tintColor, marginTop: 2 }]}>{text}</Text>
+            <Text style={[globalStyle.btext, { fontSize: 13, lineHeight: 21, color: tintColor, marginTop: 2 }]}>
+                {text}
+            </Text>
         </TouchableOpacity>
     );
 }

@@ -5,17 +5,11 @@ import { convertWithdrawRevertMessage, getRevertMessage, VOTE_SELECT } from '~/u
 import {
     Enum_Proposal_Status as EnumProposalStatus,
     Enum_Vote_Proposal_State as EnumVoteProposalState,
-    useRecordBallotMutation,
-    useSubmitBallotMutation,
     useVoteStatusLazyQuery,
 } from '~/graphql/generated/generated';
 import { ProposalContext } from '~/contexts/ProposalContext';
 import { AuthContext, MetamaskStatus } from '~/contexts/AuthContext';
 import getString from '~/utils/locales/STRINGS';
-import { useAppDispatch } from '~/state/hooks';
-import { showSnackBar } from '~/state/features/snackBar';
-import { showLoadingAniModal, hideLoadingAniModal } from '~/state/features/loadingAniModal';
-import VoteraVote from '~/utils/votera/VoteraVote';
 import Voting from './voting';
 import VoteResult from './result';
 import PendingVote from './pendingVote';
@@ -24,13 +18,12 @@ import globalStyle from '~/styles/global';
 
 interface Props {
     onLayout: (h: number) => void;
-    onRefresh: () => void;
+    onSubmitBallot: (vote: VOTE_SELECT) => Promise<boolean>;
 }
 
 function VoteScreen(props: Props): JSX.Element {
-    const { onLayout, onRefresh } = props;
-    const dispatch = useAppDispatch();
-    const { proposal, isJoined, joinProposal, fetchProposal } = useContext(ProposalContext);
+    const { onLayout, onSubmitBallot } = props;
+    const { proposal, fetchProposal } = useContext(ProposalContext);
     const {
         user,
         isGuest,
@@ -43,15 +36,12 @@ function VoteScreen(props: Props): JSX.Element {
     } = useContext(AuthContext);
     const [isValidator, setIsValidator] = useState(false);
     const [needVote, setNeedVote] = useState(false);
-    const [runningTx, setRunningTx] = useState(false);
     const [voteProposalState, setVoteProposalState] = useState<EnumVoteProposalState>();
 
     const [getVoteStatus, { data: voteStatusData, refetch: refetchVoteStatus, loading }] = useVoteStatusLazyQuery({
         fetchPolicy: 'cache-and-network',
         notifyOnNetworkStatusChange: true,
     });
-    const [submitBallot] = useSubmitBallotMutation();
-    const [recordBallot] = useRecordBallotMutation();
 
     useEffect(() => {
         if (proposal?.proposalId) {
@@ -109,93 +99,16 @@ function VoteScreen(props: Props): JSX.Element {
 
     const runVote = useCallback(
         async (vote: VOTE_SELECT): Promise<boolean> => {
-            try {
-                if (isGuest || !metamaskProvider) {
-                    return false;
-                }
-
-                if (!proposal?.proposalId) {
-                    dispatch(showSnackBar(getString('Proposal 정보가 잘못 입력되었습니다&#46;')));
-                    return false;
-                }
-
-                dispatch(showLoadingAniModal());
-
-                if (!isJoined) await joinProposal();
-                const submitResult = await submitBallot({
-                    variables: {
-                        input: {
-                            data: {
-                                proposalId: proposal.proposalId,
-                                address: user?.address || '',
-                                choice: vote,
-                            },
-                        },
-                    },
-                });
-                if (!submitResult?.data?.submitBallot) {
-                    dispatch(hideLoadingAniModal());
-                    dispatch(showSnackBar(getString('투표 처리 중 오류가 발생했습니다&#46;')));
-                    return false;
-                }
-                const { signature, commitment } = submitResult.data.submitBallot;
-                if (!signature || !commitment) {
-                    dispatch(hideLoadingAniModal());
-                    dispatch(showSnackBar(getString('투표 처리 중 오류가 발생했습니다&#46;')));
-                    return false;
-                }
-
-                setRunningTx(true);
-
-                const voteraVote = new VoteraVote(proposal?.voteraVoteAddress || '', metamaskProvider.getSigner());
-                const tx = await voteraVote.submitBallot(proposal.proposalId, commitment, signature, {});
-
-                await recordBallot({
-                    variables: {
-                        input: {
-                            data: {
-                                proposalId: proposal.proposalId,
-                                commitment,
-                                address: user?.address || '',
-                                transactionHash: tx.hash,
-                            },
-                        },
-                    },
-                });
-
-                tx.wait()
-                    .catch(console.log)
-                    .finally(() => {
-                        setRunningTx(false);
-                    });
-
-                metamaskUpdateBalance();
-                setNeedVote(false);
-                dispatch(hideLoadingAniModal());
-                onRefresh();
-                return true;
-            } catch (err) {
-                setRunningTx(false);
-                console.log('runVote catch exception: ', err);
-                dispatch(hideLoadingAniModal());
-                dispatch(showSnackBar(getString('투표 처리 중 오류가 발생했습니다&#46;')));
+            if (isGuest) {
                 return false;
             }
+            const result = await onSubmitBallot(vote);
+            if (result) {
+                setNeedVote(false);
+            }
+            return result;
         },
-        [
-            dispatch,
-            isGuest,
-            isJoined,
-            joinProposal,
-            metamaskProvider,
-            metamaskUpdateBalance,
-            proposal?.proposalId,
-            proposal?.voteraVoteAddress,
-            onRefresh,
-            recordBallot,
-            submitBallot,
-            user?.address,
-        ],
+        [isGuest, onSubmitBallot],
     );
 
     const runWithdraw = useCallback(async () => {
@@ -218,14 +131,13 @@ function VoteScreen(props: Props): JSX.Element {
         }
 
         try {
-            setRunningTx(true);
             const commonsBudget = new CommonsBudget(
                 voteStatusData.voteStatus.destination || '',
                 metamaskProvider.getSigner(),
             );
             const tx = await commonsBudget.withdraw(proposal.proposalId, {});
             const receipt = await tx.wait();
-            metamaskUpdateBalance();
+            metamaskUpdateBalance(tx.hash);
             if (receipt.status) {
                 refetchVoteStatus().catch(console.log);
                 return '';
@@ -236,8 +148,6 @@ function VoteScreen(props: Props): JSX.Element {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             const revertMsg = getRevertMessage(err);
             return convertWithdrawRevertMessage(revertMsg);
-        } finally {
-            setRunningTx(false);
         }
     }, [
         isGuest,

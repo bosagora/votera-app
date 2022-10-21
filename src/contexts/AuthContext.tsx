@@ -108,7 +108,7 @@ type AuthContextState = {
     metamaskProvider: ethers.providers.Web3Provider | null;
     metamaskConnect: () => void;
     metamaskSwitch: () => void;
-    metamaskUpdateBalance: () => void;
+    metamaskUpdateBalance: (tx?: string) => void;
 };
 
 type UserConfigType = {
@@ -441,18 +441,33 @@ export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
         setMetamaskChainId(chainId);
     }, [status, account, chainId, userState, isMemberQuery]);
 
-    const metamaskUpdateBalance = useCallback(() => {
-        if (metamaskAccount && metamaskProvider) {
-            metamaskProvider
-                .getBalance(metamaskAccount)
-                .then((value) => {
-                    setMetamaskBalance(value);
-                })
-                .catch(console.log);
-        } else {
-            setMetamaskBalance(null);
-        }
-    }, [metamaskAccount, metamaskProvider]);
+    const metamaskUpdateBalance = useCallback(
+        (tx?: string) => {
+            if (metamaskAccount && metamaskProvider) {
+                if (tx) {
+                    metamaskProvider
+                        .waitForTransaction(tx, 1)
+                        .then((value) => {
+                            return metamaskProvider.getBalance(metamaskAccount);
+                        })
+                        .then((value) => {
+                            setMetamaskBalance(value);
+                        })
+                        .catch(console.log);
+                } else {
+                    metamaskProvider
+                        .getBalance(metamaskAccount)
+                        .then((value) => {
+                            setMetamaskBalance(value);
+                        })
+                        .catch(console.log);
+                }
+            } else {
+                setMetamaskBalance(null);
+            }
+        },
+        [metamaskAccount, metamaskProvider],
+    );
 
     useEffect(() => {
         metamaskUpdateBalance();

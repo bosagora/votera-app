@@ -326,6 +326,7 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
                                 })
                                 .catch(console.log);
                         }}
+                        maxInput={300}
                     />
 
                     <Button

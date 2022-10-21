@@ -10,7 +10,7 @@ export default function LoadingAniModal(): JSX.Element | null {
     const dispatch = useAppDispatch();
 
     useEffect(() => {
-        let tm: NodeJS.Timeout;
+        let tm: NodeJS.Timeout | undefined;
         if (loadingAniModal.visibility) {
             tm = setTimeout(() => {
                 if (Platform.OS === 'web') {
@@ -22,9 +22,7 @@ export default function LoadingAniModal(): JSX.Element | null {
             }, 180000);
         }
         return () => {
-            if (tm) {
-                clearTimeout(tm);
-            }
+            clearTimeout(tm);
         };
     }, [loadingAniModal.visibility, dispatch]);
 

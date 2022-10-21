@@ -56,8 +56,9 @@ function DatePickerComponent(props: Props): JSX.Element {
             <Text
                 style={{
                     fontSize: 14,
-                    color:
-                        Object.keys(value).length !== 0 ? themeContext.color.textBlack : themeContext.color.placeholder,
+                    color: !(value.startDate || value.endDate)
+                        ? themeContext.color.placeholder
+                        : themeContext.color.textBlack,
                 }}
             >
                 {calcDate(value)}

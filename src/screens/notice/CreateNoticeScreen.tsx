@@ -7,16 +7,15 @@ import { Button, Input, Text, Icon } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemeContext } from 'styled-components/native';
 import { useAssets } from 'expo-asset';
-import { useLinkTo } from '@react-navigation/native';
 import ImagePicker from '~/components/input/ImagePicker';
 import DocumentPicker from '~/components/input/DocumentPicker';
-import globalStyle from '~/styles/global';
+import globalStyle, { TOP_NAV_HEIGHT } from '~/styles/global';
 import ShortButton from '~/components/button/ShortButton';
 import TextInputComponent from '~/components/input/SingleLineInput';
 import { loadUriAsFile } from '~/graphql/client';
 import { Enum_Post_Type as EnumPostType, useUploadFileMutation } from '~/graphql/generated/generated';
 import FocusAwareStatusBar from '~/components/statusbar/FocusAwareStatusBar';
-import { MainScreenProps } from '~/navigation/main/MainParams';
+import { MainScreenProps, replaceToHome } from '~/navigation/main/MainParams';
 import getString from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
 import { showLoadingAniModal, hideLoadingAniModal } from '~/state/features/loadingAniModal';
@@ -75,7 +74,6 @@ function CreateNoticeScreen({ navigation, route }: MainScreenProps<'CreateNotice
     const [mainImage, setMainImage] = useState<ImagePickerResult>();
     const [uploadFiles, setUploadFiles] = useState<DocumentResult[]>([]);
     const [assets] = useAssets(iconAssets);
-    const linkTo = useLinkTo();
 
     const [uploadAttachment] = useUploadFileMutation();
 
@@ -126,16 +124,16 @@ function CreateNoticeScreen({ navigation, route }: MainScreenProps<'CreateNotice
 
                 dispatch(hideLoadingAniModal());
                 if (navigation.canGoBack()) {
-                    navigation.goBack();
+                    navigation.pop();
                 } else {
-                    linkTo('/home');
+                    navigation.dispatch(replaceToHome());
                 }
             } catch (e) {
                 console.log('CreateNotice error : ', e);
                 dispatch(hideLoadingAniModal());
             }
         },
-        [activityId, createProposalNotice, dispatch, linkTo, mainImage, navigation, uploadAttachment, uploadFiles],
+        [activityId, createProposalNotice, dispatch, mainImage, navigation, uploadAttachment, uploadFiles],
     );
 
     const headerLeft = useCallback(() => {
@@ -143,16 +141,16 @@ function CreateNoticeScreen({ navigation, route }: MainScreenProps<'CreateNotice
             <Button
                 onPress={() => {
                     if (navigation.canGoBack()) {
-                        navigation.goBack();
+                        navigation.pop();
                     } else {
-                        linkTo('/home');
+                        navigation.dispatch(replaceToHome());
                     }
                 }}
                 icon={<Icon name="chevron-left" color="white" tvParallaxProperties={undefined} />}
                 type="clear"
             />
         );
-    }, [navigation, linkTo]);
+    }, [navigation]);
 
     const headerRight = useCallback(() => {
         return (
@@ -175,12 +173,16 @@ function CreateNoticeScreen({ navigation, route }: MainScreenProps<'CreateNotice
     }, [description, runCreateNotice, title]);
 
     const headerBackground = useCallback(() => {
-        if (!assets) return null;
         return (
-            <Image
-                style={{ height: 55 + insets.top, width: '100%' }}
-                source={assets[EnumIconAsset.Background] as ImageURISource}
-            />
+            <>
+                {assets && (
+                    <Image
+                        style={{ height: TOP_NAV_HEIGHT + insets.top, width: '100%' }}
+                        source={assets[EnumIconAsset.Background] as ImageURISource}
+                    />
+                )}
+                <View style={globalStyle.headerBackground} />
+            </>
         );
     }, [assets, insets.top]);
 
@@ -188,6 +190,7 @@ function CreateNoticeScreen({ navigation, route }: MainScreenProps<'CreateNotice
         navigation.setOptions({
             title: getString('공지사항 작성'),
             headerTitleStyle: [globalStyle.headerTitle, { color: 'white' }],
+            headerTitleAlign: 'center',
             headerLeft,
             headerRight,
             headerBackground,

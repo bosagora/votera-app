@@ -108,6 +108,8 @@ function CreateScreen(props: Props): JSX.Element {
                     console.log('checkProposalFee call error = ', err);
                     dispatch(showSnackBar(getString('입금 정보 확인 중 오류가 발생했습니다&#46;')));
                 });
+
+                metamaskUpdateBalance(tx.hash);
             } catch (err) {
                 const revertMessage = getRevertMessage(err);
                 if (revertMessage) {
@@ -126,10 +128,12 @@ function CreateScreen(props: Props): JSX.Element {
                 }
             }
         },
-        [checkProposalFee, data, dispatch, metamaskProvider],
+        [checkProposalFee, data, dispatch, metamaskProvider, metamaskUpdateBalance],
     );
 
     useEffect(() => {
+        let tmid: NodeJS.Timeout | undefined;
+
         if (checkProposalFeeData?.checkProposalFee) {
             if (checkProposalFeeData.checkProposalFee.status === EnumFeeStatus.Paid) {
                 dispatch(showSnackBar(getString('입금이 확인되었습니다&#46;')));
@@ -137,12 +141,12 @@ function CreateScreen(props: Props): JSX.Element {
                 onChangeStatus();
             } else {
                 if (checkProposalFeeData.checkProposalFee.status === EnumFeeStatus.Mining) {
-                    setTimeout(() => {
+                    tmid = setTimeout(() => {
                         refetchCheckProposalFee().catch((err) => {
                             console.log('refetchCheckProposalFee error ', err);
                             dispatch(showSnackBar(getString('입금 정보 확인 중 오류가 발생했습니다&#46;')));
                         });
-                    }, 1000);
+                    }, 10000);
                 } else {
                     dispatch(showSnackBar(getString('입금 정보 확인 중 오류가 발생했습니다&#46;')));
                 }
@@ -152,9 +156,11 @@ function CreateScreen(props: Props): JSX.Element {
                     dispatch(showSnackBar(getString('입금 정보 확인 중 오류가 발생했습니다&#46;')));
                 });
             }
-            metamaskUpdateBalance();
         }
-    }, [checkProposalFeeData, dispatch, metamaskUpdateBalance, onChangeStatus, refetch, refetchCheckProposalFee]);
+        return () => {
+            clearTimeout(tmid);
+        };
+    }, [checkProposalFeeData, dispatch, onChangeStatus, refetch, refetchCheckProposalFee]);
 
     if (metamaskStatus === MetamaskStatus.UNAVAILABLE) {
         // redirect to landing page for installing metamask
