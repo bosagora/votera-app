@@ -1,0 +1,47 @@
+query me {
+    meEx {
+        id
+        member {
+            id
+            address
+            username
+        }
+        user_feed {
+            id
+            locale
+            myProposalsNews
+            likeProposalsNews
+            newProposalsNews
+            myCommentsNews
+            etcNews
+        }
+    }
+    feedsStatus {
+        notReadCount
+    }
+}
+
+mutation updatePushToken($input: updateUserPushTokenInput!) {
+    updateUserPushToken(input: $input) {
+        userFeed {
+            id
+            pushes {
+                id
+                isActive
+            }
+        }
+    }
+}
+
+mutation updateAlarmStatus($input: updateUserAlarmStatusInput!) {
+    updateUserAlarmStatus(input: $input) {
+        userFeed {
+            id
+            myProposalsNews
+            likeProposalsNews
+            newProposalsNews
+            myCommentsNews
+            etcNews
+        }
+    }
+}
