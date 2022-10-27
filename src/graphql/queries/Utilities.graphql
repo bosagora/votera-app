@@ -1,0 +1,34 @@
+mutation UploadFile($file: Upload!, $info: FileInfoInput) {
+    upload(file: $file, info: $info) {
+        id
+    }
+}
+
+query VoteraConfiguration {
+    version {
+        ios
+        android
+    }
+    agora {
+        proposalFundMin
+        proposalFundMax
+        userServiceTermUrl
+        privacyTermUrl
+        commonsBudgetAddress
+        voteraVoteAddress
+        providerUrl
+        blockExplorerUrl
+    }
+    feePolicy {
+        fundProposalFeePermil
+        systemProposalFee
+        voterFee
+        withdrawDelayPeriod
+    }
+}
+
+mutation UpdateReceipt($input: UpdateReceiptInput!) {
+    updateReceipt(input: $input) {
+        status
+    }
+}
