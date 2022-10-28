@@ -161,6 +161,7 @@ function VoteScreen(props: Props): JSX.Element {
     return (
         <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)}>
             <VoteResult
+                proposal={proposal}
                 data={voteStatusData?.voteStatus}
                 runWithdraw={async () => {
                     if (metamaskStatus === MetamaskStatus.OTHER_CHAIN) {

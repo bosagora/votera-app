@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         left: 0,
-        paddingRight: 23,
+        paddingRight: 13,
         position: 'absolute',
         right: 0,
     },
@@ -150,6 +150,7 @@ function MultilineInput(props: TextInputComponentProps): JSX.Element {
                 placeholderTextColor={placeholderTextColor}
                 selectionColor={themeContext.color.primary}
                 autoCompleteType={undefined}
+                containerStyle={{ paddingHorizontal: 0 }}
             />
             {!onlyRead && writeBtnComponent()}
         </View>
