@@ -242,7 +242,7 @@
     "노드 {nodename} 인증!": "Node {nodename} Verified",
     "제안에 대한 투표를 진행해주세요&#46;": "Please vote the proposals",
     "제안에 대한 투표가 진행 중 입니다&#46;": "Voting on the proposal is in progress",
-    "내 투표 기록": "My voting record",
+    "내투표 기록": "My voting record",
     "투표하기": "Vote",
     "사용자 설정 오류로 변경 실패": "Change unable due to the Account settings",
     "계정이름이 변경되었습니다": "Change account name",

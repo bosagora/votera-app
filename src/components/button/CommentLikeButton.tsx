@@ -34,6 +34,7 @@ function CommentLikeButton(props: HeaderProps): JSX.Element {
                     paddingHorizontal: 10,
                     paddingVertical: 5.5,
                     borderColor: isLiked ? themeContext.color.primary : themeContext.color.boxBorder,
+                    backgroundColor: isLiked ? themeContext.color.boxBorder : themeContext.color.white,
                     borderWidth: 1,
                     borderRadius: 6,
                     height: 25,

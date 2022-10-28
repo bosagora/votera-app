@@ -23,7 +23,6 @@ const imageAssets = [require('@assets/images/header/bgLong.png'), require('@asse
 const styles = StyleSheet.create({
     contents: {
         flexDirection: 'column',
-        paddingHorizontal: 22,
         paddingVertical: 20,
     },
     fontDescriptions: { color: 'white', fontSize: 13, lineHeight: 23 },
@@ -54,7 +53,7 @@ const styles = StyleSheet.create({
         left: 0,
         paddingHorizontal: 23,
         position: 'absolute',
-        right: 18,
+        width: '100%',
     },
 });
 

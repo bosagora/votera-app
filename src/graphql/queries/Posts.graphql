@@ -142,3 +142,16 @@ mutation recordBallot($input: RecordBallotInput!) {
         }
     }
 }
+
+query listMyBallots($proposalId: String!, $actor: String!, $sort: String, $limit: Int, $start: Int) {
+    listMyBallots(proposalId: $proposalId, actor: $actor, sort: $sort, limit: $limit, start: $start) {
+        count
+        values {
+            id
+            choice
+            commitment
+            transactionHash
+            createdAt
+        }
+    }
+}

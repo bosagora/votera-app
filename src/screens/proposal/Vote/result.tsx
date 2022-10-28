@@ -1,17 +1,46 @@
 import React, { useContext, useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, TouchableOpacity, Image, ImageURISource } from 'react-native';
+import { useAssets } from 'expo-asset';
 import { ThemeContext } from 'styled-components/native';
-import { Text } from 'react-native-elements';
+import { Icon, Text } from 'react-native-elements';
 import { BigNumber } from 'ethers';
 import dayjs from 'dayjs';
-import { VoteStatusPayload, Enum_Vote_Proposal_State as EnumVoteProposalState } from '~/graphql/generated/generated';
+import {
+    Proposal,
+    VoteStatusPayload,
+    Enum_Vote_Proposal_State as EnumVoteProposalState,
+    useListMyBallotsQuery,
+    MyBallot,
+} from '~/graphql/generated/generated';
 import globalStyle from '~/styles/global';
 import CommonButton from '~/components/button/CommonButton';
 import getString from '~/utils/locales/STRINGS';
 import { afterCalc } from '~/utils/time';
 import { AuthContext, MetamaskStatus } from '~/contexts/AuthContext';
+import { VOTE_SELECT } from '~/utils/votera/voterautil';
+
+enum EnumIconAsset {
+    Abstain = 0,
+}
+
+// eslint-disable-next-line global-require, import/extensions
+const iconAssets = [require('@assets/icons/prohibit.png')];
 
 const styles = StyleSheet.create({
+    ballotText: {
+        fontSize: 13,
+        lineHeight: 21,
+        textAlign: 'right',
+        width: 32,
+    },
+    imageAbstain: {
+        height: 16,
+        width: 16,
+    },
+    itemBallotContainer: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+    },
     metaButton: {
         justifyContent: 'center',
         paddingHorizontal: 21,
@@ -31,9 +60,34 @@ const styles = StyleSheet.create({
     metaTitle: {
         marginRight: 12,
     },
+    myBallotContainer: {
+        borderBottomWidth: 1,
+        height: 70,
+        paddingTop: 25,
+    },
+    myBallotLabel: {
+        fontSize: 13,
+        lineHeight: 21,
+    },
+    resultAbstain: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginHorizontal: 2,
+    },
+    resultAgree: {
+        borderRadius: 7,
+        borderWidth: 2,
+        height: 14,
+        marginHorizontal: 3,
+        marginTop: 4,
+        width: 14,
+    },
     resultContainer: {
         marginTop: 30,
         width: '100%',
+    },
+    resultDisagree: {
+        marginTop: 1,
     },
     resultRowBackground: {
         flex: 1,
@@ -102,20 +156,34 @@ function getRejectedTooltip(state?: EnumVoteProposalState | null) {
 }
 
 interface VoteResultProps {
+    proposal: Proposal | undefined;
     data: VoteStatusPayload | undefined | null;
     runWithdraw: () => Promise<string>;
 }
 
 function VoteResult(props: VoteResultProps): JSX.Element {
-    const { data, runWithdraw } = props;
+    const { proposal, data, runWithdraw } = props;
     const themeContext = useContext(ThemeContext);
-    const { metamaskStatus, metamaskProvider, metamaskConnect, metamaskSwitch } = useContext(AuthContext);
+    const { isGuest, user, metamaskStatus, metamaskProvider, metamaskConnect, metamaskSwitch } =
+        useContext(AuthContext);
     const [graphMaxWidth, setGraphMaxWidth] = useState(0);
     const [total, setTotal] = useState(0);
     const [participated, setParticipated] = useState(0);
     const [runningTx, setRunningTx] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string>();
     const [showTooltip, setShowTooltip] = useState(false);
+    const [assets] = useAssets(iconAssets);
+    const [count, setCount] = useState(0);
+    const [myBallots, setMyBallots] = useState<MyBallot[]>([]);
+    const {
+        data: myBallotsData,
+        fetchMore,
+        loading,
+    } = useListMyBallotsQuery({
+        fetchPolicy: 'cache-and-network',
+        skip: isGuest || !user || !proposal,
+        variables: { proposalId: proposal?.proposalId || '', actor: user?.memberId || '', sort: 'createdAt:desc' },
+    });
 
     useEffect(() => {
         if (data?.validatorSize) {
@@ -133,6 +201,13 @@ function VoteResult(props: VoteResultProps): JSX.Element {
             setParticipated(0);
         }
     }, [data?.voteResult, data?.validatorSize]);
+
+    useEffect(() => {
+        if (myBallotsData?.listMyBallots) {
+            setCount(myBallotsData.listMyBallots.count ?? 0);
+            setMyBallots(myBallotsData.listMyBallots.values as MyBallot[]);
+        }
+    }, [myBallotsData]);
 
     const selectResultColor = (state?: EnumVoteProposalState | null) => {
         switch (state) {
@@ -488,6 +563,94 @@ function VoteResult(props: VoteResultProps): JSX.Element {
         themeContext.color.error,
     ]);
 
+    const showBallotResult = useCallback(
+        (choice?: number | null): JSX.Element => {
+            if (choice === VOTE_SELECT.YES) {
+                return (
+                    <View style={styles.itemBallotContainer}>
+                        <View style={[styles.resultAgree, { borderColor: themeContext.color.agree }]} />
+                        <Text style={[globalStyle.btext, styles.ballotText, { color: themeContext.color.agree }]}>
+                            {getString('찬성')}
+                        </Text>
+                    </View>
+                );
+            }
+            if (choice === VOTE_SELECT.NO) {
+                return (
+                    <View style={styles.itemBallotContainer}>
+                        <Icon
+                            style={styles.resultDisagree}
+                            name="close"
+                            color={themeContext.color.disagree}
+                            tvParallaxProperties={undefined}
+                            size={20}
+                        />
+                        <Text style={[globalStyle.btext, styles.ballotText, { color: themeContext.color.disagree }]}>
+                            {getString('반대')}
+                        </Text>
+                    </View>
+                );
+            }
+            return (
+                <View style={styles.itemBallotContainer}>
+                    {assets && (
+                        <View style={styles.resultAbstain}>
+                            <Image
+                                source={assets[EnumIconAsset.Abstain] as ImageURISource}
+                                resizeMode="contain"
+                                style={styles.imageAbstain}
+                            />
+                        </View>
+                    )}
+                    <Text style={[globalStyle.btext, styles.ballotText, { color: themeContext.color.abstain }]}>
+                        {getString('기권')}
+                    </Text>
+                </View>
+            );
+        },
+        [assets, themeContext.color.abstain, themeContext.color.agree, themeContext.color.disagree],
+    );
+
+    const renderMyBallots = useCallback(() => {
+        if (isGuest || !user) {
+            return null;
+        }
+        if (loading) {
+            return (
+                <View style={[globalStyle.center, { height: 50 }]}>
+                    <ActivityIndicator />
+                </View>
+            );
+        }
+        return (
+            <View style={{ justifyContent: 'flex-start', width: '100%' }}>
+                <View style={globalStyle.lineComponent} />
+                <Text style={[globalStyle.rtext, styles.myBallotLabel, { color: themeContext.color.textBlack }]}>
+                    {getString('내투표 기록')}
+                </Text>
+                {myBallots.map((myBallot, index) => (
+                    <View
+                        style={[styles.myBallotContainer, { borderBottomColor: themeContext.color.divider }]}
+                        key={`myBallot.${myBallot.id}`}
+                    >
+                        <View style={[globalStyle.flexRowBetween]}>
+                            <Text
+                                style={[
+                                    globalStyle.ltext,
+                                    styles.myBallotLabel,
+                                    { color: themeContext.color.textBlack },
+                                ]}
+                            >
+                                {dayjs(myBallot.createdAt as string).format(getString('YYYY년 M월 D일 HH:mm'))}
+                            </Text>
+                            {showBallotResult(myBallot.choice)}
+                        </View>
+                    </View>
+                ))}
+            </View>
+        );
+    }, [isGuest, user, loading, themeContext.color.textBlack, themeContext.color.divider, myBallots, showBallotResult]);
+
     return (
         <View style={{ backgroundColor: 'white' }}>
             <View
@@ -567,6 +730,7 @@ function VoteResult(props: VoteResultProps): JSX.Element {
                 </View>
                 {renderVoteResult()}
                 {renderWithdraw()}
+                {renderMyBallots()}
             </View>
         </View>
     );

@@ -180,6 +180,13 @@ const client = new ApolloClient({
                     },
                 },
             },
+            ListMyBallotsPayload: {
+                fields: {
+                    values: {
+                        merge: fnCacheMerge,
+                    },
+                },
+            },
             Query: {
                 fields: {
                     listProposal: {
@@ -204,6 +211,9 @@ const client = new ApolloClient({
                     },
                     listFeeds: {
                         keyArgs: ['sort', 'where'],
+                    },
+                    listBallots: {
+                        keyArgs: ['proposalId', 'actor', 'sort'],
                     },
                 },
             },
