@@ -1,12 +1,13 @@
 import React, { useContext } from 'react';
 import { View, StyleSheet, Image, TouchableOpacity, Platform, ImageURISource } from 'react-native';
-import { Button, Icon, Text } from 'react-native-elements';
+import { Button, Text } from 'react-native-elements';
 import dayjs from 'dayjs';
 import { useAssets } from 'expo-asset';
 import { ThemeContext } from 'styled-components/native';
 import globalStyle from '~/styles/global';
 import { Proposal, Enum_Proposal_Type as EnumProposalType } from '~/graphql/generated/generated';
 import getString from '~/utils/locales/STRINGS';
+import { ClearIcon } from '~/components/icons';
 import StatusBar from '../status/StatusBar';
 import Period from '../status/Period';
 
@@ -54,7 +55,7 @@ function ProposalCard(props: ProposalCardProps): JSX.Element {
                 <StatusBar type={type} status={status} deadline={votePeriod?.end as string} temp={!!temp} />
                 {temp && (
                     <Button
-                        icon={<Icon name="clear" tvParallaxProperties={undefined} />}
+                        icon={<ClearIcon color="black" />}
                         type="clear"
                         onPress={() => {
                             if (onDelete) onDelete();

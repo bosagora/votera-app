@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { TouchableOpacity, StyleSheet, View } from 'react-native';
 import { ThemeContext } from 'styled-components/native';
-import * as DocumentPicker from 'expo-document-picker';
-import { Icon, Text } from 'react-native-elements';
+import { DocumentResult, getDocumentAsync } from 'expo-document-picker';
+import { Text } from 'react-native-elements';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
 import getString from '~/utils/locales/STRINGS';
+import { AddIcon, ClearIcon } from '~/components/icons';
 
 const styles = StyleSheet.create({
     container: {
@@ -23,18 +24,18 @@ const styles = StyleSheet.create({
 });
 
 interface Props {
-    data: DocumentPicker.DocumentResult;
+    data: DocumentResult;
     placeholder: string;
     fileType: string[];
-    addFile: (fileData: DocumentPicker.DocumentResult) => void;
-    removeFile: (fileData: DocumentPicker.DocumentResult) => void;
+    addFile: (fileData: DocumentResult) => void;
+    removeFile: (fileData: DocumentResult) => void;
 }
 
 interface PickerProps {
     placeholder: string;
     fileType: string[];
-    onChangeFiles: (files: DocumentPicker.DocumentResult[]) => void;
-    value?: DocumentPicker.DocumentResult[];
+    onChangeFiles: (files: DocumentResult[]) => void;
+    value?: DocumentResult[];
 }
 
 const MAX_SIZE = 10 * 1024 * 1024;
@@ -42,7 +43,7 @@ const MAX_SIZE = 10 * 1024 * 1024;
 function DocumentPickerComponent(props: Props): JSX.Element {
     const { data, removeFile, addFile, fileType, placeholder, ...others } = props;
     const themeContext = useContext(ThemeContext);
-    const [fileSource, setFileSource] = useState<DocumentPicker.DocumentResult>();
+    const [fileSource, setFileSource] = useState<DocumentResult>();
     const dispatch = useAppDispatch();
 
     useEffect(() => {
@@ -58,7 +59,7 @@ function DocumentPickerComponent(props: Props): JSX.Element {
 
     const pickFile = async () => {
         try {
-            const result = await DocumentPicker.getDocumentAsync({
+            const result = await getDocumentAsync({
                 type: fileType.length === 0 ? '*/*' : fileType,
             });
             if (result.type !== 'cancel') {
@@ -101,11 +102,11 @@ function DocumentPickerComponent(props: Props): JSX.Element {
                     justifyContent: 'center',
                 }}
             >
-                <Icon
-                    color={fileSource?.type === 'success' ? themeContext.color.primary : themeContext.color.white}
-                    name={fileSource?.type === 'success' ? 'clear' : 'add'}
-                    tvParallaxProperties={undefined}
-                />
+                {fileSource?.type === 'success' ? (
+                    <ClearIcon color={themeContext.color.primary} />
+                ) : (
+                    <AddIcon color={themeContext.color.white} />
+                )}
             </TouchableOpacity>
         </View>
     );
@@ -114,7 +115,7 @@ function DocumentPickerComponent(props: Props): JSX.Element {
 function DocumentPickerWrapper(props: PickerProps): JSX.Element {
     const { value, onChangeFiles, placeholder, fileType } = props;
 
-    const addFile = (fileData: DocumentPicker.DocumentResult) => {
+    const addFile = (fileData: DocumentResult) => {
         if (fileData.type !== 'success') {
             return;
         }
@@ -125,7 +126,7 @@ function DocumentPickerWrapper(props: PickerProps): JSX.Element {
         onChangeFiles(newFiles);
     };
 
-    const removeFile = (fileData: DocumentPicker.DocumentResult) => {
+    const removeFile = (fileData: DocumentResult) => {
         if (fileData.type === 'cancel') {
             return;
         }

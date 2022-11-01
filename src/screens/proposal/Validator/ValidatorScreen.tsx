@@ -3,9 +3,8 @@
 import React, { useCallback, useContext } from 'react';
 import { View, Image, StyleSheet, TouchableOpacity, ImageURISource, ActivityIndicator } from 'react-native';
 import { useAssets } from 'expo-asset';
-import { MaterialIcons, Octicons } from '@expo/vector-icons';
 import { setStringAsync } from 'expo-clipboard';
-import { Icon, Text } from 'react-native-elements';
+import { Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import {
     Enum_Proposal_Status as EnumProposalStatus,
@@ -22,6 +21,7 @@ import { VOTE_SELECT } from '~/utils/votera/voterautil';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
 import { getBlockExplorerUrl } from '~/utils/votera/agoraconf';
+import { CopyIcon, CloseIcon } from '~/components/icons';
 
 const styles = StyleSheet.create({
     anchor: {
@@ -212,6 +212,7 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
     const { total, participated, validators, onLayout, onRefresh, loading } = props;
     const themeContext = useContext(ThemeContext);
     const dispatch = useAppDispatch();
+    const [assets] = useAssets(iconAssets);
 
     const renderItem = useCallback(
         (item: Validator) => {
@@ -221,7 +222,7 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
                 <View style={styles.rowContainer}>
                     <View style={styles.nameColumn}>
                         <View style={styles.nameKeyRow}>
-                            <Octicons name="key" size={18} />
+                            {assets && <Image source={assets[EnumIconAsset.PublicKey] as ImageURISource} />}
                             <Anchor style={styles.anchor} source={getBlockExplorerUrl(address)}>
                                 <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
                                     {publicKey.slice(0, ELLIPSIS_TAIL_SIZE)}
@@ -239,11 +240,11 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
                                         .catch(console.log);
                                 }}
                             >
-                                <MaterialIcons name="content-copy" size={20} color={themeContext.color.primary} />
+                                <CopyIcon color={themeContext.color.primary} />
                             </TouchableOpacity>
                         </View>
                         <View style={styles.nameGlobeRow}>
-                            <Octicons name="globe" size={18} />
+                            {assets && <Image source={assets[EnumIconAsset.Address] as ImageURISource} />}
                             <Anchor style={styles.anchor} source={getBlockExplorerUrl(address)}>
                                 <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
                                     {address.slice(0, ELLIPSIS_TAIL_SIZE)}
@@ -261,7 +262,7 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
                                         .catch(console.log);
                                 }}
                             >
-                                <MaterialIcons name="content-copy" size={20} color={themeContext.color.primary} />
+                                <CopyIcon color={themeContext.color.primary} />
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -278,7 +279,7 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
                 </View>
             );
         },
-        [themeContext.color.primary, themeContext.color.textBlack, dispatch],
+        [assets, themeContext.color.primary, themeContext.color.textBlack, dispatch],
     );
 
     return (
@@ -300,12 +301,13 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
             </View>
             <LineComponent />
             <AssessListHeaderComponent onRefresh={onRefresh} />
-            {validators.map((validator) => (
-                <View key={`assess.${validator.id}`}>
-                    {renderItem(validator)}
-                    <LineComponent />
-                </View>
-            ))}
+            {assets &&
+                validators.map((validator) => (
+                    <View key={`assess.${validator.id}`}>
+                        {renderItem(validator)}
+                        <LineComponent />
+                    </View>
+                ))}
             {loading && <ActivityIndicator />}
             {!loading && total > validators.length && <Text style={styles.moreText}>......</Text>}
         </View>
@@ -316,6 +318,7 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
     const { total, participated, validators, onLayout, onRefresh, loading } = props;
     const themeContext = useContext(ThemeContext);
     const dispatch = useAppDispatch();
+    const [assets] = useAssets(iconAssets);
 
     const renderItem = useCallback(
         (item: Validator) => {
@@ -325,7 +328,7 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
                 <View style={styles.rowContainer}>
                     <View style={styles.nameColumn}>
                         <View style={styles.nameKeyRow}>
-                            <Octicons name="key" size={18} />
+                            {assets && <Image source={assets[EnumIconAsset.PublicKey] as ImageURISource} />}
                             <Anchor style={styles.anchor} source={getBlockExplorerUrl(address)}>
                                 <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
                                     {publicKey.slice(0, ELLIPSIS_TAIL_SIZE)}
@@ -343,11 +346,11 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
                                         .catch(console.log);
                                 }}
                             >
-                                <MaterialIcons name="content-copy" size={20} color={themeContext.color.primary} />
+                                <CopyIcon color={themeContext.color.primary} />
                             </TouchableOpacity>
                         </View>
                         <View style={styles.nameGlobeRow}>
-                            <Octicons name="globe" size={18} />
+                            {assets && <Image source={assets[EnumIconAsset.Address] as ImageURISource} />}
                             <Anchor style={styles.anchor} source={getBlockExplorerUrl(address)}>
                                 <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
                                     {address.slice(0, ELLIPSIS_TAIL_SIZE)}
@@ -365,7 +368,7 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
                                         .catch(console.log);
                                 }}
                             >
-                                <MaterialIcons name="content-copy" size={20} color={themeContext.color.primary} />
+                                <CopyIcon color={themeContext.color.primary} />
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -382,7 +385,7 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
                 </View>
             );
         },
-        [themeContext.color.primary, themeContext.color.textBlack, dispatch],
+        [assets, dispatch, themeContext.color.primary, themeContext.color.textBlack],
     );
 
     return (
@@ -404,12 +407,13 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
             </View>
             <LineComponent />
             <VoteListHeaderComponent onRefresh={onRefresh} />
-            {validators.map((validator) => (
-                <View key={`vote.${validator.id}`}>
-                    {renderItem(validator)}
-                    <LineComponent />
-                </View>
-            ))}
+            {assets &&
+                validators.map((validator) => (
+                    <View key={`vote.${validator.id}`}>
+                        {renderItem(validator)}
+                        <LineComponent />
+                    </View>
+                ))}
             {loading && <ActivityIndicator />}
             {!loading && total > validators.length && <Text style={styles.moreText}>......</Text>}
         </View>
@@ -437,7 +441,7 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
             if (choice === VOTE_SELECT.NO) {
                 return (
                     <View style={styles.itemBallotContainer}>
-                        <Icon name="close" color={themeContext.color.disagree} tvParallaxProperties={undefined} />
+                        <CloseIcon color={themeContext.color.disagree} />
                         <Text style={[globalStyle.rtext, { color: themeContext.color.disagree }]}>
                             {getString('반대')}
                         </Text>
@@ -462,7 +466,7 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                 <View style={styles.rowContainer}>
                     <View style={styles.nameColumn}>
                         <View style={styles.nameKeyRow}>
-                            <Octicons name="key" size={18} />
+                            {assets && <Image source={assets[EnumIconAsset.PublicKey] as ImageURISource} />}
                             <Anchor style={styles.anchor} source={getBlockExplorerUrl(address)}>
                                 <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
                                     {publicKey.slice(0, ELLIPSIS_TAIL_SIZE)}
@@ -480,11 +484,11 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                                         .catch(console.log);
                                 }}
                             >
-                                <MaterialIcons name="content-copy" size={20} color={themeContext.color.primary} />
+                                <CopyIcon color={themeContext.color.primary} />
                             </TouchableOpacity>
                         </View>
                         <View style={styles.nameGlobeRow}>
-                            <Octicons name="globe" size={18} />
+                            {assets && <Image source={assets[EnumIconAsset.Address] as ImageURISource} />}
                             <Anchor style={styles.anchor} source={getBlockExplorerUrl(address)}>
                                 <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
                                     {address.slice(0, ELLIPSIS_TAIL_SIZE)}
@@ -502,7 +506,7 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                                         .catch(console.log);
                                 }}
                             >
-                                <MaterialIcons name="content-copy" size={20} color={themeContext.color.primary} />
+                                <CopyIcon color={themeContext.color.primary} />
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -521,7 +525,7 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                 </View>
             );
         },
-        [themeContext.color.primary, themeContext.color.textBlack, showBallotResult, dispatch],
+        [assets, themeContext.color.primary, themeContext.color.textBlack, showBallotResult, dispatch],
     );
 
     return (
@@ -543,12 +547,13 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
             </View>
             <LineComponent />
             <ClosedListHeaderComponent />
-            {validators.map((validator) => (
-                <View key={`closed.${validator.id}`}>
-                    {renderItem(validator)}
-                    <LineComponent />
-                </View>
-            ))}
+            {assets &&
+                validators.map((validator) => (
+                    <View key={`closed.${validator.id}`}>
+                        {renderItem(validator)}
+                        <LineComponent />
+                    </View>
+                ))}
             {loading && <ActivityIndicator />}
             {!loading && total > validators.length && <Text style={styles.moreText}>......</Text>}
         </View>

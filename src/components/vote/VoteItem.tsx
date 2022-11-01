@@ -1,11 +1,12 @@
 import React, { useContext } from 'react';
 import { View, Image, StyleSheet, ImageURISource } from 'react-native';
-import { Icon, Text } from 'react-native-elements';
+import { Text } from 'react-native-elements';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { ThemeContext } from 'styled-components/native';
 import { useAssets } from 'expo-asset';
 import globalStyle from '~/styles/global';
 import { VOTE_SELECT } from '~/utils/votera/voterautil';
+import { CloseIcon } from '~/components/icons';
 
 enum EnumIconAsset {
     Abstain = 0,
@@ -79,7 +80,7 @@ function VoteItem(props: VoteItemProps): JSX.Element {
             {type === VOTE_SELECT.YES && (
                 <View style={{ width: 17, height: 17, borderRadius: 9, borderWidth: 2, borderColor: tintColor }} />
             )}
-            {type === VOTE_SELECT.NO && <Icon name="close" color={tintColor} tvParallaxProperties={undefined} />}
+            {type === VOTE_SELECT.NO && <CloseIcon color={tintColor} />}
             {type === VOTE_SELECT.BLANK && assets && (
                 <Image style={{ tintColor }} source={assets[EnumIconAsset.Abstain] as ImageURISource} />
             )}

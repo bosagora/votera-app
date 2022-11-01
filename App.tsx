@@ -5,7 +5,7 @@ import { ThemeProvider as StyledThemeProvider } from 'styled-components/native';
 import { Provider } from 'react-redux';
 import { ApolloProvider } from '@apollo/react-hooks';
 import { MetaMaskProvider } from 'metamask-react';
-import * as SplashScreen from 'expo-splash-screen';
+import { preventAutoHideAsync } from 'expo-splash-screen';
 import Routes from '~/navigation/Routes';
 import store from '~/state/store';
 import theme from '~/theme/theme';
@@ -18,7 +18,7 @@ let preventCalled = false;
 
 if (!preventCalled) {
     // console.log('Call prevent splash');
-    SplashScreen.preventAutoHideAsync().catch(console.log); // it's good to explicitly catch and inspect any error
+    preventAutoHideAsync().catch(console.log); // it's good to explicitly catch and inspect any error
     preventCalled = true;
 }
 

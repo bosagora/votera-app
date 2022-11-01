@@ -1,4 +1,4 @@
-import * as Localization from 'expo-localization';
+import { locale as expoLocale } from 'expo-localization';
 import i18n from 'i18n-js';
 import moment from 'moment';
 import 'moment/locale/ko';
@@ -8,12 +8,12 @@ i18n.fallbacks = true;
 
 i18n.translations = { en };
 
-i18n.locale = Localization.locale;
-moment.locale(Localization.locale);
+i18n.locale = expoLocale;
+moment.locale(expoLocale);
 
 export const getLocale = (): string => i18n.locale;
 export const setLocale = (locale = 'ko'): void => {
-    if (!locale) i18n.locale = Localization.locale;
+    if (!locale) i18n.locale = expoLocale;
     else i18n.locale = locale;
 };
 

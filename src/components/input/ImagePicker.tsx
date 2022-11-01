@@ -1,11 +1,17 @@
 import React, { useState, useContext } from 'react';
 import { TouchableOpacity, Image, View, StyleSheet } from 'react-native';
 import { ThemeContext } from 'styled-components/native';
-import * as ImagePicker from 'expo-image-picker';
-import { Icon, Text } from 'react-native-elements';
+import {
+    ImagePickerResult,
+    launchImageLibraryAsync,
+    MediaTypeOptions,
+    getMediaLibraryPermissionsAsync,
+} from 'expo-image-picker';
+import { Text } from 'react-native-elements';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
 import getString from '~/utils/locales/STRINGS';
+import { AddIcon, ClearIcon } from '~/components/icons';
 
 const styles = StyleSheet.create({
     container: {
@@ -37,15 +43,15 @@ const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 interface Props {
     showImage: boolean;
     placeholder: string;
-    value?: ImagePicker.ImagePickerResult;
-    onChangeImage: (image: ImagePicker.ImagePickerResult | undefined) => void;
+    value?: ImagePickerResult;
+    onChangeImage: (image: ImagePickerResult | undefined) => void;
 }
 
 function ImagePickerComponent(props: Props): JSX.Element {
     const themeContext = useContext(ThemeContext);
     const { showImage, value, placeholder, onChangeImage, ...others } = props;
     const [imageUri, setImageUri] = useState('');
-    // const [imageSource, setImageSource] = useState<ImagePicker.ImagePickerResult>();
+    // const [imageSource, setImageSource] = useState<ImagePickerResult>();
     const dispatch = useAppDispatch();
 
     React.useEffect(() => {
@@ -63,8 +69,8 @@ function ImagePickerComponent(props: Props): JSX.Element {
 
     const pickImage = async () => {
         try {
-            const result: ImagePicker.ImagePickerResult = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            const result: ImagePickerResult = await launchImageLibraryAsync({
+                mediaTypes: MediaTypeOptions.Images,
                 allowsEditing: true,
                 quality: 1,
                 exif: true,
@@ -86,7 +92,7 @@ function ImagePickerComponent(props: Props): JSX.Element {
     };
 
     const checkPermission = () => {
-        ImagePicker.getMediaLibraryPermissionsAsync()
+        getMediaLibraryPermissionsAsync()
             .then(() => {
                 return pickImage();
             })
@@ -125,11 +131,11 @@ function ImagePickerComponent(props: Props): JSX.Element {
                     justifyContent: 'center',
                 }}
             >
-                <Icon
-                    color={imageUri ? themeContext.color.primary : themeContext.color.white}
-                    name={imageUri ? 'clear' : 'add'}
-                    tvParallaxProperties={undefined}
-                />
+                {imageUri ? (
+                    <ClearIcon color={themeContext.color.primary} />
+                ) : (
+                    <AddIcon color={themeContext.color.white} />
+                )}
             </TouchableOpacity>
         </View>
     );

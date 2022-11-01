@@ -1,5 +1,4 @@
-import { gql } from '@apollo/client';
-import * as Apollo from '@apollo/client';
+import { gql, SubscriptionHookOptions, useSubscription } from '@apollo/client';
 import {
     Enum_Proposal_Type as EnumProposalType,
     Enum_Proposal_Status as EnumProposalStatus,
@@ -48,12 +47,9 @@ export type ListenFeedSubscription = {
 };
 
 export function useListenFeedSubscription(
-    baseOptions?: Apollo.SubscriptionHookOptions<ListenFeedSubscription, ListenFeedSubscriptionVariables>,
+    baseOptions?: SubscriptionHookOptions<ListenFeedSubscription, ListenFeedSubscriptionVariables>,
 ) {
-    return Apollo.useSubscription<ListenFeedSubscription, ListenFeedSubscriptionVariables>(
-        ListenFeedDocument,
-        baseOptions,
-    );
+    return useSubscription<ListenFeedSubscription, ListenFeedSubscriptionVariables>(ListenFeedDocument, baseOptions);
 }
 
 export type ProposalChangedSubscriptionVariables = {
@@ -83,9 +79,9 @@ export type ProposalChangedSubscription = {
 };
 
 export function useProposalChangedSubscription(
-    baseOptions?: Apollo.SubscriptionHookOptions<ProposalChangedSubscription, ProposalChangedSubscriptionVariables>,
+    baseOptions?: SubscriptionHookOptions<ProposalChangedSubscription, ProposalChangedSubscriptionVariables>,
 ) {
-    return Apollo.useSubscription<ProposalChangedSubscription, ProposalChangedSubscriptionVariables>(
+    return useSubscription<ProposalChangedSubscription, ProposalChangedSubscriptionVariables>(
         ProposalChangedDocument,
         baseOptions,
     );

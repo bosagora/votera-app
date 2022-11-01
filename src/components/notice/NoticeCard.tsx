@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { View, TouchableOpacity, Dimensions, StyleSheet } from 'react-native';
 import { ThemeContext } from 'styled-components/native';
-import { Button, Icon, Text, Image } from 'react-native-elements';
+import { Button, Text, Image } from 'react-native-elements';
 import dayjs from 'dayjs';
 import globalStyle from '~/styles/global';
 import { Post, PostStatus, usePostCommentsLazyQuery } from '~/graphql/generated/generated';
@@ -11,6 +11,7 @@ import getString from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
 import { adjustAttachmentImage, AttachmentFile, AttachmentImage, filterAttachment } from '~/utils/attach';
+import { ExpandLessIcon } from '~/components/icons';
 import MultilineInput from '../input/MultiLineInput';
 import DownloadComponent from '../ui/Download';
 import CommentCard from '../opinion/CommentCard';
@@ -331,7 +332,7 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
 
                     <Button
                         onPress={() => setExpanded(false)}
-                        icon={<Icon name="expand-less" tvParallaxProperties={undefined} />}
+                        icon={<ExpandLessIcon />}
                         buttonStyle={{ marginTop: 30 }}
                         type="clear"
                     />

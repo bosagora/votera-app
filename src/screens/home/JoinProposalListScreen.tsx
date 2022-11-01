@@ -16,6 +16,7 @@ import getString from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
 import { AuthContext } from '~/contexts/AuthContext';
+import { ChevronLeftIcon } from '~/components/icons';
 
 const FETCH_INIT_LIMIT = 5;
 const FETCH_MORE_LIMIT = 5;
@@ -75,7 +76,7 @@ function JoinProposalListScreen({ navigation, route }: MainScreenProps<'JoinProp
                         navigation.dispatch(replaceToHome());
                     }
                 }}
-                icon={<Icon name="chevron-left" color="white" tvParallaxProperties={undefined} />}
+                icon={<ChevronLeftIcon color="white" />}
                 type="clear"
             />
         );

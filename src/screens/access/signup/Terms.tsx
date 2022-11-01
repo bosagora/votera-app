@@ -1,11 +1,12 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { View, TouchableOpacity } from 'react-native';
 import { useLinkTo } from '@react-navigation/native';
-import { Text, CheckBox, Icon } from 'react-native-elements';
+import { Text, CheckBox } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import CommonButton from '~/components/button/CommonButton';
 import getString from '~/utils/locales/STRINGS';
 import globalStyle from '~/styles/global';
+import { CheckIcon } from '~/components/icons';
 
 interface TermsProps {
     onComplete: () => void;
@@ -37,12 +38,7 @@ function Terms(props: TermsProps): JSX.Element {
                 borderColor: isActive ? color.primary : color.boxBorder,
             }}
         >
-            <Icon
-                name="check"
-                size={18}
-                color={isActive ? color.white : color.boxBorder}
-                tvParallaxProperties={undefined}
-            />
+            <CheckIcon size={18} color={isActive ? color.white : color.boxBorder} />
         </View>
     );
 

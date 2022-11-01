@@ -1,8 +1,9 @@
 import React, { useContext } from 'react';
 import { View } from 'react-native';
-import { Button, Icon } from 'react-native-elements';
+import { Button } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import globalStyle from '~/styles/global';
+import { ExpandLessIcon } from '~/components/icons';
 
 interface ListFooterButtonProps {
     onPress: () => void;
@@ -30,7 +31,7 @@ function ListFooterButton(props: ListFooterButtonProps): JSX.Element {
                             },
                         ]}
                     >
-                        <Icon name="expand-less" tvParallaxProperties={undefined} />
+                        <ExpandLessIcon />
                     </View>
                 }
                 type="clear"

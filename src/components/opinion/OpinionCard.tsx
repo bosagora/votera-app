@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import React, { useEffect, useState, useContext, useCallback, useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { Text, Divider, Icon, Button } from 'react-native-elements';
+import { Text, Divider, Button } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import { debounce } from 'lodash';
 import MultilineInput from '~/components/input/MultiLineInput';
@@ -16,6 +16,7 @@ import getString from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
 import useReport from '~/graphql/hooks/Reports';
+import { ExpandLessIcon } from '~/components/icons';
 import CommentButton from '../button/CommentButton';
 import CommentLikeButton from '../button/CommentLikeButton';
 import ShortButton from '../button/ShortButton';
@@ -199,12 +200,7 @@ function Reply(props: ReplyProps): JSX.Element {
                 }}
                 maxInput={300}
             />
-            <Button
-                onPress={closeReply}
-                icon={<Icon name="expand-less" tvParallaxProperties={undefined} />}
-                buttonStyle={{ marginVertical: 10 }}
-                type="clear"
-            />
+            <Button onPress={closeReply} icon={<ExpandLessIcon />} buttonStyle={{ marginVertical: 10 }} type="clear" />
         </>
     );
 }

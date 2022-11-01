@@ -15,7 +15,6 @@ import { ThemeContext } from 'styled-components/native';
 import { Button, Text } from 'react-native-elements';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, DrawerActions, useLinkTo } from '@react-navigation/native';
-import { MaterialIcons } from '@expo/vector-icons';
 import { useAssets } from 'expo-asset';
 import { TabView, SceneRendererProps, NavigationState } from 'react-native-tab-view';
 import { AuthContext, MetamaskStatus } from '~/contexts/AuthContext';
@@ -25,6 +24,7 @@ import { useAppDispatch } from '~/state/hooks';
 import { hideSnackBar } from '~/state/features/snackBar';
 import globalStyle, { isLargeScreen } from '~/styles/global';
 import FocusAwareStatusBar from '~/components/statusbar/FocusAwareStatusBar';
+import { SearchIcon } from '~/components/icons';
 import HomeView from './HomeView';
 import { WhereType } from '~/graphql/hooks/Proposals';
 
@@ -110,7 +110,7 @@ function HomeScreen({ navigation, route }: MainScreenProps<'Home'>): JSX.Element
             return (
                 <View style={{ flexDirection: 'row' }}>
                     <TouchableOpacity style={styles.searchButton} onPress={() => linkTo('/search')}>
-                        <MaterialIcons name="search" color="black" size={24} />
+                        <SearchIcon color="black" />
                     </TouchableOpacity>
                 </View>
             );
@@ -148,7 +148,7 @@ function HomeScreen({ navigation, route }: MainScreenProps<'Home'>): JSX.Element
                     </View>
                 )}
                 <TouchableOpacity style={styles.searchButton} onPress={() => linkTo('/search')}>
-                    <MaterialIcons name="search" color="black" size={24} />
+                    <SearchIcon color="black" />
                 </TouchableOpacity>
             </View>
         );

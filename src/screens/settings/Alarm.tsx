@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { View, ScrollView, Switch } from 'react-native';
-import { Button, Text, Icon } from 'react-native-elements';
+import { Button, Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import { debounce } from 'lodash';
 import { useLinkTo } from '@react-navigation/native';
@@ -14,6 +14,7 @@ import getString from '~/utils/locales/STRINGS';
 import pushService from '~/services/FcmService';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
+import { ChevronLeftIcon } from '~/components/icons';
 
 const headerTitle = () => (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -78,7 +79,7 @@ function Alarm({ navigation, route }: MainScreenProps<'Alarm'>): JSX.Element {
                         linkTo('/home');
                     }
                 }}
-                icon={<Icon name="chevron-left" tvParallaxProperties={undefined} />}
+                icon={<ChevronLeftIcon color="black" />}
                 type="clear"
             />
         );

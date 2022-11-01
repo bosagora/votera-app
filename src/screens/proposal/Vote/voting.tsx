@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { ThemeContext } from 'styled-components/native';
-import { Button, Text, Icon } from 'react-native-elements';
+import { Button, Text } from 'react-native-elements';
 import globalStyle from '~/styles/global';
 import CommonButton from '~/components/button/CommonButton';
 import { AuthContext, MetamaskStatus } from '~/contexts/AuthContext';
@@ -10,6 +10,7 @@ import VoteItemGroup from '~/components/vote/VoteItemGroup';
 import getString from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
+import { CheckIcon } from '~/components/icons';
 
 const styles = StyleSheet.create({
     container: {
@@ -225,13 +226,7 @@ function Voting(props: Props): JSX.Element {
                         marginLeft: 6,
                     },
                 ]}
-                icon={
-                    <Icon
-                        name="check"
-                        color={isSelected ? themeContext.color.primary : themeContext.color.unchecked}
-                        tvParallaxProperties={undefined}
-                    />
-                }
+                icon={<CheckIcon color={isSelected ? themeContext.color.primary : themeContext.color.unchecked} />}
                 type="clear"
                 disabled={!isSelected}
             />

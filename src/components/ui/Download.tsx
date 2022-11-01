@@ -1,12 +1,13 @@
 import React, { useContext } from 'react';
 import { TouchableOpacity } from 'react-native';
-import { Icon, Text } from 'react-native-elements';
+import { Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import { showSnackBar } from '~/state/features/snackBar';
 import { useAppDispatch } from '~/state/hooks';
 import globalStyle from '~/styles/global';
 import { AttachmentFile, downloadFile } from '~/utils/attach';
 import getString from '~/utils/locales/STRINGS';
+import { FileDownloadIcon } from '~/components/icons';
 
 interface DownloadProps {
     file?: AttachmentFile;
@@ -29,7 +30,7 @@ function DownloadComponent(props: DownloadProps) {
                     .catch(console.log);
             }}
         >
-            <Icon name="file-download" color={themeContext.color.primary} tvParallaxProperties={undefined} />
+            <FileDownloadIcon color={themeContext.color.primary} />
             <Text
                 style={[
                     globalStyle.rtext,

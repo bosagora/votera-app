@@ -1,11 +1,12 @@
 import React, { useContext, useState, useEffect, useMemo } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, TouchableOpacity } from 'react-native';
 import { ThemeContext } from 'styled-components/native';
-import { Icon, Text } from 'react-native-elements';
+import { Text } from 'react-native-elements';
 import { debounce } from 'lodash';
 import TextInputComponent from '~/components/input/SingleLineInput2';
 import { useCheckUsernameLazyQuery } from '~/graphql/generated/generated';
 import getString from '~/utils/locales/STRINGS';
+import { CancelIcon } from '~/components/icons';
 
 const DEBOUNCER_TIME = 300;
 
@@ -80,13 +81,9 @@ function NameScreen(props: NameScreenProps): JSX.Element {
                 onChangeText={checkAccountName}
                 subComponent={
                     accountName.length ? (
-                        <Icon
-                            onPress={() => setAccountName('')}
-                            name="cancel"
-                            color={themeContext.color.primary}
-                            size={28}
-                            tvParallaxProperties={undefined}
-                        />
+                        <TouchableOpacity onPress={() => setAccountName('')}>
+                            <CancelIcon color={themeContext.color.primary} size={28} />
+                        </TouchableOpacity>
                     ) : undefined
                 }
                 placeholderText={getString('계정명을 입력해주세요')}

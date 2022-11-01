@@ -1,7 +1,7 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { View, ListRenderItemInfo, ActivityIndicator } from 'react-native';
 import { useFocusEffect, useLinkTo } from '@react-navigation/native';
-import { Button, Icon, Text } from 'react-native-elements';
+import { Button, Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
 import { MainScreenProps } from '~/navigation/main/MainParams';
@@ -13,6 +13,7 @@ import LocalStorage from '~/utils/LocalStorage';
 import FocusAwareStatusBar from '~/components/statusbar/FocusAwareStatusBar';
 import { ProposalContext } from '~/contexts/ProposalContext';
 import getString from '~/utils/locales/STRINGS';
+import { CancelIcon, ChevronLeftIcon, CloseIcon, SearchIcon } from '~/components/icons';
 
 const LOCAL_SEARCH_HISTORY = 'local.search';
 
@@ -158,13 +159,7 @@ function Search({ navigation, route }: MainScreenProps<'Search'>): JSX.Element {
                                     </Text>
                                 </TouchableOpacity>
                                 <Button
-                                    icon={
-                                        <Icon
-                                            name="close"
-                                            color={themeContext.color.textBlack}
-                                            tvParallaxProperties={undefined}
-                                        />
-                                    }
+                                    icon={<CloseIcon color={themeContext.color.textBlack} />}
                                     onPress={() => {
                                         const currentHistory = [...searchHistory];
                                         currentHistory.splice(index, 1);
@@ -180,7 +175,7 @@ function Search({ navigation, route }: MainScreenProps<'Search'>): JSX.Element {
                     }}
                     ListEmptyComponent={
                         <View style={globalStyle.flexRowCenter}>
-                            <Icon name="search" color={themeContext.color.disabled} tvParallaxProperties={undefined} />
+                            <SearchIcon color={themeContext.color.disabled} />
                             <Text
                                 style={[
                                     globalStyle.rtext,
@@ -232,7 +227,7 @@ function Search({ navigation, route }: MainScreenProps<'Search'>): JSX.Element {
                 renderItem={renderProposals}
                 ListEmptyComponent={
                     <View style={globalStyle.flexRowCenter}>
-                        <Icon name="search" color={themeContext.color.disabled} tvParallaxProperties={undefined} />
+                        <SearchIcon color={themeContext.color.disabled} />
                         <Text
                             style={[
                                 globalStyle.rtext,
@@ -265,7 +260,7 @@ function Search({ navigation, route }: MainScreenProps<'Search'>): JSX.Element {
                         linkTo('/home');
                     }
                 }}
-                icon={<Icon name="chevron-left" tvParallaxProperties={undefined} />}
+                icon={<ChevronLeftIcon color="black" />}
                 type="clear"
             />
         );
@@ -311,23 +306,22 @@ function Search({ navigation, route }: MainScreenProps<'Search'>): JSX.Element {
                                     onPress={() => runSearch(searchValue)}
                                     disabled={loading}
                                 >
-                                    <Icon
-                                        name="search"
+                                    <SearchIcon
                                         color={loading ? themeContext.color.disabled : themeContext.color.primary}
-                                        tvParallaxProperties={undefined}
                                     />
                                 </TouchableOpacity>
-                                <Icon
+                                <TouchableOpacity
                                     onPress={() => {
                                         setSearchValue('');
                                         setIsSearched(false);
                                         setProposals([]);
                                     }}
-                                    name="cancel"
-                                    color={loading ? themeContext.color.disabled : themeContext.color.primary}
-                                    size={28}
-                                    tvParallaxProperties={undefined}
-                                />
+                                >
+                                    <CancelIcon
+                                        color={loading ? themeContext.color.disabled : themeContext.color.primary}
+                                        size={28}
+                                    />
+                                </TouchableOpacity>
                             </View>
                         )
                     }

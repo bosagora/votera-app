@@ -1,4 +1,4 @@
-import * as Device from 'expo-device';
+import { isDevice } from 'expo-device';
 import LocalStorage, { LocalStoragePushProps } from '~/utils/LocalStorage';
 import { PushStatusType, PushRequestStatus } from '~/types/pushType';
 import { FeedProps } from '~/types/alarmType';
@@ -6,7 +6,7 @@ import { FeedProps } from '~/types/alarmType';
 const PushServiceLocation = 'PushServiceProp';
 
 function isValidPlatform(): boolean {
-    if (!Device.isDevice) {
+    if (!isDevice) {
         console.log('Must use physical device for Push Notifications');
         return false;
     }

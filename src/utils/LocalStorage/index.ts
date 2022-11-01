@@ -1,4 +1,10 @@
-import * as SecureStore from 'expo-secure-store';
+import {
+    SecureStoreOptions,
+    getItemAsync as secureGetItemAsync,
+    setItemAsync as secureSetItemAsync,
+    deleteItemAsync as secureDeleteItemAsync,
+    WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+} from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Random from 'expo-random';
 import { encryptLocalData, decryptLocalData, generateKey } from '@utils/crypto';
@@ -11,17 +17,17 @@ let localStorageKey: Buffer | undefined;
 
 async function getLocalStorageKey(): Promise<Buffer> {
     if (!localStorageKey) {
-        const options: SecureStore.SecureStoreOptions = {
+        const options: SecureStoreOptions = {
             keychainService: LOCALSTORAGE_SERVICE,
-            keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+            keychainAccessible: WHEN_UNLOCKED_THIS_DEVICE_ONLY,
         };
         try {
             console.log('call getLocalStorageKey');
-            let value = await SecureStore.getItemAsync(LOCALSTORAGE_KEY, options);
+            let value = await secureGetItemAsync(LOCALSTORAGE_KEY, options);
             if (!value || value === '') {
                 console.log('detect no LocalStorageKey, initailize');
-                await SecureStore.setItemAsync(LOCALSTORAGE_KEY, generateKey(), options);
-                value = await SecureStore.getItemAsync(LOCALSTORAGE_KEY, options);
+                await secureSetItemAsync(LOCALSTORAGE_KEY, generateKey(), options);
+                value = await secureGetItemAsync(LOCALSTORAGE_KEY, options);
                 if (!value || value === '') {
                     throw new Error('Read Failed from SecureStore');
                 }
@@ -82,7 +88,7 @@ async function set(data: LocalStorageProps): Promise<LocalStorageProps> {
 
 async function reset(): Promise<void> {
     await AsyncStorage.removeItem(LOCALSTORAGE_KEY);
-    await SecureStore.deleteItemAsync(LOCALSTORAGE_KEY);
+    await secureDeleteItemAsync(LOCALSTORAGE_KEY);
     localStorageKey = undefined;
 }
 

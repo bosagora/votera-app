@@ -17,6 +17,7 @@ import styles, { HEADER_HEIGHT } from '../proposal/styles';
 import { getDefaultAssessPeriod, PreviewProposal } from '~/types/proposalType';
 import { MainScreenProps, replaceToHome } from '~/navigation/main/MainParams';
 import { loadPreviewFromSession } from '~/utils/votera/preview';
+import { ChevronLeftIcon } from '~/components/icons';
 import Info from '../proposal/Info';
 
 function ProposalPreviewScreen({ navigation, route }: MainScreenProps<'ProposalPreview'>): JSX.Element {
@@ -130,7 +131,7 @@ function ProposalPreviewScreen({ navigation, route }: MainScreenProps<'ProposalP
                                 navigation.dispatch(replaceToHome());
                             }
                         }}
-                        icon={<Icon name="chevron-left" color="white" tvParallaxProperties={undefined} />}
+                        icon={<ChevronLeftIcon color="white" />}
                         type="clear"
                     />
 

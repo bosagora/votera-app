@@ -1,7 +1,8 @@
 import React, { useContext } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { Icon, Text } from 'react-native-elements';
+import { Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
+import { RadioButtonCheckedIcon, RadioButtonUncheckedIcon } from '~/components/icons';
 
 interface ButtonProps {
     text: string;
@@ -24,12 +25,11 @@ function ButtonContent(props: ButtonProps): JSX.Element {
     return (
         <View style={styles.contents}>
             <TouchableOpacity onPress={onPress}>
-                <Icon
-                    name={isActive ? 'radio-button-checked' : 'radio-button-unchecked'}
-                    size={28}
-                    color={isActive ? themeContext.color.primary : themeContext.color.boxBorder}
-                    tvParallaxProperties={undefined}
-                />
+                {isActive ? (
+                    <RadioButtonCheckedIcon color={themeContext.color.primary} />
+                ) : (
+                    <RadioButtonUncheckedIcon color={themeContext.color.boxBorder} />
+                )}
             </TouchableOpacity>
             <Text style={styles.texts}>{text}</Text>
         </View>

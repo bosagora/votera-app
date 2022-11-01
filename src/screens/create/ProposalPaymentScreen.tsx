@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useCallback, useState } from 'react';
 import { View, Image, ActivityIndicator, ScrollView, ImageURISource, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Icon } from 'react-native-elements';
 import { useAssets } from 'expo-asset';
 import { BigNumber } from 'ethers';
 import { useIsFocused } from '@react-navigation/native';
@@ -24,6 +23,7 @@ import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
 import CommonsBudget from '~/utils/votera/CommonsBudget';
 import { MainScreenProps } from '~/navigation/main/MainParams';
+import { ChevronLeftIcon } from '~/components/icons';
 
 enum EnumIconAsset {
     Background = 0,
@@ -80,7 +80,7 @@ function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment
     }, [fetchProposal, id, navigation]);
 
     const headerLeft = useCallback(() => {
-        return <Icon name="chevron-left" color="transparent" tvParallaxProperties={undefined} />;
+        return <ChevronLeftIcon color="transparent" />;
     }, []);
 
     const headerBackground = useCallback(() => {

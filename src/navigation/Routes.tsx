@@ -2,8 +2,12 @@ import React, { useCallback, useContext, useState } from 'react';
 import { View, useWindowDimensions, Text } from 'react-native';
 import { NavigationContainer, LinkingOptions } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import * as SplashScreen from 'expo-splash-screen';
-import * as Linking from 'expo-linking';
+import { hideAsync as splashHideAsync } from 'expo-splash-screen';
+import {
+    createURL as linkingCreateURL,
+    getInitialURL as linkingGetInitialURL,
+    addEventListener as linkingAddEventListener,
+} from 'expo-linking';
 
 import Loading from '~/screens/loading';
 import MainDrawer from './main/MainNavigator';
@@ -23,7 +27,7 @@ enum ScreenType {
     GuestScreens,
 }
 
-const prefix = Linking.createURL('/');
+const prefix = linkingCreateURL('/');
 
 const linking: LinkingOptions<RootStackParams> = {
     prefixes: [prefix],
@@ -65,13 +69,12 @@ const linking: LinkingOptions<RootStackParams> = {
         },
     },
     async getInitialURL() {
-        const url = await Linking.getInitialURL();
+        const url = await linkingGetInitialURL();
         console.log('Routes.initialUrl = ', url);
         return url;
     },
     subscribe(listener) {
-        console.log('Routes.linking.subscribe');
-        const linkingSubscription = Linking.addEventListener('url', ({ url }) => {
+        const linkingSubscription = linkingAddEventListener('url', ({ url }) => {
             console.log('eventListener url=', url);
             listener(url);
         });
@@ -109,7 +112,7 @@ function Routes(): JSX.Element {
 
     const onLayoutRootView = useCallback(() => {
         if (!isLoading) {
-            SplashScreen.hideAsync().catch((err) => {
+            splashHideAsync().catch((err) => {
                 console.log('AplashScreen.hideAsync returns error', err);
             });
         }
