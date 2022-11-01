@@ -2,7 +2,7 @@ import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, ActivityIndicator, TouchableOpacity, Image, ImageURISource } from 'react-native';
 import { useAssets } from 'expo-asset';
 import { ThemeContext } from 'styled-components/native';
-import { Icon, Text } from 'react-native-elements';
+import { Text } from 'react-native-elements';
 import { BigNumber } from 'ethers';
 import dayjs from 'dayjs';
 import {
@@ -18,6 +18,7 @@ import getString from '~/utils/locales/STRINGS';
 import { afterCalc } from '~/utils/time';
 import { AuthContext, MetamaskStatus } from '~/contexts/AuthContext';
 import { VOTE_SELECT } from '~/utils/votera/voterautil';
+import { CloseIcon } from '~/components/icons';
 
 enum EnumIconAsset {
     Abstain = 0,
@@ -578,13 +579,7 @@ function VoteResult(props: VoteResultProps): JSX.Element {
             if (choice === VOTE_SELECT.NO) {
                 return (
                     <View style={styles.itemBallotContainer}>
-                        <Icon
-                            style={styles.resultDisagree}
-                            name="close"
-                            color={themeContext.color.disagree}
-                            tvParallaxProperties={undefined}
-                            size={20}
-                        />
+                        <CloseIcon color={themeContext.color.disagree} size={20} />
                         <Text style={[globalStyle.btext, styles.ballotText, { color: themeContext.color.disagree }]}>
                             {getString('반대')}
                         </Text>

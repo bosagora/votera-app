@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { View, ScrollView, StyleSheet, Switch, Platform } from 'react-native';
-import { Button, Text, Icon } from 'react-native-elements';
+import { Button, Text } from 'react-native-elements';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useIsFocused, useLinkTo } from '@react-navigation/native';
 import { ThemeContext } from 'styled-components/native';
@@ -15,6 +15,7 @@ import getString from '~/utils/locales/STRINGS';
 import { PushStatusType } from '~/types/pushType';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
+import { ChevronLeftIcon, ChevronRightIcon } from '~/components/icons';
 
 const styles = StyleSheet.create({
     sectionLabel: {
@@ -103,7 +104,7 @@ function Settings({ navigation, route }: MainScreenProps<'Settings'>): JSX.Eleme
                         linkTo('/home');
                     }
                 }}
-                icon={<Icon name="chevron-left" tvParallaxProperties={undefined} />}
+                icon={<ChevronLeftIcon color="black" />}
                 type="clear"
             />
         );
@@ -167,7 +168,7 @@ function Settings({ navigation, route }: MainScreenProps<'Settings'>): JSX.Eleme
                         onPress={() => linkTo('/alarm')}
                     >
                         <Text style={{ fontSize: 13 }}>{getString('알림 수신 설정')}</Text>
-                        <Icon name="chevron-right" color="darkgray" tvParallaxProperties={undefined} />
+                        <ChevronRightIcon color="darkgray" />
                     </TouchableOpacity>
                 </View>
 
@@ -180,7 +181,7 @@ function Settings({ navigation, route }: MainScreenProps<'Settings'>): JSX.Eleme
                         onPress={() => linkTo('/accountinfo')}
                     >
                         <Text style={{ fontSize: 13 }}>{getString('계정이름 변경하기')}</Text>
-                        <Icon name="chevron-right" color="darkgray" tvParallaxProperties={undefined} />
+                        <ChevronRightIcon color="darkgray" />
                     </TouchableOpacity>
                 </View>
 
@@ -193,7 +194,7 @@ function Settings({ navigation, route }: MainScreenProps<'Settings'>): JSX.Eleme
                     onPress={() => linkTo('/userservice')}
                 >
                     <Text style={{ fontSize: 13 }}>{getString('이용약관')}</Text>
-                    <Icon name="chevron-right" color="darkgray" tvParallaxProperties={undefined} />
+                    <ChevronRightIcon color="darkgray" />
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -201,7 +202,7 @@ function Settings({ navigation, route }: MainScreenProps<'Settings'>): JSX.Eleme
                     onPress={() => linkTo('/privacy')}
                 >
                     <Text style={{ fontSize: 13 }}>{getString('개인정보보호정책')}</Text>
-                    <Icon name="chevron-right" color="darkgray" tvParallaxProperties={undefined} />
+                    <ChevronRightIcon color="darkgray" />
                 </TouchableOpacity>
             </ScrollView>
         </View>

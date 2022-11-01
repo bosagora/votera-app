@@ -35,16 +35,6 @@ const styles = StyleSheet.create({
     },
 });
 
-/*
-<TextInput
-    onChangeText={(text) => {
-        console.log('changeText', text);
-    }}
-    koreanInput
-    subComponent={<Icon onPress={console.log} name="cancel" color="rgb(112, 58, 222)" size={28} />}
-/>
-*/
-
 function TextInputComponent(props: TextInputComponentProps): JSX.Element {
     const themeContext = useContext(ThemeContext);
     const {

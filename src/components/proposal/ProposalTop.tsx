@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
 import { View, StyleSheet, TouchableOpacity, ImageBackground, Platform, ImageURISource } from 'react-native';
-import { Text, Icon } from 'react-native-elements';
+import { Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import { useAssets } from 'expo-asset';
 import globalStyle from '~/styles/global';
@@ -11,6 +11,7 @@ import Period from '../status/Period';
 import StatusMark from '../status/StatusMark';
 import ProgressMark from '../status/ProgressMark';
 import DdayMark from '../status/DdayMark';
+import { ChevronRightIcon } from '~/components/icons';
 
 enum EnumImageAsset {
     WhereProject = 0,
@@ -44,6 +45,7 @@ const styles = StyleSheet.create({
         bottom: 0,
         height: 43,
         justifyContent: 'center',
+        padding: 1,
         width: 43,
     },
     writeContent: {
@@ -122,12 +124,7 @@ function ProposalTop(props: ProposalTopProps): JSX.Element | null {
                     style={[styles.writeButton, { backgroundColor: themeContext.color.primary }]}
                     onPress={onPress}
                 >
-                    <Icon
-                        name="chevron-right"
-                        color="white"
-                        style={{ bottom: 1, left: 1 }}
-                        tvParallaxProperties={undefined}
-                    />
+                    <ChevronRightIcon color="white" />
                 </TouchableOpacity>
             </View>
         </View>

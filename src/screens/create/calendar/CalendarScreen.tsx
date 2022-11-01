@@ -13,6 +13,7 @@ import { useAppDispatch } from '~/state/hooks';
 import { selectDatePicker } from '~/state/features/selectDatePicker';
 import { MainScreenProps, replaceToHome } from '~/navigation/main/MainParams';
 import ShortButton from '~/components/button/ShortButton';
+import { ChevronLeftIcon } from '~/components/icons';
 
 LocaleConfig.locales.ko = {
     monthNames: ['일월', '이월', '삼월', '사월', '오월', '유월', '칠월', '팔월', '구월', '시월', '십일월', '십이월'],
@@ -84,7 +85,7 @@ function CalendarScreen({ navigation, route }: MainScreenProps<'Calendar'>): JSX
                         navigation.dispatch(replaceToHome());
                     }
                 }}
-                icon={<Icon name="chevron-left" tvParallaxProperties={undefined} />}
+                icon={<ChevronLeftIcon color="black" />}
                 type="clear"
             />
         );

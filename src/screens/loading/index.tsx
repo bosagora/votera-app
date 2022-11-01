@@ -1,11 +1,11 @@
 import React, { useEffect, useContext } from 'react';
-import { MaterialIcons, Octicons } from '@expo/vector-icons';
 import { useVoteraConfigurationQuery } from '~/graphql/generated/generated';
 import { AuthContext } from '~/contexts/AuthContext';
 import { setAppUpdate } from '~/utils/device';
 import { setAgoraConf, setFeePolicy } from '~/utils/votera/agoraconf';
 import { useAppDispatch } from '~/state/hooks';
 import { hideSnackBar } from '~/state/features/snackBar';
+import { loadFont } from '~/components/icons';
 
 interface LoadingProps {
     onComplete: () => void;
@@ -37,8 +37,7 @@ function Loading(props: LoadingProps): JSX.Element | null {
     useEffect(() => {
         if (!configLoading && loaded) {
             const asyncHandler = async () => {
-                await MaterialIcons.loadFont();
-                await Octicons.loadFont();
+                await loadFont();
                 onComplete();
             };
             asyncHandler().catch(console.log);

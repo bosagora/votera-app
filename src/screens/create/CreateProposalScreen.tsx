@@ -43,6 +43,7 @@ import { getDefaultAssessPeriod, PreviewProposal } from '~/types/proposalType';
 import { MainScreenProps, replaceToHome } from '~/navigation/main/MainParams';
 import { savePreviewToSession } from '~/utils/votera/preview';
 import { isValidBusinessVoteDate } from '~/utils/time';
+import { ChevronLeftIcon } from '~/components/icons';
 
 const TITLE_MAX_LENGTH = 255;
 // const HEADER_BG_WIDTH = Dimensions.get('window').width;
@@ -424,7 +425,7 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
                         navigation.dispatch(replaceToHome());
                     }
                 }}
-                icon={<Icon name="chevron-left" color="white" tvParallaxProperties={undefined} />}
+                icon={<ChevronLeftIcon color="white" />}
                 type="clear"
             />
         );

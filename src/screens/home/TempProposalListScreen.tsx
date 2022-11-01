@@ -1,6 +1,6 @@
 import React, { useContext, useState, useCallback } from 'react';
 import { View, Image, FlatList, Alert, ListRenderItemInfo, ImageURISource, Platform, StyleSheet } from 'react-native';
-import { Button, Text, Icon } from 'react-native-elements';
+import { Button, Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
@@ -18,6 +18,7 @@ import ListFooterButton from '~/components/button/ListFooterButton';
 import getString from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
+import { ChevronLeftIcon } from '~/components/icons';
 
 enum EnumIconAsset {
     Background = 0,
@@ -52,7 +53,7 @@ function TempProposalListScreen({ navigation, route }: MainScreenProps<'TempProp
                         navigation.dispatch(replaceToHome());
                     }
                 }}
-                icon={<Icon name="chevron-left" color="white" tvParallaxProperties={undefined} />}
+                icon={<ChevronLeftIcon color="white" />}
                 type="clear"
             />
         );

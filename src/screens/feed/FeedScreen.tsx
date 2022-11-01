@@ -20,6 +20,7 @@ import { FeedFilterType } from '~/types/filterType';
 import FilterButton from '~/components/button/FilterButton';
 import { AuthContext } from '~/contexts/AuthContext';
 import getString from '~/utils/locales/STRINGS';
+import { ChevronLeftIcon } from '~/components/icons';
 
 enum EnumIconAsset {
     Logo = 0,
@@ -112,7 +113,7 @@ function Feed({ navigation }: MainScreenProps<'Feed'>): JSX.Element {
                         navigation.dispatch(replaceToHome());
                     }
                 }}
-                icon={<Icon name="chevron-left" color="white" tvParallaxProperties={undefined} />}
+                icon={<ChevronLeftIcon color="white" />}
                 type="clear"
             />
         );

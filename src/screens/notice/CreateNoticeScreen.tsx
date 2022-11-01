@@ -3,7 +3,7 @@ import { View, Image, ImageURISource } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { ImagePickerResult } from 'expo-image-picker';
 import { DocumentResult } from 'expo-document-picker';
-import { Button, Input, Text, Icon } from 'react-native-elements';
+import { Button, Input, Text } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemeContext } from 'styled-components/native';
 import { useAssets } from 'expo-asset';
@@ -20,6 +20,7 @@ import getString from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
 import { showLoadingAniModal, hideLoadingAniModal } from '~/state/features/loadingAniModal';
 import { ProposalContext } from '~/contexts/ProposalContext';
+import { ChevronLeftIcon } from '~/components/icons';
 
 const TITLE_MAX_LENGTH = 100;
 // const HEADER_BG_WIDTH = Dimensions.get('window').width;
@@ -146,7 +147,7 @@ function CreateNoticeScreen({ navigation, route }: MainScreenProps<'CreateNotice
                         navigation.dispatch(replaceToHome());
                     }
                 }}
-                icon={<Icon name="chevron-left" color="white" tvParallaxProperties={undefined} />}
+                icon={<ChevronLeftIcon color="white" />}
                 type="clear"
             />
         );

@@ -1,6 +1,6 @@
 import React, { PropsWithChildren } from 'react';
 import { TouchableOpacity, StyleProp, ViewStyle } from 'react-native';
-import * as Linking from 'expo-linking';
+import { openURL as linkingOpenURL } from 'expo-linking';
 
 interface AnchorProps {
     source: string;
@@ -13,7 +13,7 @@ function Anchor(props: PropsWithChildren<AnchorProps>): JSX.Element {
         <TouchableOpacity
             style={style}
             onPress={() => {
-                Linking.openURL(source).catch(console.log);
+                linkingOpenURL(source).catch(console.log);
             }}
         >
             {children}

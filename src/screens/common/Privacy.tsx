@@ -1,12 +1,13 @@
-import React, { useCallback, useContext, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { View } from 'react-native';
-import { Button, Text, Icon } from 'react-native-elements';
+import { Button, Text } from 'react-native-elements';
 import { useLinkTo } from '@react-navigation/native';
 import { CommonScreenProps } from '~/navigation/common/CommonParams';
 import getString from '~/utils/locales/STRINGS';
 import { getPrivacyTermURL } from '~/utils/votera/agoraconf';
 import WebFrameView from '~/components/ui/WebFrameView';
 import globalStyle from '~/styles/global';
+import { ChevronLeftIcon } from '~/components/icons';
 
 function PrivacyScreen({ route, navigation }: CommonScreenProps<'Privacy'>): JSX.Element {
     const [title] = useState(getString('개인정보수집약관'));
@@ -23,7 +24,7 @@ function PrivacyScreen({ route, navigation }: CommonScreenProps<'Privacy'>): JSX
                         linkTo('/home');
                     }
                 }}
-                icon={<Icon name="chevron-left" tvParallaxProperties={undefined} />}
+                icon={<ChevronLeftIcon color="black" />}
                 type="clear"
             />
         );

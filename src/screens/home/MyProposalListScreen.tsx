@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { View, Image, FlatList, ListRenderItemInfo, ImageURISource, StyleSheet } from 'react-native';
-import { Button, Text, Icon } from 'react-native-elements';
+import { Button, Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAssets } from 'expo-asset';
@@ -16,6 +16,7 @@ import getString from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
 import { AuthContext } from '~/contexts/AuthContext';
+import { ChevronLeftIcon } from '~/components/icons';
 
 const FETCH_INIT_LIMIT = 5;
 const FETCH_MORE_LIMIT = 5;
@@ -76,7 +77,7 @@ function MyProposalListScreen({ navigation, route }: MainScreenProps<'MyProposal
                     //     linkTo('/home');
                     // }
                 }}
-                icon={<Icon name="chevron-left" color="white" tvParallaxProperties={undefined} />}
+                icon={<ChevronLeftIcon color="white" />}
                 type="clear"
             />
         );

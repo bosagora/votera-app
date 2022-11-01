@@ -1,6 +1,6 @@
 import React, { useContext, useRef, useState, useCallback, useEffect } from 'react';
 import { View, Animated, Dimensions, useWindowDimensions, NativeScrollEvent } from 'react-native';
-import { Button, Text, Icon } from 'react-native-elements';
+import { Button, Text } from 'react-native-elements';
 import { TabView, SceneRendererProps } from 'react-native-tab-view';
 import { BigNumber } from 'ethers';
 import { useIsFocused } from '@react-navigation/native';
@@ -37,6 +37,9 @@ import VoteraVote from '~/utils/votera/VoteraVote';
 import { VOTE_SELECT } from '~/utils/votera/voterautil';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
+import { useProposalChangedSubscription } from '~/graphql/hooks/Subscriptions';
+import { getProposalStatusString } from '~/components/status/ProgressMark';
+import { ChevronLeftIcon } from '~/components/icons';
 import Info from './Info';
 import Discussion from './Discussion';
 import styles, { HEADER_HEIGHT } from './styles';
@@ -45,8 +48,6 @@ import AssessScreen from './Assess/AssessScreen';
 import VoteScreen from './Vote/VoteScreen';
 import ValidatorScreen from './Validator/ValidatorScreen';
 import { AssessResult } from './Assess/evaluating';
-import { useProposalChangedSubscription } from '~/graphql/hooks/Subscriptions';
-import { getProposalStatusString } from '~/components/status/ProgressMark';
 
 const FETCH_INIT_LIMIT = 10;
 const FETCH_MORE_LIMIT = 10;
@@ -587,7 +588,7 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
                                 navigation.dispatch(replaceToHome());
                             }
                         }}
-                        icon={<Icon name="chevron-left" color="white" tvParallaxProperties={undefined} />}
+                        icon={<ChevronLeftIcon color="white" />}
                         type="clear"
                     />
 

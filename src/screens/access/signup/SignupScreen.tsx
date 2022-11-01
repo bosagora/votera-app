@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { View, Keyboard, BackHandler, Image, ImageURISource, ActivityIndicator, StyleSheet } from 'react-native';
-import { Button, Text, Icon } from 'react-native-elements';
+import { Button, Text } from 'react-native-elements';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TabView, SceneRendererProps, NavigationState } from 'react-native-tab-view';
 import { ThemeContext } from 'styled-components/native';
@@ -16,6 +16,7 @@ import getString from '~/utils/locales/STRINGS';
 import pushService from '~/services/FcmService';
 import { hideLoadingAniModal, showLoadingAniModal } from '~/state/features/loadingAniModal';
 import ShortButton from '~/components/button/ShortButton';
+import { ChevronLeftIcon } from '~/components/icons';
 import Terms from './Terms';
 import NodeGuide from './NodeGuide';
 import NameScreen from './Name';
@@ -185,7 +186,7 @@ function SignupScreen({ navigation }: AccessScreenProps<'Signup'>): JSX.Element 
                         setIndex(index - 1);
                     }
                 }}
-                icon={<Icon color="white" name="chevron-left" tvParallaxProperties={undefined} />}
+                icon={<ChevronLeftIcon color="white" />}
                 type="clear"
             />
         );

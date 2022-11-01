@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext, useCallback } from 'react';
 import { View, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { ThemeContext } from 'styled-components/native';
-import { Button, Text, Icon } from 'react-native-elements';
+import { Button, Text } from 'react-native-elements';
 import globalStyle from '~/styles/global';
 import { AuthContext, MetamaskStatus } from '~/contexts/AuthContext';
 import { ProposalContext } from '~/contexts/ProposalContext';
@@ -10,6 +10,7 @@ import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
 import { getCommonPeriodText } from '~/utils/time';
 import CommonButton from '~/components/button/CommonButton';
+import { CheckIcon } from '~/components/icons';
 
 const styles = StyleSheet.create({
     buttonsContainer: {
@@ -210,13 +211,7 @@ function Evaluating(props: Props): JSX.Element {
                                         });
                                 }
                             }}
-                            icon={
-                                <Icon
-                                    name="check"
-                                    color={allCheck ? themeContext.color.primary : 'rgb(219,213,235)'}
-                                    tvParallaxProperties={undefined}
-                                />
-                            }
+                            icon={<CheckIcon color={allCheck ? themeContext.color.primary : 'rgb(219,213,235)'} />}
                             title={getString('평가하기')}
                             titleStyle={[
                                 globalStyle.btext,

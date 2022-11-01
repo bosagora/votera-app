@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import React, { useContext } from 'react';
 import { View, StyleSheet, StyleProp, ViewStyle, ColorValue } from 'react-native';
-import { Text, Icon } from 'react-native-elements';
+import { Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import {
     Enum_Proposal_Type as EnumProposalType,
@@ -9,6 +9,7 @@ import {
 } from '~/graphql/generated/generated';
 import getString from '~/utils/locales/STRINGS';
 import globalStyle from '~/styles/global';
+import { SmallChevronRightIcon } from '~/components/icons';
 
 const styles = StyleSheet.create({
     label: { fontSize: 11, lineHeight: 19 },
@@ -74,14 +75,9 @@ function ProgressMark(props: ProgressMarkProps): JSX.Element {
                 {temp ? getString('작성중') : getProposalStatusString(status)}
             </Text>
             {status === EnumProposalStatus.Closed && (
-                <Icon
-                    type="font-awesome"
-                    size={14}
-                    name="angle-right"
-                    style={{ paddingLeft: 8 }}
-                    color={color}
-                    tvParallaxProperties={undefined}
-                />
+                <View style={{ paddingLeft: 8, paddingTop: 4 }}>
+                    <SmallChevronRightIcon color={color} size={12} />
+                </View>
             )}
         </View>
     );

@@ -1,10 +1,11 @@
 /* eslint-disable react/display-name */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import React, { useContext, useState, useEffect } from 'react';
-import { Icon, Button } from 'react-native-elements';
+import { Button } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import globalStyle from '~/styles/global';
 import getString from '~/utils/locales/STRINGS';
+import { KeyboardArrowUpIcon, KeyboardArrowDownIcon } from '~/components/icons';
 
 interface CommentButtonProps {
     onPress: any;
@@ -43,19 +44,9 @@ function CommentButton(props: CommentButtonProps): JSX.Element {
             type="outline"
             icon={
                 arrowUp ? (
-                    <Icon
-                        name="keyboard-arrow-up"
-                        color={themeContext.color.primary}
-                        size={10}
-                        tvParallaxProperties={undefined}
-                    />
+                    <KeyboardArrowUpIcon color={themeContext.color.primary} />
                 ) : (
-                    <Icon
-                        name="keyboard-arrow-down"
-                        color={themeContext.color.primary}
-                        size={10}
-                        tvParallaxProperties={undefined}
-                    />
+                    <KeyboardArrowDownIcon size={10} color={themeContext.color.primary} />
                 )
             }
         />

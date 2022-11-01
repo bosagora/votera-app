@@ -1,12 +1,13 @@
 import React, { useState, useContext } from 'react';
 import { TouchableOpacity, Image, View, StyleSheet } from 'react-native';
 import { ThemeContext } from 'styled-components/native';
-import * as ImagePicker from 'expo-image-picker';
-import { Icon, Text } from 'react-native-elements';
+import { ImagePickerResult } from 'expo-image-picker';
+import { Text } from 'react-native-elements';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
 import getString from '~/utils/locales/STRINGS';
 import { launchImageLibraryAsync } from './ImagePickerWebFunc';
+import { AddIcon, ClearIcon } from '~/components/icons';
 
 const styles = StyleSheet.create({
     container: {
@@ -38,8 +39,8 @@ const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 interface Props {
     showImage: boolean;
     placeholder: string;
-    value?: ImagePicker.ImagePickerResult;
-    onChangeImage: (image: ImagePicker.ImagePickerResult | undefined) => void;
+    value?: ImagePickerResult;
+    onChangeImage: (image: ImagePickerResult | undefined) => void;
 }
 
 function ImagePickerComponent(props: Props): JSX.Element {
@@ -67,7 +68,7 @@ function ImagePickerComponent(props: Props): JSX.Element {
 
     const pickImage = async () => {
         try {
-            const result: ImagePicker.ImagePickerResult = await launchImageLibraryAsync();
+            const result: ImagePickerResult = await launchImageLibraryAsync();
             if (!result.cancelled) {
                 if (result.uri.startsWith('data:image')) {
                     const size = getBase64ImageSize(result.uri);
@@ -117,11 +118,11 @@ function ImagePickerComponent(props: Props): JSX.Element {
                     justifyContent: 'center',
                 }}
             >
-                <Icon
-                    color={imageUri ? themeContext.color.primary : themeContext.color.white}
-                    name={imageUri ? 'clear' : 'add'}
-                    tvParallaxProperties={undefined}
-                />
+                {imageUri ? (
+                    <ClearIcon color={themeContext.color.primary} />
+                ) : (
+                    <AddIcon color={themeContext.color.white} />
+                )}
             </TouchableOpacity>
         </View>
     );

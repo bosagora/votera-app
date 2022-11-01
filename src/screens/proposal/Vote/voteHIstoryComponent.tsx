@@ -2,12 +2,13 @@ import React, { useContext } from 'react';
 import { View, Image, ImageURISource } from 'react-native';
 // import { GBText, BText, RLText } from '~/components/text';
 import { DefaultTheme, ThemeContext } from 'styled-components/native';
-import { Icon, Text } from 'react-native-elements';
+import { Text } from 'react-native-elements';
 import { useAssets } from 'expo-asset';
 import dayjs from 'dayjs';
 import globalStyle from '~/styles/global';
 import { VOTE_SELECT } from '~/utils/votera/voterautil';
 import getString from '~/utils/locales/STRINGS';
+import { CloseIcon } from '~/components/icons';
 
 function getVoteColor(type: VOTE_SELECT, theme: DefaultTheme): string {
     switch (type) {
@@ -62,7 +63,7 @@ function VoteHistoryComponent(props: Props): JSX.Element {
             case VOTE_SELECT.YES:
                 return agreeMark();
             case VOTE_SELECT.NO:
-                return <Icon name="close" color={themeContext.color.disagree} tvParallaxProperties={undefined} />;
+                return <CloseIcon color={themeContext.color.disagree} />;
             default:
                 return assets ? (
                     <Image

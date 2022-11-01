@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { View, TouchableOpacity, Platform, useWindowDimensions, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, Platform, useWindowDimensions, StyleSheet, Image, ImageURISource } from 'react-native';
 import { DrawerContentScrollView, DrawerContentComponentProps } from '@react-navigation/drawer';
 import { useLinkTo, StackActions } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemeContext } from 'styled-components/native';
-import { Button, Text, Icon } from 'react-native-elements';
-import { MaterialIcons, Octicons } from '@expo/vector-icons';
-import * as Clipboard from 'expo-clipboard';
+import { Button, Text } from 'react-native-elements';
+import { setStringAsync } from 'expo-clipboard';
+import { useAssets } from 'expo-asset';
 import { AuthContext } from '~/contexts/AuthContext';
 import globalStyle, { isLargeScreen } from '~/styles/global';
 import { useIsValidatorLazyQuery } from '~/graphql/generated/generated';
@@ -16,6 +16,7 @@ import { showSnackBar } from '~/state/features/snackBar';
 import { RoundDecimalPoint, WeiAmountToString } from '~/utils/votera/voterautil';
 import { getBlockExplorerUrl } from '~/utils/votera/agoraconf';
 import Anchor from '~/components/anchor/Anchor';
+import { CopyIcon, ChevronRightIcon, CloseIcon, HomeIcon, NotificationIcon } from '~/components/icons';
 
 const styles = StyleSheet.create({
     anchor: {
@@ -54,6 +55,14 @@ const styles = StyleSheet.create({
     validator: { fontSize: 14, lineHeight: 18 },
 });
 
+enum EnumIconAsset {
+    PublicKey = 0,
+    Address,
+}
+
+// eslint-disable-next-line global-require, import/extensions
+const iconAssets = [require('@assets/icons/key.png'), require('@assets/icons/globe.png')];
+
 function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element {
     const insets = useSafeAreaInsets();
     const themeContext = useContext(ThemeContext);
@@ -74,6 +83,7 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
     });
     const { width } = useWindowDimensions();
     const linkTo = useLinkTo();
+    const [assets] = useAssets(iconAssets);
 
     const onClickSignout = () => {
         if (isGuest) {
@@ -128,7 +138,7 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                 <View style={globalStyle.flexRowBetween}>
                     <View style={{ flexDirection: 'row' }}>
                         <TouchableOpacity style={{ marginRight: 5 }} onPress={() => linkTo('/home')}>
-                            <Icon size={28} name="home" color="rgb(91,194,217)" tvParallaxProperties={undefined} />
+                            <HomeIcon color="rgb(91,194,217)" />
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={() => {
@@ -139,12 +149,7 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                                 }
                             }}
                         >
-                            <Icon
-                                size={28}
-                                name="notifications"
-                                color="rgb(91,194,217)"
-                                tvParallaxProperties={undefined}
-                            />
+                            <NotificationIcon color="rgb(91,194,217)" />
                             {feedCount !== 0 && (
                                 <View
                                     style={[
@@ -173,7 +178,7 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                     </View>
                     {!isLargeScreen(width) && (
                         <Button
-                            icon={<Icon name="close" color="lightgray" tvParallaxProperties={undefined} />}
+                            icon={<CloseIcon color="lightgray" />}
                             onPress={() => navigation.closeDrawer()}
                             type="clear"
                         />
@@ -205,14 +210,14 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                     </View>
                     {!isGuest && (
                         <>
-                            {publicKey && (
+                            {publicKey && assets && (
                                 <View
                                     style={[
                                         globalStyle.flexRowBetween,
                                         { marginTop: Platform.OS === 'android' ? 5 : 14 },
                                     ]}
                                 >
-                                    <Octicons name="key" size={18} />
+                                    <Image source={assets[EnumIconAsset.PublicKey] as ImageURISource} />
                                     <Anchor style={styles.anchor} source={getBlockExplorerUrl(metamaskAccount || '')}>
                                         <Text
                                             style={[
@@ -237,24 +242,20 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                                     <TouchableOpacity
                                         style={styles.copyIcon}
                                         onPress={() => {
-                                            Clipboard.setStringAsync(publicKey)
+                                            setStringAsync(publicKey)
                                                 .then(() => {
                                                     dispatch(showSnackBar(getString('클립보드에 복사되었습니다')));
                                                 })
                                                 .catch(console.log);
                                         }}
                                     >
-                                        <MaterialIcons
-                                            name="content-copy"
-                                            size={20}
-                                            color={themeContext.color.primary}
-                                        />
+                                        <CopyIcon color={themeContext.color.primary} />
                                     </TouchableOpacity>
                                 </View>
                             )}
-                            {metamaskAccount && (
+                            {metamaskAccount && assets && (
                                 <View style={[globalStyle.flexRowBetween, { marginTop: 14 }]}>
-                                    <Octicons name="globe" size={18} />
+                                    <Image source={assets[EnumIconAsset.Address] as ImageURISource} />
                                     <Anchor style={styles.anchor} source={getBlockExplorerUrl(metamaskAccount || '')}>
                                         <Text
                                             style={[
@@ -279,18 +280,14 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                                     <TouchableOpacity
                                         style={styles.copyIcon}
                                         onPress={() => {
-                                            Clipboard.setStringAsync(metamaskAccount)
+                                            setStringAsync(metamaskAccount)
                                                 .then(() => {
                                                     dispatch(showSnackBar(getString('클립보드에 복사되었습니다')));
                                                 })
                                                 .catch(console.log);
                                         }}
                                     >
-                                        <MaterialIcons
-                                            name="content-copy"
-                                            size={20}
-                                            color={themeContext.color.primary}
-                                        />
+                                        <CopyIcon color={themeContext.color.primary} />
                                     </TouchableOpacity>
                                 </View>
                             )}
@@ -335,7 +332,7 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                 >
                     <Text style={[globalStyle.btext, styles.menuLabel]}>{getString('내가 참여한 제안')}</Text>
                     <View style={[globalStyle.center, styles.menuRightIcon]}>
-                        <Icon name="chevron-right" color="darkgray" tvParallaxProperties={undefined} />
+                        <ChevronRightIcon color="darkgray" />
                     </View>
                 </TouchableOpacity>
 
@@ -357,7 +354,7 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                     >
                         <Text style={[globalStyle.rtext, styles.subLabel]}>{getString('신규제안 작성')}</Text>
                         <View style={[globalStyle.center, styles.menuRightIcon]}>
-                            <Icon name="chevron-right" color="darkgray" tvParallaxProperties={undefined} />
+                            <ChevronRightIcon color="darkgray" />
                         </View>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -369,7 +366,7 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                     >
                         <Text style={[globalStyle.rtext, styles.subLabel]}>{getString('임시저장 제안')}</Text>
                         <View style={[globalStyle.center, styles.menuRightIcon]}>
-                            <Icon name="chevron-right" color="darkgray" tvParallaxProperties={undefined} />
+                            <ChevronRightIcon color="darkgray" />
                         </View>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -385,7 +382,7 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                     >
                         <Text style={[globalStyle.rtext, styles.subLabel]}>{getString('내가 작성한 제안')}</Text>
                         <View style={[globalStyle.center, styles.menuRightIcon]}>
-                            <Icon name="chevron-right" color="darkgray" tvParallaxProperties={undefined} />
+                            <ChevronRightIcon color="darkgray" />
                         </View>
                     </TouchableOpacity>
                 </View>
@@ -395,7 +392,7 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                 <TouchableOpacity style={globalStyle.flexRowBetween} onPress={() => linkTo('/settings')}>
                     <Text style={[globalStyle.btext, styles.menuLabel]}>{getString('설정')}</Text>
                     <View style={[globalStyle.center, styles.menuRightIcon]}>
-                        <Icon name="chevron-right" color="darkgray" tvParallaxProperties={undefined} />
+                        <ChevronRightIcon color="darkgray" />
                     </View>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.subMenu} onPress={onClickSignout}>

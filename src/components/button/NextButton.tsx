@@ -1,8 +1,9 @@
 import React, { useContext } from 'react';
 import { View, StyleSheet, Image, TouchableOpacity, StyleProp, ViewStyle } from 'react-native';
-import { Icon, Text } from 'react-native-elements';
+import { Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import globalStyle from '~/styles/global';
+import { ChevronRightIcon } from '~/components/icons';
 
 interface ButtonProps {
     icon?: Image;
@@ -59,12 +60,7 @@ function ButtonContent(props: ButtonProps): JSX.Element {
                         </Text>
                     </>
                 </View>
-                <Icon
-                    name="chevron-right"
-                    color={filled ? themeContext.color.white : themeContext.color.primary}
-                    style={{}}
-                    tvParallaxProperties={undefined}
-                />
+                <ChevronRightIcon color={filled ? themeContext.color.white : themeContext.color.primary} />
             </TouchableOpacity>
         </View>
     );

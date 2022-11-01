@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleProp, ViewStyle, TouchableOpacity, TextStyle } from 'react-native';
-import { Icon, Text } from 'react-native-elements';
+import { Text } from 'react-native-elements';
 import globalStyle from '~/styles/global';
+import { ArrowBackIcon, ClearIcon } from '~/components/icons';
 import styles from './style';
 
 interface CellProps {
@@ -75,11 +76,11 @@ function VirtualNumericKeypad(props: VirtualNumericKeypadProps): JSX.Element {
             <Row symbols={[7, 8, 9]} cellStyle={cellStyle} rowStyle={rowStyle} onPress={onPress} />
             <View style={[styles.row, rowStyle]}>
                 <TouchableOpacity style={[styles.cell, cellStyle]} onPress={() => onPress('clear')}>
-                    <Icon name="clear" tvParallaxProperties={undefined} />
+                    <ClearIcon color="black" />
                 </TouchableOpacity>
                 <Cell symbol={0} onPress={() => onPress(0)} cellStyle={cellStyle} />
                 <TouchableOpacity style={[styles.cell, cellStyle]} onPress={() => onPress('back')}>
-                    <Icon name="arrow-back" tvParallaxProperties={undefined} />
+                    <ArrowBackIcon color="black" />
                 </TouchableOpacity>
             </View>
         </View>

@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { View, Image, FlatList, RefreshControl, ImageURISource, ActivityIndicator } from 'react-native';
-import { Button, Icon, Text } from 'react-native-elements';
+import { Button, Text } from 'react-native-elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAssets } from 'expo-asset';
 import globalStyle, { TOP_NAV_HEIGHT } from '~/styles/global';
@@ -13,6 +13,7 @@ import { ProposalContext } from '~/contexts/ProposalContext';
 import { AuthContext } from '~/contexts/AuthContext';
 import getString from '~/utils/locales/STRINGS';
 import { isCloseToBottom } from '~/utils';
+import { AddIcon, ChevronLeftIcon } from '~/components/icons';
 
 const FETCH_INIT_LIMIT = 5;
 const FETCH_MORE_LIMIT = 5;
@@ -74,7 +75,7 @@ function NoticeScreen({ navigation, route }: MainScreenProps<'Notice'>): JSX.Ele
                         navigation.dispatch(replaceToHome());
                     }
                 }}
-                icon={<Icon name="chevron-left" color="white" tvParallaxProperties={undefined} />}
+                icon={<ChevronLeftIcon color="white" />}
                 type="clear"
             />
         );
@@ -86,7 +87,7 @@ function NoticeScreen({ navigation, route }: MainScreenProps<'Notice'>): JSX.Ele
                 onPress={() => {
                     navigation.push('RootUser', { screen: 'CreateNotice', params: { id: route.params.id } });
                 }}
-                icon={<Icon name="add" color="white" tvParallaxProperties={undefined} />}
+                icon={<AddIcon color="white" />}
                 type="clear"
             />
         ) : null;

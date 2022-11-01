@@ -1,6 +1,6 @@
 import React, { useCallback, useContext, useState, useEffect, useMemo } from 'react';
 import { View, ScrollView, ActivityIndicator } from 'react-native';
-import { Button, Text, Icon } from 'react-native-elements';
+import { Button, Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import { debounce } from 'lodash';
 import { useLinkTo } from '@react-navigation/native';
@@ -15,6 +15,7 @@ import { showSnackBar } from '~/state/features/snackBar';
 import { showLoadingAniModal, hideLoadingAniModal } from '~/state/features/loadingAniModal';
 import { MainScreenProps } from '~/navigation/main/MainParams';
 import { useCheckUsernameLazyQuery } from '~/graphql/generated/generated';
+import { ChevronLeftIcon } from '~/components/icons';
 
 const DEBOUNCER_TIME = 300;
 
@@ -56,7 +57,7 @@ function AccountInfo({ navigation, route }: MainScreenProps<'AccountInfo'>): JSX
                         linkTo('/home');
                     }
                 }}
-                icon={<Icon name="chevron-left" tvParallaxProperties={undefined} />}
+                icon={<ChevronLeftIcon color="black" />}
                 type="clear"
             />
         );

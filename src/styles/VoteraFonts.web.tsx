@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, import/extensions, global-require */
 import React from 'react';
 import { useFonts, FontDisplay } from 'expo-font';
-import { Platform } from 'react-native';
 
 export function useVoteraFonts(): [boolean, Error | null] {
     const [fontLoaded, error] = useFonts({
@@ -13,13 +12,6 @@ export function useVoteraFonts(): [boolean, Error | null] {
             uri: 'https://cdn.jsdelivr.net/gh/webfontworld/gmarket/GmarketSansMedium.woff',
             display: FontDisplay.SWAP,
         },
-        // NotoSansCJKkrBold: require('@assets/fonts/NotoSansCJKkr-Bold.otf'),
-        // NotoSansCJKkrLight: require('@assets/fonts/NotoSansCJKkr-Light.otf'),
-        // NotoSansCJKkrMedium: require('@assets/fonts/NotoSansCJKkr-Medium.otf'),
-        // NotoSansCJKkrRegular: require('@assets/fonts/NotoSansCJKkr-Regular.otf'),
-        // RobotoRegular: require('@assets/fonts/Roboto-Regular.ttf'),
-        // RobotoMedium: require('@assets/fonts/Roboto-Medium.ttf'),
-        // RobotoLight: require('@assets/fonts/Roboto-Light.ttf'),
     });
 
     const linkElement = document.createElement('link');
