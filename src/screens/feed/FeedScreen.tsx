@@ -4,6 +4,9 @@ import { Button, Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAssets } from 'expo-asset';
+import { Reference } from '@apollo/client';
+import { Modifiers } from '@apollo/client/cache/core/types/common';
+import stringify from 'fast-json-stable-stringify';
 import globalStyle, { TOP_NAV_HEIGHT } from '~/styles/global';
 import { MainScreenProps, replaceToHome } from '~/navigation/main/MainParams';
 import FeedCard from '~/components/feed/FeedCard';
@@ -56,6 +59,13 @@ function getVariablesForQuery(target: string, filter: FeedFilterType) {
         sort: 'createdAt:desc',
         where,
     };
+}
+
+interface ListFeedsPayloadObject {
+    __typename?: string;
+    count?: number;
+    notReadCount?: number;
+    values?: Reference[] | undefined;
 }
 
 function Feed({ navigation }: MainScreenProps<'Feed'>): JSX.Element {
@@ -185,6 +195,27 @@ function Feed({ navigation }: MainScreenProps<'Feed'>): JSX.Element {
         );
     }, [count, filter, notReadCount, themeContext.color.textBlack]);
 
+    const modifyCache = useCallback(
+        (id: string) => {
+            const { limit, ...variables } = getVariablesForQuery(user?.userId || '', FeedFilterType.NO_READ);
+            const targetFieldName = `listFeeds:${stringify(variables)}`;
+            const fields: Modifiers = {};
+            fields[targetFieldName] = (existingRef: ListFeedsPayloadObject, { readField }) => {
+                const foundIndex = existingRef.values?.findIndex((feedsRef) => id === readField('id', feedsRef));
+                if (foundIndex === undefined || foundIndex === -1) {
+                    return existingRef;
+                }
+                const response = { ...existingRef };
+                response.values = response.values?.filter((_, index) => index !== foundIndex);
+                response.count = (existingRef.count ?? 1) - 1;
+                response.notReadCount = (existingRef.notReadCount ?? 1) - 1;
+                return response;
+            };
+            client.cache.modify({ id: 'ROOT_QUERY', fields });
+        },
+        [client.cache, user?.userId],
+    );
+
     const renderFeedCard = useCallback(
         (info: ListRenderItemInfo<Feeds>): JSX.Element => {
             const { id, type, isRead } = info.item;
@@ -195,8 +226,12 @@ function Feed({ navigation }: MainScreenProps<'Feed'>): JSX.Element {
                         item={info.item}
                         onPress={() => {
                             if (!isRead) {
-                                updateFeed(id).catch(console.log);
-                                decreaseCount();
+                                updateFeed(id)
+                                    .then((value) => {
+                                        modifyCache(id);
+                                        decreaseCount();
+                                    })
+                                    .catch(console.log);
                             }
                             const stackAction = getNavigationType(
                                 type,
@@ -210,7 +245,7 @@ function Feed({ navigation }: MainScreenProps<'Feed'>): JSX.Element {
                 </View>
             );
         },
-        [decreaseCount, navigation, updateFeed],
+        [decreaseCount, modifyCache, navigation, updateFeed],
     );
 
     return (
@@ -233,7 +268,7 @@ function Feed({ navigation }: MainScreenProps<'Feed'>): JSX.Element {
             onRefresh={() => {
                 if (!loading) {
                     setPullRefresh(true);
-                    const variables = getVariablesForQuery(user?.address || '', filter);
+                    const variables = getVariablesForQuery(user?.userId || '', filter);
                     client.cache.evict({
                         fieldName: 'listFeeds',
                         args: variables,
