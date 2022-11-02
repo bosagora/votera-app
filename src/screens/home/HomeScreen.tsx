@@ -14,7 +14,7 @@ import {
 import { ThemeContext } from 'styled-components/native';
 import { Button, Text } from 'react-native-elements';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useFocusEffect, DrawerActions, useLinkTo } from '@react-navigation/native';
+import { useFocusEffect, DrawerActions } from '@react-navigation/native';
 import { useAssets } from 'expo-asset';
 import { TabView, SceneRendererProps, NavigationState } from 'react-native-tab-view';
 import { AuthContext, MetamaskStatus } from '~/contexts/AuthContext';
@@ -84,7 +84,6 @@ function HomeScreen({ navigation, route }: MainScreenProps<'Home'>): JSX.Element
     const [assets] = useAssets(iconAssets);
     const { width } = useWindowDimensions();
     const { isGuest, metamaskStatus, metamaskConnect } = useContext(AuthContext);
-    const linkTo = useLinkTo();
     const [index, setIndex] = useState(0);
     const [routes] = useState(keys);
 
@@ -109,7 +108,10 @@ function HomeScreen({ navigation, route }: MainScreenProps<'Home'>): JSX.Element
         if (isGuest) {
             return (
                 <View style={{ flexDirection: 'row' }}>
-                    <TouchableOpacity style={styles.searchButton} onPress={() => linkTo('/search')}>
+                    <TouchableOpacity
+                        style={styles.searchButton}
+                        onPress={() => navigation.push('RootUser', { screen: 'Search' })}
+                    >
                         <SearchIcon color="black" />
                     </TouchableOpacity>
                 </View>
@@ -147,12 +149,15 @@ function HomeScreen({ navigation, route }: MainScreenProps<'Home'>): JSX.Element
                         </Text>
                     </View>
                 )}
-                <TouchableOpacity style={styles.searchButton} onPress={() => linkTo('/search')}>
+                <TouchableOpacity
+                    style={styles.searchButton}
+                    onPress={() => navigation.push('RootUser', { screen: 'Search' })}
+                >
                     <SearchIcon color="black" />
                 </TouchableOpacity>
             </View>
         );
-    }, [assets, isGuest, linkTo, metamaskConnect, metamaskStatus, themeContext.color.primary]);
+    }, [assets, isGuest, metamaskConnect, metamaskStatus, navigation, themeContext.color.primary]);
 
     useLayoutEffect(() => {
         navigation.setOptions({

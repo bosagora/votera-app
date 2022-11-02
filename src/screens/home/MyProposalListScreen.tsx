@@ -4,10 +4,9 @@ import { Button, Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAssets } from 'expo-asset';
-// import { useLinkTo } from '@react-navigation/native';
 import ProposalCard from '~/components/proposal/ProposalCard';
 import { Proposal, useGetProposalsLazyQuery } from '~/graphql/generated/generated';
-import { MainScreenProps } from '~/navigation/main/MainParams';
+import { MainScreenProps, replaceToHome } from '~/navigation/main/MainParams';
 import globalStyle, { TOP_NAV_HEIGHT } from '~/styles/global';
 import { ProposalFilterType } from '~/types/filterType';
 import { ProposalContext } from '~/contexts/ProposalContext';
@@ -55,7 +54,6 @@ function MyProposalListScreen({ navigation, route }: MainScreenProps<'MyProposal
     const { user } = useContext(AuthContext);
     const [pullRefresh, setPullRefresh] = useState(false);
     const [assets] = useAssets(iconAssets);
-    // const linkTo = useLinkTo();
 
     const [getMyProposals, { data: resProposalsConnectionData, fetchMore: myFetchMore, loading: myLoading, client }] =
         useGetProposalsLazyQuery({
@@ -70,12 +68,11 @@ function MyProposalListScreen({ navigation, route }: MainScreenProps<'MyProposal
         return (
             <Button
                 onPress={() => {
-                    navigation.pop();
-                    // if (navigation.canGoBack()) {
-                    //     navigation.goBack();
-                    // } else {
-                    //     linkTo('/home');
-                    // }
+                    if (navigation.canGoBack()) {
+                        navigation.pop();
+                    } else {
+                        navigation.dispatch(replaceToHome());
+                    }
                 }}
                 icon={<ChevronLeftIcon color="white" />}
                 type="clear"
@@ -149,7 +146,6 @@ function MyProposalListScreen({ navigation, route }: MainScreenProps<'MyProposal
                         if (item.proposalId) {
                             fetchProposal(item.proposalId);
                             navigation.push('RootUser', { screen: 'ProposalDetail', params: { id: item.proposalId } });
-                            // linkTo(`/detail/${item.proposalId}`);
                         } else {
                             dispatch(showSnackBar(getString('제안서 정보가 올바르지 않습니다')));
                         }

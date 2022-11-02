@@ -1,12 +1,13 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { View, TouchableOpacity } from 'react-native';
-import { useLinkTo } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 import { Text, CheckBox } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import CommonButton from '~/components/button/CommonButton';
 import getString from '~/utils/locales/STRINGS';
 import globalStyle from '~/styles/global';
 import { CheckIcon } from '~/components/icons';
+import { AccessNavigationProps } from '~/navigation/access/AccessParams';
 
 interface TermsProps {
     onComplete: () => void;
@@ -18,8 +19,7 @@ function Terms(props: TermsProps): JSX.Element {
     const [congressTerm, setCongressTerm] = useState(false);
     const [privacyTerm, setPrivacyTerm] = useState(false);
     const [allCheck, setAllCheck] = useState(false);
-    const linkTo = useLinkTo();
-    // const navigation = useNavigation<AccessNavigationProps<'Signup'>>();
+    const navigation = useNavigation<AccessNavigationProps<'Signup'>>();
 
     useEffect(() => {
         setAllCheck(congressTerm && privacyTerm);
@@ -62,7 +62,7 @@ function Terms(props: TermsProps): JSX.Element {
                             {getString(`"Congress Function" 인증회원 약관`)}
                         </Text>
                     </View>
-                    <TouchableOpacity onPress={() => linkTo('/userservice')}>
+                    <TouchableOpacity onPress={() => navigation.push('Common', { screen: 'UserService' })}>
                         <Text style={{ color: color.primary }}>{getString('내용보기')}</Text>
                     </TouchableOpacity>
                 </View>
@@ -78,7 +78,7 @@ function Terms(props: TermsProps): JSX.Element {
                         />
                         <Text style={{ fontSize: 13, letterSpacing: -1 }}>{getString('개인정보수집 및 이용약관')}</Text>
                     </View>
-                    <TouchableOpacity onPress={() => linkTo('/privacy')}>
+                    <TouchableOpacity onPress={() => navigation.push('Common', { screen: 'Privacy' })}>
                         <Text style={{ color: color.primary }}>{getString('내용보기')}</Text>
                     </TouchableOpacity>
                 </View>

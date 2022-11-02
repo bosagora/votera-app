@@ -6,13 +6,12 @@ import { Button, Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import MetaMaskOnboarding from '@metamask/onboarding';
 import { useAssets } from 'expo-asset';
-import { useLinkTo } from '@react-navigation/native';
 import CommonButton from '~/components/button/CommonButton';
 import { AuthContext, MetamaskStatus } from '~/contexts/AuthContext';
 import { AccessScreenProps } from '~/navigation/access/AccessParams';
 import globalStyle from '~/styles/global';
 import getString from '~/utils/locales/STRINGS';
-import { WhereType } from '~/graphql/hooks/Proposals';
+import { replaceToHome } from '~/navigation/main/MainParams';
 
 enum EnumIconAsset {
     FullnameLogo = 0,
@@ -40,7 +39,6 @@ function LandingScreen({ navigation }: AccessScreenProps<'Landing'>): JSX.Elemen
     const [showLanding, setShowLanding] = useState(false);
     const onboarding = useRef<MetaMaskOnboarding>();
     const [assets] = useAssets(iconAssets);
-    const linkTo = useLinkTo();
 
     useEffect(() => {
         if (!onboarding.current) {
@@ -80,7 +78,7 @@ function LandingScreen({ navigation }: AccessScreenProps<'Landing'>): JSX.Elemen
 
     useEffect(() => {
         if (routeLoaded && isGuest) {
-            navigation.navigate('RootUser', { screen: 'Home', params: { where: WhereType.PROJECT } });
+            navigation.dispatch(replaceToHome());
         }
     }, [routeLoaded, isGuest, navigation]);
 
@@ -129,7 +127,7 @@ function LandingScreen({ navigation }: AccessScreenProps<'Landing'>): JSX.Elemen
                         title={getString('계정만들기')}
                         buttonStyle={globalStyle.metaButton}
                         filled
-                        onPress={() => linkTo('/signup')}
+                        onPress={() => navigation.push('Signup')}
                         raised
                     />
                 )}
@@ -158,7 +156,7 @@ function LandingScreen({ navigation }: AccessScreenProps<'Landing'>): JSX.Elemen
                                 color: themeContext.color.textGray,
                             }}
                             type="clear"
-                            onPress={() => linkTo('/userservice')}
+                            onPress={() => navigation.push('Common', { screen: 'UserService' })}
                         />
                         <Button
                             title={getString('개인정보보호정책')}
@@ -167,7 +165,7 @@ function LandingScreen({ navigation }: AccessScreenProps<'Landing'>): JSX.Elemen
                                 color: themeContext.color.textGray,
                             }}
                             type="clear"
-                            onPress={() => linkTo('/privacy')}
+                            onPress={() => navigation.push('Common', { screen: 'Privacy' })}
                         />
                     </View>
                 </View>

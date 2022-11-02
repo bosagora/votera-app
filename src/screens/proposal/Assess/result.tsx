@@ -38,7 +38,6 @@ function EvaluationResult(props: Props): JSX.Element {
     const [proposals, setProposals] = useState([]);
     const { fetchProposal } = useContext(ProposalContext);
     const themeContext = useContext(ThemeContext);
-    // const linkTo = useLinkTo();
     const navigation = useNavigation<MainNavigationProps<'ProposalDetail'>>();
     const rejected = assessResultData?.proposalState === EnumAssessProposalState.Rejected;
 
@@ -89,7 +88,6 @@ function EvaluationResult(props: Props): JSX.Element {
                                         screen: 'ProposalDetail',
                                         params: { id: item.proposalId || '' },
                                     });
-                                    // linkTo(`/detail/${item.proposalId || ''}`);
                                 }}
                             />
                         ))}

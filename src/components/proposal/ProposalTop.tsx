@@ -78,11 +78,7 @@ function ProposalTop(props: ProposalTopProps): JSX.Element | null {
         <View style={[styles.contents, { backgroundColor: themeContext.color.white }]}>
             <ImageBackground
                 // eslint-disable-next-line global-require, import/extensions, @typescript-eslint/no-unsafe-assignment
-                source={
-                    assets[
-                        where === WhereType.PROJECT ? EnumImageAsset.WhereProject : EnumImageAsset.WhereOpen
-                    ] as ImageURISource
-                }
+                source={assets[EnumImageAsset.WhereProject] as ImageURISource}
                 style={styles.imageBackground}
                 imageStyle={{ borderRadius: 14 }}
                 resizeMode="cover"

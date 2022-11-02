@@ -73,7 +73,6 @@ function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment
                         screen: 'ProposalDetail',
                         params: { id },
                     });
-                    // linkTo(`/detail/${id}`);
                 }}
             />
         );

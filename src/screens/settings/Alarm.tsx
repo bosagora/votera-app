@@ -3,8 +3,7 @@ import { View, ScrollView, Switch } from 'react-native';
 import { Button, Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import { debounce } from 'lodash';
-import { useLinkTo } from '@react-navigation/native';
-import { MainScreenProps } from '~/navigation/main/MainParams';
+import { MainScreenProps, replaceToHome } from '~/navigation/main/MainParams';
 import globalStyle from '~/styles/global';
 import { useUpdateAlarmStatusMutation } from '~/graphql/generated/generated';
 import { FeedProps } from '~/types/alarmType';
@@ -28,7 +27,6 @@ function Alarm({ navigation, route }: MainScreenProps<'Alarm'>): JSX.Element {
     const { isGuest, user } = useContext(AuthContext);
     const [feedStatus, setFeedStatus] = useState<FeedProps>();
     const [updateAlarmMutate] = useUpdateAlarmStatusMutation();
-    const linkTo = useLinkTo();
 
     useEffect(() => {
         setFeedStatus(pushService.getUserAlarmStatus());
@@ -74,16 +72,16 @@ function Alarm({ navigation, route }: MainScreenProps<'Alarm'>): JSX.Element {
             <Button
                 onPress={() => {
                     if (navigation.canGoBack()) {
-                        navigation.goBack();
+                        navigation.pop();
                     } else {
-                        linkTo('/home');
+                        navigation.dispatch(replaceToHome());
                     }
                 }}
                 icon={<ChevronLeftIcon color="black" />}
                 type="clear"
             />
         );
-    }, [navigation, linkTo]);
+    }, [navigation]);
 
     React.useLayoutEffect(() => {
         navigation.setOptions({

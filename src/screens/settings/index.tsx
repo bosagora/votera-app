@@ -2,11 +2,11 @@ import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { View, ScrollView, StyleSheet, Switch, Platform } from 'react-native';
 import { Button, Text } from 'react-native-elements';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { useIsFocused, useLinkTo } from '@react-navigation/native';
+import { useIsFocused } from '@react-navigation/native';
 import { ThemeContext } from 'styled-components/native';
 import globalStyle from '~/styles/global';
 import pushService from '~/services/FcmService';
-import { MainScreenProps } from '~/navigation/main/MainParams';
+import { MainScreenProps, replaceToHome } from '~/navigation/main/MainParams';
 import { useUpdatePushTokenMutation } from '~/graphql/generated/generated';
 import { getAppUpdate, getCurrentVersion } from '~/utils/device';
 import { AuthContext } from '~/contexts/AuthContext';
@@ -42,7 +42,6 @@ function Settings({ navigation, route }: MainScreenProps<'Settings'>): JSX.Eleme
     const isFocused = useIsFocused();
     const [usePush, setUsePush] = useState<boolean>(!isGuest);
     const [disablePush, setDisablePush] = useState<boolean>(isGuest);
-    const linkTo = useLinkTo();
 
     const [updatePushToken] = useUpdatePushTokenMutation();
 
@@ -99,16 +98,16 @@ function Settings({ navigation, route }: MainScreenProps<'Settings'>): JSX.Eleme
             <Button
                 onPress={() => {
                     if (navigation.canGoBack()) {
-                        navigation.goBack();
+                        navigation.pop();
                     } else {
-                        linkTo('/home');
+                        navigation.dispatch(replaceToHome());
                     }
                 }}
                 icon={<ChevronLeftIcon color="black" />}
                 type="clear"
             />
         );
-    }, [navigation, linkTo]);
+    }, [navigation]);
 
     React.useLayoutEffect(() => {
         navigation.setOptions({
@@ -165,7 +164,7 @@ function Settings({ navigation, route }: MainScreenProps<'Settings'>): JSX.Eleme
                     )}
                     <TouchableOpacity
                         style={[globalStyle.flexRowBetween, { height: 40 }]}
-                        onPress={() => linkTo('/alarm')}
+                        onPress={() => navigation.push('RootUser', { screen: 'Alarm' })}
                     >
                         <Text style={{ fontSize: 13 }}>{getString('알림 수신 설정')}</Text>
                         <ChevronRightIcon color="darkgray" />
@@ -178,7 +177,7 @@ function Settings({ navigation, route }: MainScreenProps<'Settings'>): JSX.Eleme
                     <Text style={[globalStyle.btext, styles.sectionLabel]}>{getString('계정 설정')}</Text>
                     <TouchableOpacity
                         style={[globalStyle.flexRowBetween, { height: 40 }]}
-                        onPress={() => linkTo('/accountinfo')}
+                        onPress={() => navigation.push('RootUser', { screen: 'AccountInfo' })}
                     >
                         <Text style={{ fontSize: 13 }}>{getString('계정이름 변경하기')}</Text>
                         <ChevronRightIcon color="darkgray" />
@@ -191,7 +190,7 @@ function Settings({ navigation, route }: MainScreenProps<'Settings'>): JSX.Eleme
 
                 <TouchableOpacity
                     style={[globalStyle.flexRowBetween, { height: 40 }]}
-                    onPress={() => linkTo('/userservice')}
+                    onPress={() => navigation.push('Common', { screen: 'UserService' })}
                 >
                     <Text style={{ fontSize: 13 }}>{getString('이용약관')}</Text>
                     <ChevronRightIcon color="darkgray" />
@@ -199,7 +198,7 @@ function Settings({ navigation, route }: MainScreenProps<'Settings'>): JSX.Eleme
 
                 <TouchableOpacity
                     style={[globalStyle.flexRowBetween, { height: 40 }]}
-                    onPress={() => linkTo('/privacy')}
+                    onPress={() => navigation.push('Common', { screen: 'Privacy' })}
                 >
                     <Text style={{ fontSize: 13 }}>{getString('개인정보보호정책')}</Text>
                     <ChevronRightIcon color="darkgray" />

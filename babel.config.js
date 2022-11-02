@@ -21,7 +21,8 @@ module.exports = function(api) {
         }
       ],
       ['react-native-reanimated/plugin'],
-      ['graphql-tag']
+      ['graphql-tag'],
+      ['transform-remove-console', { 'exclude': ['error', 'warn'] }]
     ]
   };
 };

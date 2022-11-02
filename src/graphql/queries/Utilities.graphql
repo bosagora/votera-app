@@ -17,7 +17,8 @@ query VoteraConfiguration {
         commonsBudgetAddress
         voteraVoteAddress
         providerUrl
-        blockExplorerUrl
+        agoraScanUrl
+        boaScanUrl
     }
     feePolicy {
         fundProposalFeePermil

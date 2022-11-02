@@ -1,34 +1,33 @@
 import React, { useCallback, useState } from 'react';
 import { View } from 'react-native';
 import { Button, Text } from 'react-native-elements';
-import { useLinkTo } from '@react-navigation/native';
 import { CommonScreenProps } from '~/navigation/common/CommonParams';
 import getString from '~/utils/locales/STRINGS';
 import { getUserServiceTermURL } from '~/utils/votera/agoraconf';
 import WebFrameView from '~/components/ui/WebFrameView';
 import globalStyle from '~/styles/global';
 import { ChevronLeftIcon } from '~/components/icons';
+import { replaceToHome } from '~/navigation/main/MainParams';
 
 function UserServiceScreen({ route, navigation }: CommonScreenProps<'UserService'>): JSX.Element {
     const [title] = useState(getString('인증회원약관'));
     const [uri] = useState(getUserServiceTermURL());
-    const linkTo = useLinkTo();
 
     const headerLeft = useCallback(() => {
         return (
             <Button
                 onPress={() => {
                     if (navigation.canGoBack()) {
-                        navigation.goBack();
+                        navigation.pop();
                     } else {
-                        linkTo('/home');
+                        navigation.dispatch(replaceToHome());
                     }
                 }}
                 icon={<ChevronLeftIcon color="black" />}
                 type="clear"
             />
         );
-    }, [navigation, linkTo]);
+    }, [navigation]);
 
     const headerTitle = useCallback(() => {
         return (
