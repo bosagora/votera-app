@@ -326,6 +326,7 @@
     "노드 {nodename} 으로": "As {nodename},",
     "{select}했습니다!": "Choose {select} !",
     "투표 완료": "Vote done",
+    "{proposalTitle}이 등록되었으니 확인해보세요&#46;": "{proposalTitle} is registered.",
     "{proposalTitle}이 등록되었으니 확인해보세요&#46; 사전 평가에도 참여하실 수 있습니다&#46;": "{proposalTitle} is registered. Check and participate in evaluation",
     "{proposalTitle}의 사전 평가 종료까지 24시간 남았습니다! 종료전 참여해보세요": "24 hours left until the end of evaluation of {proposalTitle}! Participate before the end",
     "{proposalTitle} 사전평가가 종료되었습니다&#46; 평가 결과를 확인해보세요&#46;": "Evaluation of {proposalTitle} has ended. Check out the results",

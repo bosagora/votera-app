@@ -1,5 +1,8 @@
 import { StackActions } from '@react-navigation/native';
-import { Enum_Feeds_Type as EnumFeedsType } from '~/graphql/generated/generated';
+import {
+    Enum_Feeds_Type as EnumFeedsType,
+    Enum_Proposal_Type as EnumProposalType,
+} from '~/graphql/generated/generated';
 import getString from '~/utils/locales/STRINGS';
 
 export interface ComponentFeedCotentContent {
@@ -9,6 +12,7 @@ export interface ComponentFeedCotentContent {
     groupName?: string;
     notionTitle?: string;
     proposalTitle?: string;
+    proposalType?: EnumProposalType;
     questionTitle?: string;
     comment?: string;
 }
@@ -35,11 +39,14 @@ export const getFeed = (type: EnumFeedsType, content: ComponentFeedCotentContent
     }
     const userName = content.userName || '';
     const proposalTitle = content.proposalTitle || '';
+    const proposalType = content.proposalType || EnumProposalType.System;
 
     switch (type) {
         case EnumFeedsType.NewProposal:
             feedContent = getString(
-                '{proposalTitle}이 등록되었으니 확인해보세요&#46; 사전 평가에도 참여하실 수 있습니다&#46;',
+                proposalType === EnumProposalType.Business
+                    ? '{proposalTitle}이 등록되었으니 확인해보세요&#46; 사전 평가에도 참여하실 수 있습니다&#46;'
+                    : '{proposalTitle}이 등록되었으니 확인해보세요&#46;',
             ).replace('{proposalTitle}', proposalTitle || '');
             break;
         case EnumFeedsType.Assess_24HrDeadline:

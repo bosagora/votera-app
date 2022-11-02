@@ -733,7 +733,7 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
                 renderContent={() => {
                     return (
                         <TabView
-                            swipeEnabled
+                            swipeEnabled={!isLargeScreen(width)}
                             sceneContainerStyle={{
                                 paddingHorizontal: 22,
                                 paddingTop: 25,
