@@ -1,62 +1,59 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import React from 'react';
-import { View, Image, TouchableOpacity } from 'react-native';
+import React, { useContext, useState } from 'react';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Text } from 'react-native-elements';
+import dayjs from 'dayjs';
+import { ThemeContext } from 'styled-components/native';
+import globalStyle, { MAX_WIDTH } from '~/styles/global';
+import { Feeds } from '~/graphql/generated/generated';
+import getString from '~/utils/locales/STRINGS';
+import { getFeed, ComponentFeedCotentContent } from '~/utils/feed/feedUtils';
+
+const ISREAD_WIDTH = 70;
+
+const styles = StyleSheet.create({
+    contents: { borderBottomWidth: 1, paddingVertical: 32 },
+    dotColumn: { flexDirection: 'row', justifyContent: 'flex-end', width: ISREAD_WIDTH },
+    fontContent: { fontSize: 14, lineHeight: 22 },
+    period: { fontSize: 10, lineHeight: 20 },
+    readDot: { borderRadius: 4, height: 7, width: 7 },
+});
 
 interface FeedCardProps {
-    id: string;
-    content: string;
-    date: Date;
-    isRead: boolean;
+    item: Feeds;
     onPress: () => void;
-    // id 네비게이션 용도
 }
 
-function ProposalCard(props: FeedCardProps): JSX.Element {
-    const { id, content, date, isRead, onPress } = props;
-    const created = new Date(date);
-    const createdString = `${created.getFullYear()}년 ${
-        created.getMonth() + 1
-    }월 ${created.getDate()}일 ${created.getHours()}:${created.getMinutes() < 10 ? '0' : ''}${created.getMinutes()}`;
+function FeedCard(props: FeedCardProps): JSX.Element {
+    const { item, onPress } = props;
+    const { createdAt, isRead = false, type } = item;
+    const { feedContent } = getFeed(type, (item.content as ComponentFeedCotentContent) || undefined);
+    const themeContext = useContext(ThemeContext);
+    const [viewWidth, setViewWidth] = useState(MAX_WIDTH);
+
     return (
         <TouchableOpacity
-            style={{
-                paddingBottom: 33,
-                paddingTop: 29,
-                borderBottomWidth: 1,
-                borderColor: 'rgb(235, 234, 239)',
-            }}
-            onPress={() => {
-                onPress();
+            style={[styles.contents, { borderBottomColor: themeContext.color.divider }]}
+            onPress={onPress}
+            onLayout={(event) => {
+                setViewWidth(event.nativeEvent.layout.width);
             }}
         >
-            <View
-                style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                }}
-            >
-                <View style={{ marginRight: 59 }}>
-                    <Text>{content}</Text>
+            <View style={globalStyle.flexRowBetween}>
+                <Text style={[globalStyle.rtext, styles.fontContent, { maxWidth: viewWidth - ISREAD_WIDTH }]}>
+                    {feedContent || getString('오류')}
+                </Text>
+                <View style={styles.dotColumn}>
+                    {!isRead && <View style={[styles.readDot, { backgroundColor: themeContext.color.disagree }]} />}
                 </View>
-                {!isRead && (
-                    <View
-                        style={{
-                            top: 5,
-                            width: 7,
-                            height: 7,
-                            backgroundColor: 'rgb(240,109,63)',
-                            borderRadius: 10,
-                            right: 10,
-                        }}
-                    />
-                )}
             </View>
-            <View style={{ flexDirection: 'row', paddingTop: 13 }}>
-                <Text style={{ fontSize: 10 }}>{createdString}</Text>
+            <View style={{ flexDirection: 'row', marginTop: 13 }}>
+                <Text style={[globalStyle.ltext, styles.period]}>
+                    {dayjs(createdAt as string).format(getString('YYYY년 M월 D일 HH:mm'))}
+                </Text>
             </View>
         </TouchableOpacity>
     );
 }
 
-export default ProposalCard;
+export default FeedCard;

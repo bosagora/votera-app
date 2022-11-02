@@ -3,7 +3,6 @@ import { View, ScrollView, ActivityIndicator } from 'react-native';
 import { Button, Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import { debounce } from 'lodash';
-import { useLinkTo } from '@react-navigation/native';
 import globalStyle from '~/styles/global';
 import NowNode from '~/components/input/SingleLineInput2';
 import { AuthContext } from '~/contexts/AuthContext';
@@ -13,7 +12,7 @@ import getString from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
 import { showLoadingAniModal, hideLoadingAniModal } from '~/state/features/loadingAniModal';
-import { MainScreenProps } from '~/navigation/main/MainParams';
+import { MainScreenProps, replaceToHome } from '~/navigation/main/MainParams';
 import { useCheckUsernameLazyQuery } from '~/graphql/generated/generated';
 import { ChevronLeftIcon } from '~/components/icons';
 
@@ -29,7 +28,6 @@ function AccountInfo({ navigation, route }: MainScreenProps<'AccountInfo'>): JSX
     const [nameError, setNameError] = useState(false);
     const [isEqual, setIsEqual] = useState(true);
     const [width, setWidth] = useState(0);
-    const linkTo = useLinkTo();
 
     const [checkUsername, { loading }] = useCheckUsernameLazyQuery({
         fetchPolicy: 'no-cache',
@@ -52,16 +50,16 @@ function AccountInfo({ navigation, route }: MainScreenProps<'AccountInfo'>): JSX
             <Button
                 onPress={() => {
                     if (navigation.canGoBack()) {
-                        navigation.goBack();
+                        navigation.pop();
                     } else {
-                        linkTo('/home');
+                        navigation.dispatch(replaceToHome());
                     }
                 }}
                 icon={<ChevronLeftIcon color="black" />}
                 type="clear"
             />
         );
-    }, [navigation, linkTo]);
+    }, [navigation]);
 
     React.useLayoutEffect(() => {
         navigation.setOptions({

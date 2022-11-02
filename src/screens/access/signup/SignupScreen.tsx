@@ -80,11 +80,11 @@ function SignupScreen({ navigation }: AccessScreenProps<'Signup'>): JSX.Element 
             case MetamaskStatus.UNAVAILABLE:
             case MetamaskStatus.NOT_CONNECTED:
             case MetamaskStatus.OTHER_CHAIN:
-                navigation.navigate('Landing');
+                navigation.pop();
                 return;
             default:
                 if (enrolled) {
-                    navigation.navigate('Landing');
+                    navigation.pop();
                 }
                 break;
         }
@@ -118,9 +118,10 @@ function SignupScreen({ navigation }: AccessScreenProps<'Signup'>): JSX.Element 
                         style={{ marginLeft: 12 }}
                         title={getString('다음')}
                         titleStyle={styles.buttonTitle}
-                        buttonStyle={styles.button}
+                        buttonStyle={[styles.button, { borderColor: themeContext.color.disabled }]}
                         disabled
                         disabledStyle={styles.buttonDisabled}
+                        disabledTitleStyle={[styles.buttonTitle, { color: themeContext.color.disabled }]}
                     />
                 </View>
             );
@@ -140,9 +141,10 @@ function SignupScreen({ navigation }: AccessScreenProps<'Signup'>): JSX.Element 
                         style={{ marginLeft: 12 }}
                         title={getString('다음')}
                         titleStyle={styles.buttonTitle}
-                        buttonStyle={styles.button}
+                        buttonStyle={[styles.button, { borderColor: themeContext.color.disabled }]}
                         disabled
                         disabledStyle={styles.buttonDisabled}
+                        disabledTitleStyle={[styles.buttonTitle, { color: themeContext.color.disabled }]}
                     />
                 </View>
             );
@@ -166,11 +168,21 @@ function SignupScreen({ navigation }: AccessScreenProps<'Signup'>): JSX.Element 
                 }}
                 title={getString('다음')}
                 titleStyle={styles.buttonTitle}
-                buttonStyle={styles.button}
+                buttonStyle={[styles.button, stepComplete ? {} : { borderColor: themeContext.color.disabled }]}
                 disabledStyle={styles.buttonDisabled}
+                disabledTitleStyle={[styles.buttonTitle, { color: themeContext.color.disabled }]}
             />
         );
-    }, [accountName, enrollAccount, index, metamaskConnect, metamaskStatus, stepComplete, themeContext.color.primary]);
+    }, [
+        accountName,
+        enrollAccount,
+        index,
+        metamaskConnect,
+        metamaskStatus,
+        stepComplete,
+        themeContext.color.disabled,
+        themeContext.color.primary,
+    ]);
 
     const headerLeft = useCallback(() => {
         return (
@@ -178,7 +190,7 @@ function SignupScreen({ navigation }: AccessScreenProps<'Signup'>): JSX.Element 
                 onPress={() => {
                     if (index === 0 || index === findIndex('guide')) {
                         if (navigation.canGoBack()) {
-                            navigation.goBack();
+                            navigation.pop();
                         } else {
                             navigation.replace('Landing');
                         }
@@ -221,7 +233,11 @@ function SignupScreen({ navigation }: AccessScreenProps<'Signup'>): JSX.Element 
     useEffect(() => {
         const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
             if (index === 0 || index === findIndex('guide')) {
-                navigation.goBack();
+                if (navigation.canGoBack()) {
+                    navigation.pop();
+                } else {
+                    navigation.replace('Landing');
+                }
             } else {
                 setIndex(index - 1);
             }

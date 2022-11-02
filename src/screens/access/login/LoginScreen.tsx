@@ -13,7 +13,7 @@ import globalStyle from '~/styles/global';
 import getString from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
-import { WhereType } from '~/graphql/hooks/Proposals';
+import { replaceToHome } from '~/navigation/main/MainParams';
 
 enum EnumIconAsset {
     FullnameLogo = 0,
@@ -65,7 +65,7 @@ function LoginScreen({ navigation }: AccessScreenProps<'Login'>): JSX.Element {
 
     useEffect(() => {
         if (isGuest && routeLoaded) {
-            navigation.navigate('RootUser', { screen: 'Home', params: { where: WhereType.PROJECT } });
+            navigation.dispatch(replaceToHome());
         }
     }, [isGuest, navigation, routeLoaded]);
 

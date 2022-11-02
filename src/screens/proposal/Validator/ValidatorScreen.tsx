@@ -20,7 +20,7 @@ import { getValidatorDateString } from '~/utils/time';
 import { VOTE_SELECT } from '~/utils/votera/voterautil';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
-import { getBlockExplorerUrl } from '~/utils/votera/agoraconf';
+import { getBoaScanUrl, getAgoraScanUrl } from '~/utils/votera/agoraconf';
 import { CopyIcon, CloseIcon } from '~/components/icons';
 
 const styles = StyleSheet.create({
@@ -223,7 +223,7 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
                     <View style={styles.nameColumn}>
                         <View style={styles.nameKeyRow}>
                             {assets && <Image source={assets[EnumIconAsset.PublicKey] as ImageURISource} />}
-                            <Anchor style={styles.anchor} source={getBlockExplorerUrl(address)}>
+                            <Anchor style={styles.anchor} source={getAgoraScanUrl(publicKey)}>
                                 <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
                                     {publicKey.slice(0, ELLIPSIS_TAIL_SIZE)}
                                 </Text>
@@ -245,7 +245,7 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
                         </View>
                         <View style={styles.nameGlobeRow}>
                             {assets && <Image source={assets[EnumIconAsset.Address] as ImageURISource} />}
-                            <Anchor style={styles.anchor} source={getBlockExplorerUrl(address)}>
+                            <Anchor style={styles.anchor} source={getBoaScanUrl(address)}>
                                 <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
                                     {address.slice(0, ELLIPSIS_TAIL_SIZE)}
                                 </Text>
@@ -329,7 +329,7 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
                     <View style={styles.nameColumn}>
                         <View style={styles.nameKeyRow}>
                             {assets && <Image source={assets[EnumIconAsset.PublicKey] as ImageURISource} />}
-                            <Anchor style={styles.anchor} source={getBlockExplorerUrl(address)}>
+                            <Anchor style={styles.anchor} source={getAgoraScanUrl(publicKey)}>
                                 <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
                                     {publicKey.slice(0, ELLIPSIS_TAIL_SIZE)}
                                 </Text>
@@ -351,7 +351,7 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
                         </View>
                         <View style={styles.nameGlobeRow}>
                             {assets && <Image source={assets[EnumIconAsset.Address] as ImageURISource} />}
-                            <Anchor style={styles.anchor} source={getBlockExplorerUrl(address)}>
+                            <Anchor style={styles.anchor} source={getBoaScanUrl(address)}>
                                 <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
                                     {address.slice(0, ELLIPSIS_TAIL_SIZE)}
                                 </Text>
@@ -467,7 +467,7 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                     <View style={styles.nameColumn}>
                         <View style={styles.nameKeyRow}>
                             {assets && <Image source={assets[EnumIconAsset.PublicKey] as ImageURISource} />}
-                            <Anchor style={styles.anchor} source={getBlockExplorerUrl(address)}>
+                            <Anchor style={styles.anchor} source={getAgoraScanUrl(publicKey)}>
                                 <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
                                     {publicKey.slice(0, ELLIPSIS_TAIL_SIZE)}
                                 </Text>
@@ -489,7 +489,7 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                         </View>
                         <View style={styles.nameGlobeRow}>
                             {assets && <Image source={assets[EnumIconAsset.Address] as ImageURISource} />}
-                            <Anchor style={styles.anchor} source={getBlockExplorerUrl(address)}>
+                            <Anchor style={styles.anchor} source={getBoaScanUrl(address)}>
                                 <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
                                     {address.slice(0, ELLIPSIS_TAIL_SIZE)}
                                 </Text>

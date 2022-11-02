@@ -1,10 +1,10 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { View, ListRenderItemInfo, ActivityIndicator } from 'react-native';
-import { useFocusEffect, useLinkTo } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import { Button, Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import { FlatList, TouchableOpacity } from 'react-native-gesture-handler';
-import { MainScreenProps } from '~/navigation/main/MainParams';
+import { MainScreenProps, replaceToHome } from '~/navigation/main/MainParams';
 import globalStyle from '~/styles/global';
 import SearchInput from '~/components/input/SingleLineInput2';
 import { Proposal, useGetProposalsLazyQuery } from '~/graphql/generated/generated';
@@ -38,7 +38,6 @@ function Search({ navigation, route }: MainScreenProps<'Search'>): JSX.Element {
     const [isSearched, setIsSearched] = useState<boolean>(false);
     const [searchHistory, setSearchHistory] = useState<string[]>([]);
     const { fetchProposal } = useContext(ProposalContext);
-    const linkTo = useLinkTo();
 
     useFocusEffect(
         useCallback(() => {
@@ -114,7 +113,6 @@ function Search({ navigation, route }: MainScreenProps<'Search'>): JSX.Element {
                 onPress={() => {
                     fetchProposal(proposalId);
                     navigation.push('RootUser', { screen: 'ProposalDetail', params: { id: proposalId } });
-                    // linkTo(`/detail/${proposalId}`);
                 }}
             />
         );
@@ -255,16 +253,16 @@ function Search({ navigation, route }: MainScreenProps<'Search'>): JSX.Element {
             <Button
                 onPress={() => {
                     if (navigation.canGoBack()) {
-                        navigation.goBack();
+                        navigation.pop();
                     } else {
-                        linkTo('/home');
+                        navigation.dispatch(replaceToHome());
                     }
                 }}
                 icon={<ChevronLeftIcon color="black" />}
                 type="clear"
             />
         );
-    }, [navigation, linkTo]);
+    }, [navigation]);
 
     React.useLayoutEffect(() => {
         navigation.setOptions({

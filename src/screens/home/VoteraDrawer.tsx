@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { View, TouchableOpacity, Platform, useWindowDimensions, StyleSheet, Image, ImageURISource } from 'react-native';
 import { DrawerContentScrollView, DrawerContentComponentProps } from '@react-navigation/drawer';
-import { useLinkTo, StackActions } from '@react-navigation/native';
+import { StackActions } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemeContext } from 'styled-components/native';
 import { Button, Text } from 'react-native-elements';
@@ -14,7 +14,7 @@ import getString from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
 import { RoundDecimalPoint, WeiAmountToString } from '~/utils/votera/voterautil';
-import { getBlockExplorerUrl } from '~/utils/votera/agoraconf';
+import { getBoaScanUrl, getAgoraScanUrl } from '~/utils/votera/agoraconf';
 import Anchor from '~/components/anchor/Anchor';
 import { CopyIcon, ChevronRightIcon, CloseIcon, HomeIcon, NotificationIcon } from '~/components/icons';
 
@@ -82,7 +82,6 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
         },
     });
     const { width } = useWindowDimensions();
-    const linkTo = useLinkTo();
     const [assets] = useAssets(iconAssets);
 
     const onClickSignout = () => {
@@ -137,7 +136,12 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
             <View style={{ flex: 1 }}>
                 <View style={globalStyle.flexRowBetween}>
                     <View style={{ flexDirection: 'row' }}>
-                        <TouchableOpacity style={{ marginRight: 5 }} onPress={() => linkTo('/home')}>
+                        <TouchableOpacity
+                            style={{ marginRight: 5 }}
+                            onPress={() => {
+                                navigation.navigate('Home');
+                            }}
+                        >
                             <HomeIcon color="rgb(91,194,217)" />
                         </TouchableOpacity>
                         <TouchableOpacity
@@ -218,7 +222,7 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                                     ]}
                                 >
                                     <Image source={assets[EnumIconAsset.PublicKey] as ImageURISource} />
-                                    <Anchor style={styles.anchor} source={getBlockExplorerUrl(metamaskAccount || '')}>
+                                    <Anchor style={styles.anchor} source={getAgoraScanUrl(publicKey)}>
                                         <Text
                                             style={[
                                                 globalStyle.rtext,
@@ -256,7 +260,7 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                             {metamaskAccount && assets && (
                                 <View style={[globalStyle.flexRowBetween, { marginTop: 14 }]}>
                                     <Image source={assets[EnumIconAsset.Address] as ImageURISource} />
-                                    <Anchor style={styles.anchor} source={getBlockExplorerUrl(metamaskAccount || '')}>
+                                    <Anchor style={styles.anchor} source={getBoaScanUrl(metamaskAccount)}>
                                         <Text
                                             style={[
                                                 globalStyle.rtext,
@@ -326,7 +330,6 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                             dispatch(showSnackBar(getString('둘러보기 중에는 사용할 수 없습니다')));
                         } else {
                             navigation.dispatch(StackActions.push('RootUser', { screen: 'JoinProposalList' }));
-                            // linkTo('/list-join');
                         }
                     }}
                 >
@@ -349,7 +352,6 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                                     params: { tempId: Date.now().toString() },
                                 }),
                             );
-                            // linkTo(`/createproposal/${Date.now().toString()}`);
                         }}
                     >
                         <Text style={[globalStyle.rtext, styles.subLabel]}>{getString('신규제안 작성')}</Text>
@@ -361,7 +363,6 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                         style={[globalStyle.flexRowBetween, styles.subMenu]}
                         onPress={() => {
                             navigation.dispatch(StackActions.push('RootUser', { screen: 'TempProposalList' }));
-                            // linkTo('/list-temp');
                         }}
                     >
                         <Text style={[globalStyle.rtext, styles.subLabel]}>{getString('임시저장 제안')}</Text>
@@ -376,7 +377,6 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                                 dispatch(showSnackBar(getString('둘러보기 중에는 사용할 수 없습니다')));
                             } else {
                                 navigation.dispatch(StackActions.push('RootUser', { screen: 'MyProposalList' }));
-                                // linkTo('/list-mine');
                             }
                         }}
                     >
@@ -389,7 +389,10 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
 
                 <View style={styles.separator} />
 
-                <TouchableOpacity style={globalStyle.flexRowBetween} onPress={() => linkTo('/settings')}>
+                <TouchableOpacity
+                    style={globalStyle.flexRowBetween}
+                    onPress={() => navigation.dispatch(StackActions.push('RootUser', { screen: 'Settings' }))}
+                >
                     <Text style={[globalStyle.btext, styles.menuLabel]}>{getString('설정')}</Text>
                     <View style={[globalStyle.center, styles.menuRightIcon]}>
                         <ChevronRightIcon color="darkgray" />

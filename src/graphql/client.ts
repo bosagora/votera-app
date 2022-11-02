@@ -102,6 +102,8 @@ const fnCacheMerge: FieldMergeFunction<any, any> = (existing, incoming, { variab
                 merged[offset + i] = incoming[i];
             }
         }
+    } else if (offset < merged.length) {
+        return merged.slice(0, offset);
     }
     return merged;
 };

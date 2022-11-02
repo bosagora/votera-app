@@ -99,21 +99,20 @@ function HomeView(props: HomeViewProps): JSX.Element {
                 />
             }
         >
-            {topProposal?.proposalId && (
-                <ProposalTop
-                    item={topProposal}
-                    onPress={() => {
-                        fetchProposal(topProposal.proposalId as string);
-                        navigation.push('RootUser', {
-                            screen: 'ProposalDetail',
-                            params: { id: topProposal.proposalId as string },
-                        });
-                        // linkTo({ screen: 'ProposalDetail', params: { id: topProposal.proposalId as string } });
-                    }}
-                    where={where}
-                />
-            )}
             <View style={[{ backgroundColor: 'white' }, isLargeScreen(width) ? { paddingRight: 22 } : undefined]}>
+                {topProposal?.proposalId && (
+                    <ProposalTop
+                        item={topProposal}
+                        onPress={() => {
+                            fetchProposal(topProposal.proposalId as string);
+                            navigation.push('RootUser', {
+                                screen: 'ProposalDetail',
+                                params: { id: topProposal.proposalId as string },
+                            });
+                        }}
+                        where={where}
+                    />
+                )}
                 <ProposalHeader
                     username={isGuest || !user ? 'Guest' : user.username || ''}
                     currentFilter={filter}
@@ -131,7 +130,6 @@ function HomeView(props: HomeViewProps): JSX.Element {
                                     screen: 'ProposalDetail',
                                     params: { id: proposal.proposalId as string },
                                 });
-                                // linkTo({ screen: 'ProposalDetail', params: { id: proposal.proposalId as string } });
                             }}
                         />
                     ))}

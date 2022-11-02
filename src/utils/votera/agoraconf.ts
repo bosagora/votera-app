@@ -12,7 +12,8 @@ let fundProposalFeePermil = BigNumber.from(1);
 let systemProposalFee = BigNumber.from('100000000000000000000');
 let voterFee = BigNumber.from('400000000000000');
 let withdrawDelayPeriod = 86400;
-let blockExplorerUrl = '';
+let boaScanUrl = '';
+let agoraScanUrl = '';
 
 export function setAgoraConf(
     agora:
@@ -25,7 +26,8 @@ export function setAgoraConf(
               | 'commonsBudgetAddress'
               | 'voteraVoteAddress'
               | 'providerUrl'
-              | 'blockExplorerUrl'
+              | 'boaScanUrl'
+              | 'agoraScanUrl'
           >
         | undefined,
 ) {
@@ -73,8 +75,11 @@ export function setAgoraConf(
         proposalFundMax = fundMax;
         proposalFundMin = fundMin;
     }
-    if (agora.blockExplorerUrl) {
-        blockExplorerUrl = agora.blockExplorerUrl;
+    if (agora.boaScanUrl) {
+        boaScanUrl = agora.boaScanUrl;
+    }
+    if (agora.agoraScanUrl) {
+        agoraScanUrl = agora.agoraScanUrl;
     }
 }
 
@@ -86,8 +91,12 @@ export function getUserServiceTermURL() {
     return userServiceTermUrl;
 }
 
-export function getBlockExplorerUrl(address: string): string {
-    return `${blockExplorerUrl}/${address}`;
+export function getBoaScanUrl(address: string): string {
+    return `${boaScanUrl}/${address}`;
+}
+
+export function getAgoraScanUrl(publicKey: string): string {
+    return `${agoraScanUrl}/${publicKey}`;
 }
 
 export function isValidFundAmount(_amount: string | undefined | null): boolean {
