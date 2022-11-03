@@ -21,11 +21,10 @@ export const OpenWhere = (address: string | null) => {
 };
 
 export const ProjectWhere = {
-    status_nin: [
-        EnumProposalStatus.Created,
-        EnumProposalStatus.PendingAssess,
-        EnumProposalStatus.Assess,
-        EnumProposalStatus.Deleted,
-        EnumProposalStatus.Cancel,
+    status_in: [
+        EnumProposalStatus.PendingVote,
+        EnumProposalStatus.Vote,
+        EnumProposalStatus.Reject,
+        EnumProposalStatus.Closed,
     ],
 };
