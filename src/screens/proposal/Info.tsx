@@ -21,7 +21,7 @@ import globalStyle, { MAX_WIDTH } from '~/styles/global';
 import AssessAvg from '~/components/proposal/AssessAvg';
 import { getProposalStatusString } from '~/components/status/ProgressMark';
 import { ProposalContext } from '~/contexts/ProposalContext';
-import getString from '~/utils/locales/STRINGS';
+import getString, { getLocale } from '~/utils/locales/STRINGS';
 import { StringWeiAmountFormat } from '~/utils/votera/voterautil';
 import { useAppDispatch } from '~/state/hooks';
 import { getCommonPeriodText } from '~/utils/time';
@@ -30,7 +30,10 @@ import { getDefaultAssessPeriod, PreviewProposal } from '~/types/proposalType';
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const IMAGE_MAX_WIDTH = SCREEN_WIDTH - 46;
 
-const COLUMN_WIDTH = 70;
+function getColumnWidth() {
+    const locale = getLocale();
+    return locale.startsWith('ko') ? 70 : 140;
+}
 
 function LineComponent(): JSX.Element {
     return <Divider style={{ marginVertical: 30 }} />;
@@ -39,7 +42,7 @@ function LineComponent(): JSX.Element {
 const styles = StyleSheet.create({
     container: { marginBottom: 90 },
     description: { fontSize: 13, lineHeight: 23, width: '100%' },
-    label: { fontSize: 13, lineHeight: 25, width: COLUMN_WIDTH },
+    label: { fontSize: 13, lineHeight: 25 },
     labelText: { fontSize: 13, lineHeight: 25 },
     logoWrapper: { alignItems: 'center', paddingBottom: 35, paddingTop: 45 },
     title: { fontSize: 13, lineHeight: 26 },
@@ -77,6 +80,8 @@ function Info(props: Props): JSX.Element {
     const [images, setImages] = useState<(AttachmentImage | undefined)[]>([]);
     const [files, setFiles] = useState<AttachmentFile[]>([]);
     const [viewWidth, setViewWidth] = useState(MAX_WIDTH);
+
+    const columnWidth = getColumnWidth();
 
     useEffect(() => {
         let canceled = false;
@@ -172,34 +177,52 @@ function Info(props: Props): JSX.Element {
             )}
             <View>
                 <View style={globalStyle.flexRowAlignCenter}>
-                    <Text style={[globalStyle.rtext, styles.label]}>{getString('제안유형')}</Text>
-                    <Text style={[globalStyle.ltext, styles.labelText]}>
+                    <Text style={[globalStyle.rtext, styles.label, { width: columnWidth }]}>
+                        {getString('제안유형')}
+                    </Text>
+                    <Text style={[globalStyle.ltext, styles.labelText, { maxWidth: viewWidth - columnWidth }]}>
                         {type === EnumProposalType.Business ? getString('사업제안') : getString('시스템제안')}
                     </Text>
                 </View>
                 <View style={{ flexDirection: 'row' }}>
-                    <Text style={[globalStyle.rtext, styles.label]}>{getString('제안제목')}</Text>
-                    <Text style={[globalStyle.ltext, styles.labelText, { maxWidth: viewWidth - COLUMN_WIDTH }]}>
+                    <Text style={[globalStyle.rtext, styles.label, { width: columnWidth }]}>
+                        {getString('제안제목')}
+                    </Text>
+                    <Text style={[globalStyle.ltext, styles.labelText, { maxWidth: viewWidth - columnWidth }]}>
                         {name}
                     </Text>
                 </View>
                 <View style={globalStyle.flexRowAlignCenter}>
-                    <Text style={[globalStyle.rtext, styles.label]}>{getString('제안상태')}</Text>
-                    <Text style={[globalStyle.ltext, styles.labelText]}>{proposalStatus}</Text>
+                    <Text style={[globalStyle.rtext, styles.label, { width: columnWidth }]}>
+                        {getString('제안상태')}
+                    </Text>
+                    <Text style={[globalStyle.ltext, styles.labelText, { maxWidth: viewWidth - columnWidth }]}>
+                        {proposalStatus}
+                    </Text>
                 </View>
                 {type === EnumProposalType.Business && (
                     <View style={globalStyle.flexRowAlignCenter}>
-                        <Text style={[globalStyle.rtext, styles.label]}>{getString('평가기간')}</Text>
-                        <Text style={[globalStyle.ltext, styles.labelText]}>{assessPeriod}</Text>
+                        <Text style={[globalStyle.rtext, styles.label, { width: columnWidth }]}>
+                            {getString('평가기간')}
+                        </Text>
+                        <Text style={[globalStyle.ltext, styles.labelText, { maxWidth: viewWidth - columnWidth }]}>
+                            {assessPeriod}
+                        </Text>
                     </View>
                 )}
                 <View style={globalStyle.flexRowAlignCenter}>
-                    <Text style={[globalStyle.rtext, styles.label]}>{getString('투표기간')}</Text>
-                    <Text style={[globalStyle.ltext, styles.labelText]}>{votePeriod}</Text>
+                    <Text style={[globalStyle.rtext, styles.label, { width: columnWidth }]}>
+                        {getString('투표기간')}
+                    </Text>
+                    <Text style={[globalStyle.ltext, styles.labelText, { maxWidth: viewWidth - columnWidth }]}>
+                        {votePeriod}
+                    </Text>
                 </View>
                 {type === EnumProposalType.Business && (
                     <View style={globalStyle.flexRowAlignCenter}>
-                        <Text style={[globalStyle.rtext, styles.label]}>{getString('요청금액')}</Text>
+                        <Text style={[globalStyle.rtext, styles.label, { width: columnWidth }]}>
+                            {getString('요청금액')}
+                        </Text>
                         <Text style={[globalStyle.btext, styles.labelText, { color: themeContext.color.primary }]}>
                             {amount} BOA
                         </Text>

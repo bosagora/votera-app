@@ -7,6 +7,7 @@ import PeriodDay from 'react-native-calendars/src/calendar/day/period';
 import { Button, Text, Icon } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import dayjs from 'dayjs';
+import { locale as expoLocale } from 'expo-localization';
 import globalStyle from '~/styles/global';
 import getString from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
@@ -21,7 +22,7 @@ LocaleConfig.locales.ko = {
     dayNames: ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
     dayNamesShort: ['일', '월', '화', '수', '목', '금', '토'],
 };
-LocaleConfig.defaultLocale = 'ko';
+LocaleConfig.defaultLocale = expoLocale.startsWith('ko-') ? 'ko' : '';
 
 const styles = StyleSheet.create({
     button: {

@@ -20,8 +20,6 @@ function LineComponent() {
     return <View style={globalStyle.lineComponent} />;
 }
 
-const COLUMN_WIDTH = 70;
-
 interface Props {
     proposal: Proposal | undefined;
 }
@@ -53,12 +51,7 @@ function PendingVote(props: Props): JSX.Element {
             )}
 
             <View style={{ marginTop: 30 }}>
-                <Text
-                    style={[
-                        globalStyle.btext,
-                        { fontSize: 13, lineHeight: 17, width: COLUMN_WIDTH, color: themeContext.color.black },
-                    ]}
-                >
+                <Text style={[globalStyle.btext, { fontSize: 13, lineHeight: 17, color: themeContext.color.black }]}>
                     {getString('투표 기간')}
                 </Text>
                 <Text
