@@ -15,15 +15,13 @@ import { StringWeiAmountFormat } from '~/utils/votera/voterautil';
 import CommonButton from '~/components/button/CommonButton';
 
 const styles = StyleSheet.create({
+    accountLabel: { fontSize: 13, lineHeight: 24 },
     metaContainer: { alignSelf: 'center', borderRadius: 25 },
 });
 
-function LineComponent(): JSX.Element {
-    return <View style={globalStyle.lineComponent} />;
+function getColumnWidth() {
+    return 70;
 }
-
-const MAX_HEIGHT = 200;
-const COLUMN_WIDTH = 70;
 
 interface PaymentInfoProps {
     proposal?: Proposal | null;
@@ -36,7 +34,9 @@ function PaymentInfo(props: PaymentInfoProps): JSX.Element {
     const { proposal, proposalFee, onCallBudget, loading } = props;
     const themeContext = useContext(ThemeContext);
     const { metamaskStatus, metamaskProvider, metamaskConnect, metamaskSwitch } = useContext(AuthContext);
-    const [maxWidth, setMaxWidth] = useState(0);
+    const [viewWidth, setViewWidth] = useState(0);
+
+    const columnWidth = getColumnWidth();
 
     const renderButton = useCallback(() => {
         if (!proposalFee?.destination || !metamaskProvider) {
@@ -157,7 +157,7 @@ function PaymentInfo(props: PaymentInfoProps): JSX.Element {
         <View
             style={{ width: '100%' }}
             onLayout={(event) => {
-                setMaxWidth(event.nativeEvent.layout.width - COLUMN_WIDTH);
+                setViewWidth(event.nativeEvent.layout.width);
             }}
         >
             <View style={{ marginTop: 45 }}>
@@ -179,7 +179,8 @@ function PaymentInfo(props: PaymentInfoProps): JSX.Element {
                 <Text
                     style={[
                         globalStyle.rtext,
-                        { fontSize: 13, lineHeight: 24, width: COLUMN_WIDTH, color: themeContext.color.black },
+                        styles.accountLabel,
+                        { width: columnWidth, color: themeContext.color.black },
                     ]}
                 >
                     {getString('입금주소')}
@@ -187,7 +188,8 @@ function PaymentInfo(props: PaymentInfoProps): JSX.Element {
                 <Text
                     style={[
                         globalStyle.ltext,
-                        { fontSize: 13, lineHeight: 24, maxWidth, color: themeContext.color.black },
+                        styles.accountLabel,
+                        { maxWidth: viewWidth - columnWidth, color: themeContext.color.black },
                     ]}
                 >
                     {proposalFee?.destination || ''}
@@ -197,7 +199,8 @@ function PaymentInfo(props: PaymentInfoProps): JSX.Element {
                 <Text
                     style={[
                         globalStyle.rtext,
-                        { fontSize: 13, lineHeight: 24, width: COLUMN_WIDTH, color: themeContext.color.black },
+                        styles.accountLabel,
+                        { width: columnWidth, color: themeContext.color.black },
                     ]}
                 >
                     {getString('입금금액')}
@@ -205,7 +208,8 @@ function PaymentInfo(props: PaymentInfoProps): JSX.Element {
                 <Text
                     style={[
                         globalStyle.btext,
-                        { fontSize: 13, lineHeight: 24, flex: 1, color: themeContext.color.primary },
+                        styles.accountLabel,
+                        { maxWidth: viewWidth - columnWidth, color: themeContext.color.primary },
                     ]}
                 >
                     {StringWeiAmountFormat(proposalFee?.feeAmount)} BOA

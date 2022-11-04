@@ -7,8 +7,6 @@ import { ProposalContext } from '~/contexts/ProposalContext';
 import getString from '~/utils/locales/STRINGS';
 import { getCommonPeriodText } from '~/utils/time';
 
-const COLUMN_WIDTH = 70;
-
 function PendingAssess(): JSX.Element {
     const { proposal } = useContext(ProposalContext);
     const themeContext = useContext(ThemeContext);
@@ -37,16 +35,13 @@ function PendingAssess(): JSX.Element {
                 </Text>
             </View>
 
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 28 }}>
-                <Text
-                    style={[
-                        globalStyle.rtext,
-                        { fontSize: 13, lineHeight: 24, width: COLUMN_WIDTH, color: themeContext.color.black },
-                    ]}
-                >
+            <View style={{ marginTop: 28 }}>
+                <Text style={[globalStyle.btext, { fontSize: 13, lineHeight: 24, color: themeContext.color.black }]}>
                     {getString('평가기간')}
                 </Text>
-                <Text style={[globalStyle.ltext, { fontSize: 13, lineHeight: 24, color: themeContext.color.black }]}>
+                <Text
+                    style={[globalStyle.rtext, { fontSize: 13, lineHeight: 24, color: themeContext.color.textBlack }]}
+                >
                     {getCommonPeriodText(proposal?.assessPeriod)}
                 </Text>
             </View>

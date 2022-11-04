@@ -659,7 +659,7 @@ function CreateProposal({ route, navigation }: MainScreenProps<'CreateProposal'>
                                         <Text style={{ color: themeContext.color.primary }}>
                                             {WeiAmountToString(calculateProposalFee(amount), true)}
                                         </Text>
-                                        {` ${getString('BOA')}`}
+                                        {' BOA'}
                                     </Text>
                                 ) : (
                                     <Text style={[globalStyle.rrtext, { color: themeContext.color.error }]}>
