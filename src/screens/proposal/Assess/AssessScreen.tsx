@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useCallback } from 'react';
-import { View, ActivityIndicator } from 'react-native';
-import { AuthContext, MetamaskStatus } from '~/contexts/AuthContext';
+import { View } from 'react-native';
+import { AuthContext } from '~/contexts/AuthContext';
 import {
     Proposal,
     Enum_Proposal_Status as EnumProposalStatus,
@@ -23,8 +23,8 @@ interface Props {
 function AssessScreen(props: Props): JSX.Element {
     const { proposal, assessResultData, onLayout, onSubmitAssess } = props;
     const dispatch = useAppDispatch();
-    const { metamaskStatus, isGuest, signOut } = useContext(AuthContext);
-    const [needEvaluation, setNeedEvaluation] = useState(false);
+    const { isGuest } = useContext(AuthContext);
+    const [needEvaluation, setNeedEvaluation] = useState(!!assessResultData?.needEvaluation);
 
     useEffect(() => {
         setNeedEvaluation(!!assessResultData?.needEvaluation);
@@ -46,37 +46,25 @@ function AssessScreen(props: Props): JSX.Element {
         [dispatch, needEvaluation, onSubmitAssess],
     );
 
-    if (proposal?.status === EnumProposalStatus.PendingAssess) {
-        return (
-            <View onLayout={(event) => onLayout(event.nativeEvent.layout.height)}>
-                <PendingAssess />
-            </View>
-        );
-    }
+    const renderAssessContent = useCallback(
+        (item: Proposal | undefined, assessResult: AssessResultPayload) => {
+            if (item?.status === EnumProposalStatus.PendingAssess) {
+                return <PendingAssess />;
+            }
+            if (isGuest) {
+                return <EvaluationResult assessResultData={assessResult} />;
+            }
+            if (needEvaluation) {
+                return <Evaluating onEvaluating={submitResponse} />;
+            }
+            return <EvaluationResult assessResultData={assessResult} />;
+        },
+        [isGuest, needEvaluation, submitResponse],
+    );
 
-    if (metamaskStatus === MetamaskStatus.UNAVAILABLE) {
-        // redirect to landing page for installing metamask
-        signOut();
-        return <ActivityIndicator />;
-    }
-
-    if (isGuest) {
-        return (
-            <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)}>
-                <EvaluationResult assessResultData={assessResultData} />
-            </View>
-        );
-    }
-    if (needEvaluation) {
-        return (
-            <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)}>
-                <Evaluating onEvaluating={submitResponse} />
-            </View>
-        );
-    }
     return (
-        <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)}>
-            <EvaluationResult assessResultData={assessResultData} />
+        <View onLayout={(event) => onLayout(event.nativeEvent.layout.height)}>
+            {renderAssessContent(proposal, assessResultData)}
         </View>
     );
 }

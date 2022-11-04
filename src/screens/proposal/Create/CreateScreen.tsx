@@ -145,7 +145,7 @@ function CreateScreen(props: Props): JSX.Element {
                 dispatch(showSnackBar(getString('입금 정보 확인 중 오류가 발생했습니다&#46;')));
             }
         }
-    }, [checkProposalFeeData, dispatch, isFocused, onChangeStatus, refetch]);
+    }, [checkProposalFeeData?.checkProposalFee, dispatch, isFocused, onChangeStatus, refetch]);
 
     useEffect(() => {
         if (!isFocused) {
@@ -167,13 +167,7 @@ function CreateScreen(props: Props): JSX.Element {
                     break;
             }
         }
-    }, [data, dispatch, isFocused, onChangeStatus]);
-
-    if (metamaskStatus === MetamaskStatus.UNAVAILABLE) {
-        // redirect to landing page for installing metamask
-        signOut();
-        return <ActivityIndicator />;
-    }
+    }, [data?.proposalFee?.status, dispatch, isFocused, onChangeStatus]);
 
     return (
         <View onLayout={(event) => onLayout(event.nativeEvent.layout.height)}>
