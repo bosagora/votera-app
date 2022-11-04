@@ -145,7 +145,7 @@ function VoteListHeaderComponent(props: HeaderProps): JSX.Element {
     const { onRefresh } = props;
 
     return (
-        <View style={[globalStyle.flexRowAlignCenter, styles.listHeader]}>
+        <View style={[globalStyle.flexRowBetween, styles.listHeader]}>
             <Text style={[globalStyle.ltext, styles.listHeaderText]}>{getString('검증자 투표 현황')}</Text>
             <ShortButton
                 title={getString('새로고침')}
