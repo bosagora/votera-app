@@ -1,4 +1,4 @@
-import React, { useContext, useCallback, useState, useEffect } from 'react';
+import React, { useContext, useCallback, useState } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
@@ -132,6 +132,12 @@ function PaymentInfo(props: PaymentInfoProps): JSX.Element {
                 return (
                     <View style={globalStyle.center}>
                         <Text>{getString('입금 작업과 관련이 없습니다&#46;')}</Text>
+                    </View>
+                );
+            case EnumFeeStatus.Expired:
+                return (
+                    <View style={globalStyle.center}>
+                        <Text>{getString('입금 유효 기간이 지났습니다&#46;')}</Text>
                     </View>
                 );
             default:

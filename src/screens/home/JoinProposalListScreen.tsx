@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { View, Image, FlatList, ListRenderItemInfo, ImageURISource, StyleSheet } from 'react-native';
-import { Button, Text, Icon } from 'react-native-elements';
+import { Button, Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAssets } from 'expo-asset';
@@ -10,7 +10,6 @@ import { Proposal, useGetMemberRolesLazyQuery } from '~/graphql/generated/genera
 import { MainScreenProps, replaceToHome } from '~/navigation/main/MainParams';
 import globalStyle, { TOP_NAV_HEIGHT } from '~/styles/global';
 import { ProposalFilterType } from '~/types/filterType';
-import { ProposalContext } from '~/contexts/ProposalContext';
 import ListFooterButton from '~/components/button/ListFooterButton';
 import getString from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
@@ -45,14 +44,13 @@ function getJoinProposalVariables(filter: ProposalFilterType, memberId?: string)
     };
 }
 
-function JoinProposalListScreen({ navigation, route }: MainScreenProps<'JoinProposalList'>): JSX.Element {
+function JoinProposalListScreen({ navigation }: MainScreenProps<'JoinProposalList'>): JSX.Element {
     const themeContext = useContext(ThemeContext);
     const insets = useSafeAreaInsets();
     const dispatch = useAppDispatch();
     const [proposals, setProposals] = useState<Proposal[]>();
     const [proposalCount, setProposalCount] = useState<number>();
     const [filter, setFilter] = useState<ProposalFilterType>(ProposalFilterType.LATEST);
-    const { fetchProposal } = useContext(ProposalContext);
     const { user } = useContext(AuthContext);
     const [pullRefresh, setPullRefresh] = useState(false);
     const [assets] = useAssets(iconAssets);
@@ -157,7 +155,6 @@ function JoinProposalListScreen({ navigation, route }: MainScreenProps<'JoinProp
                     temp={false}
                     onPress={() => {
                         if (item.proposalId) {
-                            fetchProposal(item.proposalId);
                             navigation.push('RootUser', { screen: 'ProposalDetail', params: { id: item.proposalId } });
                         } else {
                             dispatch(showSnackBar(getString('제안서 정보가 올바르지 않습니다')));

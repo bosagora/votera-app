@@ -11,7 +11,6 @@ import {
     AssessResultPayload,
     Enum_Assess_Proposal_State as EnumAssessProposalState,
 } from '~/graphql/generated/generated';
-import { ProposalContext } from '~/contexts/ProposalContext';
 import getString from '~/utils/locales/STRINGS';
 import { MainNavigationProps } from '~/navigation/main/MainParams';
 
@@ -36,7 +35,6 @@ function getEvaluationStateTitle(assessResultData: AssessResultPayload): string 
 function EvaluationResult(props: Props): JSX.Element {
     const { assessResultData } = props;
     const [proposals, setProposals] = useState([]);
-    const { fetchProposal } = useContext(ProposalContext);
     const themeContext = useContext(ThemeContext);
     const navigation = useNavigation<MainNavigationProps<'ProposalDetail'>>();
     const rejected = assessResultData?.proposalState === EnumAssessProposalState.Rejected;
@@ -83,7 +81,6 @@ function EvaluationResult(props: Props): JSX.Element {
                                 key={`otherProposal_${item.id}`}
                                 item={item}
                                 onPress={() => {
-                                    fetchProposal(item.proposalId || '');
                                     navigation.push('RootUser', {
                                         screen: 'ProposalDetail',
                                         params: { id: item.proposalId || '' },

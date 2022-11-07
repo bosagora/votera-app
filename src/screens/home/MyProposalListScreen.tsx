@@ -9,7 +9,6 @@ import { Proposal, useGetProposalsLazyQuery } from '~/graphql/generated/generate
 import { MainScreenProps, replaceToHome } from '~/navigation/main/MainParams';
 import globalStyle, { TOP_NAV_HEIGHT } from '~/styles/global';
 import { ProposalFilterType } from '~/types/filterType';
-import { ProposalContext } from '~/contexts/ProposalContext';
 import ListFooterButton from '~/components/button/ListFooterButton';
 import getString from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
@@ -43,14 +42,13 @@ function getMyProposalVariables(filter: ProposalFilterType, memberId?: string) {
     };
 }
 
-function MyProposalListScreen({ navigation, route }: MainScreenProps<'MyProposalList'>): JSX.Element {
+function MyProposalListScreen({ navigation }: MainScreenProps<'MyProposalList'>): JSX.Element {
     const themeContext = useContext(ThemeContext);
     const insets = useSafeAreaInsets();
     const dispatch = useAppDispatch();
     const [proposals, setProposals] = useState<Proposal[]>();
     const [proposalCount, setProposalCount] = useState<number>();
     const [filter, setFilter] = useState<ProposalFilterType>(ProposalFilterType.LATEST);
-    const { fetchProposal } = useContext(ProposalContext);
     const { user } = useContext(AuthContext);
     const [pullRefresh, setPullRefresh] = useState(false);
     const [assets] = useAssets(iconAssets);
@@ -144,7 +142,6 @@ function MyProposalListScreen({ navigation, route }: MainScreenProps<'MyProposal
                     temp={false}
                     onPress={() => {
                         if (item.proposalId) {
-                            fetchProposal(item.proposalId);
                             navigation.push('RootUser', { screen: 'ProposalDetail', params: { id: item.proposalId } });
                         } else {
                             dispatch(showSnackBar(getString('제안서 정보가 올바르지 않습니다')));

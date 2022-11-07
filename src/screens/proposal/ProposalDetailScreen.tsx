@@ -20,6 +20,7 @@ import {
     AssessResultPayload,
     Post,
     PostStatus,
+    Proposal,
     useActivityPostsLazyQuery,
     useListAssessValidatorsLazyQuery,
     useListBallotValidatorsLazyQuery,
@@ -28,6 +29,7 @@ import {
     useSubmitBallotMutation,
     useUpdateReceiptMutation,
     Validator,
+    useGetProposalByIdLazyQuery,
 } from '~/graphql/generated/generated';
 import { OpinionFilterType } from '~/types/filterType';
 import { ProposalContext } from '~/contexts/ProposalContext';
@@ -59,21 +61,23 @@ type HeightType = string | number;
 
 function selectRoute(status?: EnumProposalStatus) {
     let voteTitle = '';
-    switch (status) {
-        case EnumProposalStatus.Created:
-            voteTitle = getString('입금하기');
-            break;
-        case EnumProposalStatus.PendingAssess:
-        case EnumProposalStatus.Assess:
-            voteTitle = getString('평가하기');
-            break;
-        case EnumProposalStatus.PendingVote:
-        case EnumProposalStatus.Vote:
-            voteTitle = getString('투표하기');
-            break;
-        default:
-            voteTitle = getString('결과보기');
-            break;
+    if (status !== undefined) {
+        switch (status) {
+            case EnumProposalStatus.Created:
+                voteTitle = getString('입금하기');
+                break;
+            case EnumProposalStatus.PendingAssess:
+            case EnumProposalStatus.Assess:
+                voteTitle = getString('평가하기');
+                break;
+            case EnumProposalStatus.PendingVote:
+            case EnumProposalStatus.Vote:
+                voteTitle = getString('투표하기');
+                break;
+            default:
+                voteTitle = getString('결과보기');
+                break;
+        }
     }
     return [
         { key: 'info', title: getString('제안내용') },
@@ -134,12 +138,14 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
     const { id } = route.params;
     const scroll = useRef(new Animated.Value(0)).current;
     const dispatch = useAppDispatch();
+    const [proposal, setProposal] = useState<Proposal>();
+    const [isJoined, setIsJoined] = useState(false);
     const [discussionAId, setDiscussionAId] = useState('');
     const [noticeAId, setNoticeAId] = useState('');
-    const { proposal, isJoined, joinProposal, fetchProposal, createActivityComment } = useContext(ProposalContext);
+    const { joinProposal, createActivityComment } = useContext(ProposalContext);
     const { user, isGuest, metamaskProvider, metamaskUpdateBalance } = useContext(AuthContext);
     const [index, setIndex] = useState(0);
-    const [routes, setRoutes] = useState(selectRoute(proposal?.status));
+    const [routes, setRoutes] = useState(selectRoute());
     const [commentsCount, setCommentsCount] = useState(0);
     const [commentsData, setCommentsData] = useState<Post[]>([]);
     const [commentsStatus, setCommentsStatus] = useState<PostStatus[]>([]);
@@ -157,6 +163,17 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
     const [tab2Height, setTab2Height] = useState<HeightType>('auto');
     const [tab3Height, setTab3Height] = useState<HeightType>('auto');
 
+    const [getProposalDetail, { loading }] = useGetProposalByIdLazyQuery({
+        fetchPolicy: 'cache-and-network',
+        onCompleted: (data) => {
+            if (data.proposalById) {
+                setProposal(data.proposalById as Proposal);
+            }
+            if (data.proposalStatusById) {
+                setIsJoined(!!data.proposalStatusById.isJoined);
+            }
+        },
+    });
     const [getAssessResult, { data: assessResultData, refetch: refetchAssess, client }] = useAssessResultLazyQuery({
         fetchPolicy: 'cache-and-network',
     });
@@ -187,6 +204,21 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
         setNumberOfLines(3);
     }, [id]);
 
+    const fetchProposal = useCallback(
+        (proposalId: string) => {
+            getProposalDetail({ variables: { proposalId } }).catch((err) => {
+                console.log('getProposalDetail error', err);
+            });
+        },
+        [getProposalDetail],
+    );
+
+    const setJoined = useCallback(async () => {
+        if (!isJoined) {
+            setIsJoined(await joinProposal(proposal));
+        }
+    }, [isJoined, joinProposal, proposal]);
+
     useEffect(() => {
         if (!subscriptionData) {
             fetchProposal(id);
@@ -197,7 +229,7 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
                 dispatch(showSnackBar(getString('#S 상태로 변경되었습니다&#46;').replace('#S', status)));
             }
         }
-    }, [id, subscriptionData, fetchProposal, dispatch, isFocused]);
+    }, [id, subscriptionData, dispatch, isFocused, fetchProposal]);
 
     useEffect(() => {
         setRoutes(selectRoute(proposal?.status));
@@ -207,7 +239,7 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
         if (proposal?.status === EnumProposalStatus.Created && !proposal.paidComplete) {
             if (proposal?.createTx) {
                 metamaskProvider
-                    ?.waitForTransaction(proposal?.createTx, 1)
+                    ?.waitForTransaction(proposal.createTx, 1)
                     .then((value) => {
                         metamaskUpdateBalance();
                         fetchProposal(id);
@@ -349,7 +381,8 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
                 return;
             }
 
-            if (!isJoined) await joinProposal();
+            await setJoined();
+
             const values = data.map((d) => BigNumber.from(d.value));
             const voteraVote = new VoteraVote(proposal?.voteraVoteAddress || '', metamaskProvider.getSigner());
             const tx = await voteraVote.submitAssess(proposal.proposalId, values, {});
@@ -396,13 +429,11 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
         },
         [
             getValidators,
-            isJoined,
-            joinProposal,
             metamaskProvider,
             metamaskUpdateBalance,
-            proposal?.proposalId,
-            proposal?.voteraVoteAddress,
+            proposal,
             refetchAssess,
+            setJoined,
             submitAssess,
             updateReceipt,
         ],
@@ -419,7 +450,7 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
                 return false;
             }
 
-            if (!isJoined) await joinProposal();
+            await setJoined();
 
             const submitResult = await submitBallot({
                 variables: {
@@ -484,13 +515,11 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
         [
             dispatch,
             getValidators,
-            isJoined,
-            joinProposal,
             metamaskProvider,
             metamaskUpdateBalance,
-            proposal?.proposalId,
-            proposal?.voteraVoteAddress,
+            proposal,
             recordBallot,
+            setJoined,
             submitBallot,
             updateReceipt,
             user?.address,
@@ -605,6 +634,7 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
             case 'info':
                 return (
                     <Info
+                        proposal={proposal}
                         previewData={undefined}
                         isPreview={false}
                         assessResultData={assessResultData?.assessResult as AssessResultPayload}
@@ -653,6 +683,8 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
                             moveToNotice={() => {
                                 navigation.push('RootUser', { screen: 'Notice', params: { id: noticeAId } });
                             }}
+                            isJoined={isJoined}
+                            setJoined={setJoined}
                         />
                     );
                 }

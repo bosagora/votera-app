@@ -55,11 +55,11 @@ function AssessScreen(props: Props): JSX.Element {
                 return <EvaluationResult assessResultData={assessResult} />;
             }
             if (needEvaluation) {
-                return <Evaluating onEvaluating={submitResponse} />;
+                return <Evaluating proposal={proposal} onEvaluating={submitResponse} />;
             }
             return <EvaluationResult assessResultData={assessResult} />;
         },
-        [isGuest, needEvaluation, submitResponse],
+        [isGuest, needEvaluation, proposal, submitResponse],
     );
 
     return (

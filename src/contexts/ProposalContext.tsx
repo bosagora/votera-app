@@ -1,10 +1,9 @@
-import React, { useState, useCallback, useContext, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo } from 'react';
 import {
     Proposal,
     Post,
     Enum_Post_Status as EnumPostStatus,
     Enum_Post_Type as EnumPostType,
-    useGetProposalByIdLazyQuery,
     useJoinProposalMutation,
     useReportPostMutation,
     useRestorePostMutation,
@@ -26,13 +25,9 @@ import {
 import { AuthContext } from './AuthContext';
 
 type ProposalContextState = {
-    proposal?: Proposal;
-    isLoading: boolean;
-    isJoined: boolean;
-    fetchProposal: (proposalId: string) => void;
     createProposal: (proposalData: ProposalInput, variables?: GetProposalsQueryVariables) => Promise<Proposal | null>;
-    canJoinProposal: () => boolean;
-    joinProposal: () => Promise<boolean>;
+    canJoinProposal: (proposalState: Proposal | undefined) => boolean;
+    joinProposal: (proposalState: Proposal | undefined) => Promise<boolean>;
     reportPost: (activityId: string, postId: string) => Promise<boolean>;
     restorePost: (activityId: string, postId: string) => Promise<boolean>;
     createActivityComment: (
@@ -61,31 +56,10 @@ type ProposalProviderProps = {
 
 export const ProposalContext = React.createContext<ProposalContextState>(null);
 
-export const useProposal = (): Proposal | undefined => {
-    const { proposal } = React.useContext(ProposalContext);
-    return proposal;
-};
-
 export const DEFAULT_APP_NAME = 'Votera';
 
 export function ProposalProvider({ children }: ProposalProviderProps): JSX.Element {
     const { user } = useContext(AuthContext);
-    const [proposalState, setProposalState] = useState<Proposal>();
-    const [isJoined, setIsJoined] = useState(false);
-
-    const [getProposalDetail, { loading }] = useGetProposalByIdLazyQuery({
-        fetchPolicy: 'cache-and-network',
-        nextFetchPolicy: 'cache-first',
-        onCompleted: (data) => {
-            if (data.proposalById) {
-                const proposal = data.proposalById as Proposal;
-                setProposalState(proposal);
-            }
-            if (data.proposalStatusById) {
-                setIsJoined(!!data.proposalStatusById.isJoined);
-            }
-        },
-    });
 
     const [createProposalMutation] = useCreateProposalMutation();
     const [joinProposalMutation] = useJoinProposalMutation();
@@ -93,47 +67,41 @@ export function ProposalProvider({ children }: ProposalProviderProps): JSX.Eleme
     const [restorePostMutation] = useRestorePostMutation();
     const [createCommentMutation] = useCreatePostMutation();
 
-    const fetchProposal = useCallback(
-        (proposalId: string) => {
-            setProposalState(undefined);
-            setIsJoined(false);
-            getProposalDetail({ variables: { proposalId } }).catch((err) => {
-                console.log('getProposalDetail error', err);
-            });
+    const canJoinProposal = useCallback(
+        (proposalState: Proposal | undefined) => {
+            return !!(user?.memberId && proposalState?.id);
         },
-        [getProposalDetail],
+        [user?.memberId],
     );
 
-    const canJoinProposal = useCallback(() => {
-        return !!(user?.memberId && proposalState?.id);
-    }, [proposalState?.id, user?.memberId]);
-
-    const joinProposal = useCallback(async () => {
-        try {
-            if (user?.memberId && proposalState?.id) {
-                const result = await joinProposalMutation({
-                    variables: {
-                        input: {
-                            data: {
-                                actor: user?.memberId,
-                                id: proposalState?.id,
+    const joinProposal = useCallback(
+        async (proposalState: Proposal | undefined) => {
+            try {
+                if (user?.memberId && proposalState?.id) {
+                    const result = await joinProposalMutation({
+                        variables: {
+                            input: {
+                                data: {
+                                    actor: user?.memberId,
+                                    id: proposalState?.id,
+                                },
                             },
                         },
-                    },
-                });
-                if (result.data?.joinProposal?.proposal) {
-                    setIsJoined(true);
-                    return true;
-                }
+                    });
+                    if (result.data?.joinProposal?.proposal) {
+                        return true;
+                    }
 
+                    return false;
+                }
+                return false;
+            } catch (e) {
+                console.log('Join Failed... : ', e);
                 return false;
             }
-            return false;
-        } catch (e) {
-            console.log('Join Failed... : ', e);
-            return false;
-        }
-    }, [proposalState?.id, user?.memberId, joinProposalMutation]);
+        },
+        [user?.memberId, joinProposalMutation],
+    );
 
     const createProposal = useCallback(
         async (proposalData: ProposalInput, variables?: GetProposalsQueryVariables) => {
@@ -191,7 +159,6 @@ export function ProposalProvider({ children }: ProposalProviderProps): JSX.Eleme
                         data: {
                             postId,
                             activityId,
-                            proposalId: proposalState?.id || '',
                             actor: user?.memberId || '',
                         },
                     },
@@ -202,7 +169,7 @@ export function ProposalProvider({ children }: ProposalProviderProps): JSX.Eleme
             }
             return false;
         },
-        [proposalState?.id, user?.memberId, reportPostMutation],
+        [user?.memberId, reportPostMutation],
     );
 
     const restorePost = useCallback(
@@ -213,7 +180,6 @@ export function ProposalProvider({ children }: ProposalProviderProps): JSX.Eleme
                         data: {
                             postId,
                             activityId,
-                            proposalId: proposalState?.id || '',
                             actor: user?.memberId || '',
                         },
                     },
@@ -224,15 +190,11 @@ export function ProposalProvider({ children }: ProposalProviderProps): JSX.Eleme
             }
             return false;
         },
-        [proposalState?.id, user?.memberId, restorePostMutation],
+        [user?.memberId, restorePostMutation],
     );
 
     const createActivityComment = useCallback(
         async (activityId: string, data: string, variables?: ActivityPostsQueryVariables) => {
-            if (!isJoined) {
-                await joinProposal();
-            }
-
             const createdComment = await createCommentMutation({
                 variables: {
                     input: {
@@ -288,15 +250,11 @@ export function ProposalProvider({ children }: ProposalProviderProps): JSX.Eleme
             });
             return (createdComment.data?.createPost?.post as Post) || null;
         },
-        [createCommentMutation, isJoined, joinProposal, user?.memberId],
+        [createCommentMutation, user?.memberId],
     );
 
     const createPostComment = useCallback(
         async (activityId: string, postId: string, data: string, variables?: PostCommentsQueryVariables) => {
-            if (!isJoined) {
-                await joinProposal();
-            }
-
             const createdComment = await createCommentMutation({
                 variables: {
                     input: {
@@ -353,7 +311,7 @@ export function ProposalProvider({ children }: ProposalProviderProps): JSX.Eleme
             });
             return (createdComment.data?.createPost?.post as Post) || null;
         },
-        [createCommentMutation, isJoined, joinProposal, user?.memberId],
+        [createCommentMutation, user?.memberId],
     );
 
     const createProposalNotice = useCallback(
@@ -426,10 +384,6 @@ export function ProposalProvider({ children }: ProposalProviderProps): JSX.Eleme
 
     const value = useMemo(
         () => ({
-            proposal: proposalState,
-            isLoading: loading,
-            isJoined,
-            fetchProposal,
             canJoinProposal,
             joinProposal,
             createProposal,
@@ -444,12 +398,8 @@ export function ProposalProvider({ children }: ProposalProviderProps): JSX.Eleme
             createActivityComment,
             createPostComment,
             createProposalNotice,
-            fetchProposal,
             createProposal,
-            isJoined,
             joinProposal,
-            loading,
-            proposalState,
             reportPost,
             restorePost,
         ],

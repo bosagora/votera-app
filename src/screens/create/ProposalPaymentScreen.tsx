@@ -1,20 +1,21 @@
 import React, { useContext, useEffect, useCallback, useState } from 'react';
-import { View, Image, ActivityIndicator, ScrollView, ImageURISource, StyleSheet } from 'react-native';
+import { View, Image, ScrollView, ImageURISource, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAssets } from 'expo-asset';
 import { BigNumber } from 'ethers';
 import { useIsFocused } from '@react-navigation/native';
 import globalStyle, { TOP_NAV_HEIGHT } from '~/styles/global';
-import CommonButton from '~/components/button/CommonButton';
 import {
     useGetProposalFeeLazyQuery,
     useCheckProposalFeeLazyQuery,
     Enum_Fee_Status as EnumFeeStatus,
     Enum_Proposal_Type as EnumProposalType,
+    Proposal,
+    ProposalFeePayload,
+    useGetProposalByIdLazyQuery,
 } from '~/graphql/generated/generated';
 import { convertCreateRevertMessage, getRevertMessage } from '~/utils/votera/voterautil';
-import { ProposalContext } from '~/contexts/ProposalContext';
-import { AuthContext, MetamaskStatus } from '~/contexts/AuthContext';
+import { AuthContext } from '~/contexts/AuthContext';
 import ShortButton from '~/components/button/ShortButton';
 import PaymentInfo from '~/components/proposal/PaymentInfo';
 import FocusAwareStatusBar from '~/components/statusbar/FocusAwareStatusBar';
@@ -38,20 +39,90 @@ const styles = StyleSheet.create({
 
 function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment'>): JSX.Element {
     const { id } = route.params;
-    const { metamaskStatus, metamaskProvider, signOut, metamaskUpdateBalance } = useContext(AuthContext);
-    const { proposal, fetchProposal } = useContext(ProposalContext);
+    const { metamaskProvider, metamaskUpdateBalance } = useContext(AuthContext);
+    const [proposal, setProposal] = useState<Proposal>();
+    const [feeStatus, setFeeStatus] = useState<EnumFeeStatus>();
     const dispatch = useAppDispatch();
     const [assets] = useAssets(iconAssets);
     const insets = useSafeAreaInsets();
     const [loading, setLoading] = useState(false);
     const isFocused = useIsFocused();
 
+    const [getProposalDetail] = useGetProposalByIdLazyQuery({
+        fetchPolicy: 'cache-and-network',
+        onCompleted: (data) => {
+            if (data.proposalById) {
+                setProposal(data.proposalById as Proposal);
+            }
+        },
+    });
     const [getProposalFee, { data, refetch }] = useGetProposalFeeLazyQuery({
         fetchPolicy: 'cache-and-network',
+        onCompleted: (proposalFeeData) => {
+            if (proposalFeeData?.proposalFee) {
+                const { status } = proposalFeeData.proposalFee;
+                if (feeStatus === undefined && status) {
+                    setFeeStatus(status);
+                    return;
+                }
+                if (!isFocused || feeStatus === status) {
+                    return;
+                }
+                if (status) {
+                    setFeeStatus(status);
+                }
+                if (status === EnumFeeStatus.Paid) {
+                    dispatch(showSnackBar(getString('입금이 확인되었습니다&#46;')));
+                    navigation.replace('RootUser', { screen: 'ProposalDetail', params: { id } });
+                } else {
+                    switch (status) {
+                        case EnumFeeStatus.Invalid:
+                        case EnumFeeStatus.Irrelevant:
+                            dispatch(showSnackBar(getString('입금 정보 확인 중 오류가 발생했습니다&#46;')));
+                            break;
+                        case EnumFeeStatus.Expired:
+                            dispatch(showSnackBar(getString('입금 유효 기간이 지났습니다&#46;')));
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        },
     });
-    const [checkProposalFee, { data: checkProposalFeeData }] = useCheckProposalFeeLazyQuery({
+    const [checkProposalFee] = useCheckProposalFeeLazyQuery({
         fetchPolicy: 'cache-and-network',
+        onCompleted: (checkProposalFeeData) => {
+            if (!isFocused) {
+                return;
+            }
+
+            if (checkProposalFeeData?.checkProposalFee) {
+                const { status } = checkProposalFeeData.checkProposalFee;
+                if (feeStatus === status) {
+                    return;
+                }
+                if (status) {
+                    setFeeStatus(status);
+                }
+                if (status === EnumFeeStatus.Paid) {
+                    dispatch(showSnackBar(getString('입금이 확인되었습니다&#46;')));
+                    navigation.replace('RootUser', { screen: 'ProposalDetail', params: { id } });
+                } else if (status !== EnumFeeStatus.Mining) {
+                    dispatch(showSnackBar(getString('입금 정보 확인 중 오류가 발생했습니다&#46;')));
+                }
+            }
+        },
     });
+
+    const fetchProposal = useCallback(
+        (proposalId: string) => {
+            getProposalDetail({ variables: { proposalId } }).catch((err) => {
+                console.log('getProposalDetail error', err);
+            });
+        },
+        [getProposalDetail],
+    );
 
     const headerRight = useCallback(() => {
         return (
@@ -68,7 +139,6 @@ function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment
                     marginRight: 32,
                 }}
                 onPress={() => {
-                    fetchProposal(id);
                     navigation.replace('RootUser', {
                         screen: 'ProposalDetail',
                         params: { id },
@@ -76,7 +146,7 @@ function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment
                 }}
             />
         );
-    }, [fetchProposal, id, navigation]);
+    }, [id, navigation]);
 
     const headerLeft = useCallback(() => {
         return <ChevronLeftIcon color="transparent" />;
@@ -116,11 +186,10 @@ function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment
     }, [fetchProposal, getProposalFee, id]);
 
     const callCommonsBudget = useCallback(
-        async (proposalId: string) => {
-            if (!data?.proposalFee?.destination || !metamaskProvider) {
+        async (proposalId: string, proposalFee: ProposalFeePayload | null | undefined) => {
+            if (!proposalFee?.destination || !metamaskProvider) {
                 return;
             }
-            const { proposalFee } = data;
             try {
                 setLoading(true);
 
@@ -128,38 +197,33 @@ function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment
                 const commonsBudget = new CommonsBudget(proposalFee.destination || '', metamaskProvider.getSigner());
                 if (proposalFee.type === EnumProposalType.Business) {
                     const fundInput = {
-                        start: data.proposalFee?.start || 0,
-                        end: data.proposalFee?.end || 0,
-                        startAssess: data.proposalFee?.startAssess || 0,
-                        endAssess: data.proposalFee?.endAssess || 0,
-                        amount: BigNumber.from(data.proposalFee?.amount || '0'),
-                        docHash: data.proposalFee?.docHash || '',
-                        title: data.proposalFee?.title || '',
+                        start: proposalFee?.start || 0,
+                        end: proposalFee?.end || 0,
+                        startAssess: proposalFee?.startAssess || 0,
+                        endAssess: proposalFee?.endAssess || 0,
+                        amount: BigNumber.from(proposalFee?.amount || '0'),
+                        docHash: proposalFee?.docHash || '',
+                        title: proposalFee?.title || '',
                     };
-                    tx = await commonsBudget.createFundProposal(
-                        proposalId,
-                        fundInput,
-                        data.proposalFee?.signature || '',
-                        {
-                            value: BigNumber.from(data.proposalFee?.feeAmount || '0'),
-                        },
-                    );
+                    tx = await commonsBudget.createFundProposal(proposalId, fundInput, proposalFee?.signature || '', {
+                        value: BigNumber.from(proposalFee?.feeAmount || '0'),
+                    });
                 } else {
                     const systemInput = {
-                        start: data.proposalFee?.start || 0,
-                        end: data.proposalFee?.end || 0,
+                        start: proposalFee?.start || 0,
+                        end: proposalFee?.end || 0,
                         startAssess: 0,
                         endAssess: 0,
                         amount: 0,
-                        docHash: data.proposalFee?.docHash || '',
-                        title: data.proposalFee?.title || '',
+                        docHash: proposalFee?.docHash || '',
+                        title: proposalFee?.title || '',
                     };
                     tx = await commonsBudget.createSystemProposal(
                         proposalId,
                         systemInput,
-                        data.proposalFee?.signature || '',
+                        proposalFee?.signature || '',
                         {
-                            value: BigNumber.from(data.proposalFee?.feeAmount || '0'),
+                            value: BigNumber.from(proposalFee?.feeAmount || '0'),
                         },
                     );
                 }
@@ -199,49 +263,8 @@ function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment
                 setLoading(false);
             }
         },
-        [checkProposalFee, data, dispatch, metamaskProvider, metamaskUpdateBalance, refetch],
+        [checkProposalFee, dispatch, metamaskProvider, metamaskUpdateBalance, refetch],
     );
-
-    useEffect(() => {
-        if (isFocused) {
-            if (checkProposalFeeData?.checkProposalFee) {
-                if (checkProposalFeeData.checkProposalFee.status === EnumFeeStatus.Paid) {
-                    dispatch(showSnackBar(getString('입금이 확인되었습니다&#46;')));
-                    navigation.replace('RootUser', { screen: 'ProposalDetail', params: { id } });
-                } else if (checkProposalFeeData.checkProposalFee.status !== EnumFeeStatus.Mining) {
-                    dispatch(showSnackBar(getString('입금 정보 확인 중 오류가 발생했습니다&#46;')));
-                }
-            }
-        }
-    }, [checkProposalFeeData, dispatch, id, isFocused, navigation]);
-
-    useEffect(() => {
-        if (!isFocused) {
-            return;
-        }
-        if (data?.proposalFee?.status === EnumFeeStatus.Paid) {
-            dispatch(showSnackBar(getString('입금이 확인되었습니다&#46;')));
-            navigation.replace('RootUser', { screen: 'ProposalDetail', params: { id } });
-        } else {
-            switch (data?.proposalFee?.status) {
-                case EnumFeeStatus.Invalid:
-                case EnumFeeStatus.Irrelevant:
-                    dispatch(showSnackBar(getString('입금 정보 확인 중 오류가 발생했습니다&#46;')));
-                    break;
-                case EnumFeeStatus.Expired:
-                    dispatch(showSnackBar(getString('입금 유효 기간이 지났습니다&#46;')));
-                    break;
-                default:
-                    break;
-            }
-        }
-    }, [data, dispatch, id, isFocused, navigation]);
-
-    if (metamaskStatus === MetamaskStatus.UNAVAILABLE) {
-        // redirect to landing page for installing metamask
-        signOut();
-        return <ActivityIndicator />;
-    }
 
     return (
         <View style={styles.container}>
@@ -252,7 +275,7 @@ function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment
                         proposal={proposal}
                         proposalFee={data?.proposalFee}
                         onCallBudget={() => {
-                            callCommonsBudget(id).catch(console.log);
+                            callCommonsBudget(id, data?.proposalFee).catch(console.log);
                         }}
                         loading={loading}
                     />

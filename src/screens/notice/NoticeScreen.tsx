@@ -5,7 +5,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAssets } from 'expo-asset';
 import globalStyle, { TOP_NAV_HEIGHT } from '~/styles/global';
 import { MainScreenProps, replaceToHome } from '~/navigation/main/MainParams';
-import { Enum_Post_Type as EnumPostType, Post, PostStatus, useActivityPostsQuery } from '~/graphql/generated/generated';
+import {
+    Enum_Post_Type as EnumPostType,
+    Post,
+    PostStatus,
+    Proposal,
+    useActivityPostsQuery,
+    useGetProposalByActivityLazyQuery,
+} from '~/graphql/generated/generated';
 import NoticeCard from '~/components/notice/NoticeCard';
 import FocusAwareStatusBar from '~/components/statusbar/FocusAwareStatusBar';
 import ListFooterButton from '~/components/button/ListFooterButton';
@@ -38,8 +45,10 @@ function getActivityPostsVariables(id: string) {
 function NoticeScreen({ navigation, route }: MainScreenProps<'Notice'>): JSX.Element {
     const { id: activityId } = route.params;
     const insets = useSafeAreaInsets();
-    const { proposal } = useContext(ProposalContext);
     const { user } = useContext(AuthContext);
+    const { joinProposal } = useContext(ProposalContext);
+    const [proposal, setProposal] = useState<Proposal>();
+    const [isJoined, setIsJoined] = useState(false);
     const [noticeCount, setNoticeCount] = useState(0);
     const [noticeData, setNoticeData] = useState<Post[]>();
     const [noticeStatus, setNoticeStatus] = useState<PostStatus[]>();
@@ -49,6 +58,17 @@ function NoticeScreen({ navigation, route }: MainScreenProps<'Notice'>): JSX.Ele
     const scrollViewRef = useRef<FlatList<any>>(null);
     const [assets] = useAssets(iconAssets);
 
+    const [getProposalByActivity] = useGetProposalByActivityLazyQuery({
+        fetchPolicy: 'cache-and-network',
+        onCompleted: (data) => {
+            if (data?.proposalByActivity) {
+                setProposal(data.proposalByActivity as Proposal);
+            }
+            if (data?.proposalStatusByActivity) {
+                setIsJoined(!!data.proposalStatusByActivity.isJoined);
+            }
+        },
+    });
     const {
         data: noticeQueryData,
         fetchMore,
@@ -120,10 +140,20 @@ function NoticeScreen({ navigation, route }: MainScreenProps<'Notice'>): JSX.Ele
     }, [headerBackground, headerLeft, headerRight, navigation]);
 
     useEffect(() => {
+        getProposalByActivity({ variables: { activityId } }).catch(console.log);
+    }, [activityId, getProposalByActivity]);
+
+    useEffect(() => {
         if (proposal) {
             setIsCreator(proposal.creator?.id === user?.memberId);
         }
     }, [proposal, user?.memberId]);
+
+    const setJoined = useCallback(async () => {
+        if (!isJoined) {
+            setIsJoined(await joinProposal(proposal));
+        }
+    }, [isJoined, joinProposal, proposal]);
 
     useEffect(() => {
         if (noticeQueryData?.activityPosts) {
@@ -142,6 +172,8 @@ function NoticeScreen({ navigation, route }: MainScreenProps<'Notice'>): JSX.Ele
                 noticeAId={activityId}
                 noticeData={item}
                 noticeStatus={noticeStatus ? noticeStatus[index] : undefined}
+                isJoined={isJoined}
+                setJoined={setJoined}
             />
         );
     };

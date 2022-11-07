@@ -50,8 +50,9 @@ mutation readArticle($id: ID!) {
             id
             readCount
         }
-        interaction {
-            ...InteractionItem
+        status {
+            id
+            isRead
         }
     }
 }
