@@ -2,7 +2,6 @@ import React, { useContext, useState, useCallback } from 'react';
 import { TouchableOpacity, View, StyleSheet } from 'react-native';
 import { Button, Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { OpinionFilterType } from '~/types/filterType';
 import MultilineInput from '~/components/input/MultiLineInput';
 import OpinionCard from '~/components/opinion/OpinionCard';
@@ -32,6 +31,8 @@ interface DiscussionProps {
     fetchMore: () => void;
     onLayout: (h: number) => void;
     moveToNotice: () => void;
+    isJoined: boolean;
+    setJoined: () => Promise<void>;
 }
 
 function Discussion(props: DiscussionProps): JSX.Element {
@@ -47,6 +48,8 @@ function Discussion(props: DiscussionProps): JSX.Element {
         fetchMore,
         moveToNotice,
         onLayout,
+        isJoined,
+        setJoined,
     } = props;
     const { user, isGuest } = useContext(AuthContext);
     const themeContext = useContext(ThemeContext);
@@ -62,7 +65,9 @@ function Discussion(props: DiscussionProps): JSX.Element {
                     return;
                 }
                 if (!data) return;
-
+                if (!isJoined) {
+                    await setJoined();
+                }
                 await createActivityComment(data);
 
                 // console.log('createdComment >>> ', createdComment);
@@ -83,7 +88,7 @@ function Discussion(props: DiscussionProps): JSX.Element {
                 console.log(err);
             }
         },
-        [createActivityComment, dispatch, isGuest],
+        [createActivityComment, dispatch, isGuest, isJoined, setJoined],
     );
 
     const selectFilterTextStyle = useCallback(
@@ -159,6 +164,8 @@ function Discussion(props: DiscussionProps): JSX.Element {
                     activityId={id}
                     post={comment}
                     status={commentsStatus ? commentsStatus[index] : undefined}
+                    isJoined={isJoined}
+                    setJoined={setJoined}
                 />
             ))}
             {commentsData && commentsData.length < commentsCount && (

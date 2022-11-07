@@ -70,10 +70,12 @@ interface ReplyProps {
     activityId: string;
     post: Post;
     closeReply: () => void;
+    isJoined: boolean;
+    setJoined: () => Promise<void>;
 }
 
 function Reply(props: ReplyProps): JSX.Element {
-    const { activityId, post, closeReply } = props;
+    const { activityId, post, closeReply, isJoined, setJoined } = props;
     const dispatch = useAppDispatch();
     const { isGuest } = useContext(AuthContext);
     const { createPostComment } = useContext(ProposalContext);
@@ -87,8 +89,6 @@ function Reply(props: ReplyProps): JSX.Element {
         data: replyQueryData,
         loading,
         fetchMore,
-        refetch,
-        client,
     } = usePostCommentsQuery({
         variables: getPostCommentsVariable(post.id),
     });
@@ -113,6 +113,9 @@ function Reply(props: ReplyProps): JSX.Element {
                 return;
             }
             if (!data) return;
+            if (!isJoined) {
+                await setJoined();
+            }
             await createPostComment(activityId, post.id, data, {
                 id: post.id,
                 sort: 'createdAt:desc',
@@ -130,7 +133,7 @@ function Reply(props: ReplyProps): JSX.Element {
             */
             dispatch(showSnackBar(getString('답글이 등록 되었습니다&#46;')));
         },
-        [activityId, createPostComment, dispatch, isGuest, post.id],
+        [activityId, createPostComment, dispatch, isGuest, isJoined, post.id, setJoined],
     );
 
     if (loading) return <ActivityIndicator style={{ marginVertical: 10 }} />;
@@ -209,10 +212,12 @@ interface OpinionCardProps {
     activityId: string;
     post: Post;
     status: PostStatus | undefined;
+    isJoined: boolean;
+    setJoined: () => Promise<void>;
 }
 
 function OpinionCard(props: OpinionCardProps): JSX.Element {
-    const { activityId, post, status } = props;
+    const { activityId, post, status, isJoined, setJoined } = props;
     const { isGuest } = useContext(AuthContext);
     const themeContext = useContext(ThemeContext);
     const dispatch = useAppDispatch();
@@ -371,7 +376,15 @@ function OpinionCard(props: OpinionCardProps): JSX.Element {
                     />
                 )}
             </View>
-            {showReply ? <Reply post={post} activityId={activityId} closeReply={() => setShowReply(false)} /> : null}
+            {showReply ? (
+                <Reply
+                    post={post}
+                    activityId={activityId}
+                    closeReply={() => setShowReply(false)}
+                    isJoined={isJoined}
+                    setJoined={setJoined}
+                />
+            ) : null}
             <Divider
                 style={{ left: -22, height: 3, width: cardWidth + 44, backgroundColor: themeContext.color.gray }}
             />

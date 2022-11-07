@@ -4,7 +4,6 @@ import React, { useEffect, useState, useContext } from 'react';
 import { RefreshControl, ScrollView, View, useWindowDimensions, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { AuthContext } from '~/contexts/AuthContext';
-import { ProposalContext } from '~/contexts/ProposalContext';
 import ProposalCard from '~/components/proposal/ProposalCard';
 import ProposalTop from '~/components/proposal/ProposalTop';
 import ProposalHeader from '~/components/proposal/ProposalHeader';
@@ -33,7 +32,6 @@ interface HomeViewProps {
 function HomeView(props: HomeViewProps): JSX.Element {
     const { where } = props;
     const { user, isGuest, metamaskAccount } = useContext(AuthContext);
-    const { fetchProposal } = useContext(ProposalContext);
     const [proposals, setProposals] = useState<Proposal[]>([]);
     const [topProposal, setTopProposal] = useState<Proposal>();
     const [filter, setFilter] = useState<ProposalFilterType>(ProposalFilterType.LATEST);
@@ -104,7 +102,6 @@ function HomeView(props: HomeViewProps): JSX.Element {
                     <ProposalTop
                         item={topProposal}
                         onPress={() => {
-                            fetchProposal(topProposal.proposalId as string);
                             navigation.push('RootUser', {
                                 screen: 'ProposalDetail',
                                 params: { id: topProposal.proposalId as string },
@@ -125,7 +122,6 @@ function HomeView(props: HomeViewProps): JSX.Element {
                             key={`proposalCard_${proposal.id}`}
                             item={proposal}
                             onPress={() => {
-                                fetchProposal(proposal.proposalId as string);
                                 navigation.push('RootUser', {
                                     screen: 'ProposalDetail',
                                     params: { id: proposal.proposalId as string },

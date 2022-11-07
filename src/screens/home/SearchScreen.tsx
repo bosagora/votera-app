@@ -11,7 +11,6 @@ import { Proposal, useGetProposalsLazyQuery } from '~/graphql/generated/generate
 import ProposalCard from '~/components/proposal/ProposalCard';
 import LocalStorage from '~/utils/LocalStorage';
 import FocusAwareStatusBar from '~/components/statusbar/FocusAwareStatusBar';
-import { ProposalContext } from '~/contexts/ProposalContext';
 import getString from '~/utils/locales/STRINGS';
 import { CancelIcon, ChevronLeftIcon, CloseIcon, SearchIcon } from '~/components/icons';
 
@@ -37,7 +36,6 @@ function Search({ navigation, route }: MainScreenProps<'Search'>): JSX.Element {
     });
     const [isSearched, setIsSearched] = useState<boolean>(false);
     const [searchHistory, setSearchHistory] = useState<string[]>([]);
-    const { fetchProposal } = useContext(ProposalContext);
 
     useFocusEffect(
         useCallback(() => {
@@ -111,7 +109,6 @@ function Search({ navigation, route }: MainScreenProps<'Search'>): JSX.Element {
             <ProposalCard
                 item={info.item}
                 onPress={() => {
-                    fetchProposal(proposalId);
                     navigation.push('RootUser', { screen: 'ProposalDetail', params: { id: proposalId } });
                 }}
             />

@@ -49,13 +49,17 @@ export function calculateProposalFee(_amount: string | null | undefined): BigNum
 }
 
 // hardhat node VM
-const ERROR_MSG = `Error: VM Exception while processing transaction: reverted with reason string '`;
+const ERROR_MSG_TESTNET = 'execution reverted: ';
+const ERROR_MSG_HARDHAT = `Error: VM Exception while processing transaction: reverted with reason string '`;
 
 export function getRevertMessage(error: any): string {
     if (error.reason && (typeof error.reason === 'string' || error.reason instanceof String)) {
         const reason = error.reason.valueOf() as string;
-        if (reason.startsWith(ERROR_MSG) && reason.endsWith("'")) {
-            return reason.slice(ERROR_MSG.length, -1);
+        if (reason.startsWith(ERROR_MSG_TESTNET)) {
+            return reason.slice(ERROR_MSG_TESTNET.length);
+        }
+        if (reason.startsWith(ERROR_MSG_HARDHAT) && reason.endsWith("'")) {
+            return reason.slice(ERROR_MSG_HARDHAT.length, -1);
         }
     } else if (
         error.data?.message &&

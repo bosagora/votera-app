@@ -13,6 +13,7 @@ import { showSnackBar } from '~/state/features/snackBar';
 import { CheckIcon } from '~/components/icons';
 
 const styles = StyleSheet.create({
+    buttonContainer: { marginTop: 100 },
     container: {
         alignItems: 'center',
         paddingTop: 41,
@@ -151,13 +152,13 @@ function Voting(props: Props): JSX.Element {
             case MetamaskStatus.INITIALIZING:
             case MetamaskStatus.CONNECTING:
                 return (
-                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 35 }}>
+                    <View style={[globalStyle.flexRowAlignCenter, styles.buttonContainer]}>
                         <ActivityIndicator />
                     </View>
                 );
             case MetamaskStatus.NOT_CONNECTED:
                 return (
-                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 35 }}>
+                    <View style={[globalStyle.flexRowAlignCenter, styles.buttonContainer]}>
                         <CommonButton
                             title={getString('메타마스크 연결하기')}
                             buttonStyle={globalStyle.metaButton}
@@ -169,7 +170,7 @@ function Voting(props: Props): JSX.Element {
                 );
             case MetamaskStatus.OTHER_CHAIN:
                 return (
-                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-evenly', marginTop: 35 }}>
+                    <View style={[globalStyle.flexRowAlignCenter, styles.buttonContainer]}>
                         <CommonButton
                             title={getString('메타마스크 체인 변경')}
                             buttonStyle={globalStyle.metaButton}
@@ -185,7 +186,7 @@ function Voting(props: Props): JSX.Element {
 
         if (loading) {
             return (
-                <View style={{ marginTop: 100 }}>
+                <View style={styles.buttonContainer}>
                     <ActivityIndicator />
                 </View>
             );
@@ -216,7 +217,7 @@ function Voting(props: Props): JSX.Element {
                         setVoteComplete(true);
                     }
                 }}
-                buttonStyle={{ marginTop: 100 }}
+                buttonStyle={styles.buttonContainer}
                 title={!needVote ? getString('수정하기') : getString('투표하기')}
                 titleStyle={[
                     globalStyle.btext,

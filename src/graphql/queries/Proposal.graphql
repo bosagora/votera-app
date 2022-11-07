@@ -22,6 +22,16 @@ query getProposalById($proposalId: String!) {
         isJoined
     }
 }
+query getProposalByActivity($activityId: String!) {
+    proposalByActivity(activityId: $activityId) {
+        ...ProposalItem
+    }
+    proposalStatusByActivity(activityId: $activityId) {
+        id
+        isLike
+        isJoined
+    }
+}
 
 query getProposals($sort: String, $limit: Int, $start: Int, $where: JSON) {
     listProposal(sort: $sort, limit: $limit, start: $start, where: $where) {

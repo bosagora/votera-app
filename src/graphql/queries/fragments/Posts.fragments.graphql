@@ -86,6 +86,7 @@ fragment PostItem on Post {
     }
     likeCount
     commentCount
+    readCount
 }
 
 fragment NewPostStatus on PostStatus {

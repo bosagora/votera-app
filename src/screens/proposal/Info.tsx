@@ -16,11 +16,11 @@ import {
     AssessResultPayload,
     Enum_Assess_Proposal_State as EnumAssessProposalState,
     ComponentCommonPeriodInput,
+    Proposal,
 } from '~/graphql/generated/generated';
 import globalStyle, { MAX_WIDTH } from '~/styles/global';
 import AssessAvg from '~/components/proposal/AssessAvg';
 import { getProposalStatusString } from '~/components/status/ProgressMark';
-import { ProposalContext } from '~/contexts/ProposalContext';
 import getString, { getLocale } from '~/utils/locales/STRINGS';
 import { StringWeiAmountFormat } from '~/utils/votera/voterautil';
 import { useAppDispatch } from '~/state/hooks';
@@ -58,6 +58,7 @@ function getResizedImageSize(image: AttachmentImage, width: number): ImageStyle 
 }
 
 interface Props {
+    proposal: Proposal | undefined;
     previewData: PreviewProposal | undefined;
     isPreview: boolean;
     assessResultData: AssessResultPayload;
@@ -67,8 +68,7 @@ interface Props {
 function Info(props: Props): JSX.Element {
     const themeContext = useContext(ThemeContext);
     const dispatch = useAppDispatch();
-    const { previewData, assessResultData, isPreview, onLayout } = props;
-    const { proposal } = useContext(ProposalContext);
+    const { proposal, previewData, assessResultData, isPreview, onLayout } = props;
     const [type, setType] = useState<EnumProposalType>();
     const [proposalStatus, setProposalStatus] = useState<string>();
     const [assessPeriod, setAssessPeriod] = useState<string>();

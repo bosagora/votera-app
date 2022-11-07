@@ -4,10 +4,10 @@ import { ThemeContext } from 'styled-components/native';
 import { Button, Text, Image } from 'react-native-elements';
 import dayjs from 'dayjs';
 import globalStyle from '~/styles/global';
-import { Post, PostStatus, usePostCommentsLazyQuery } from '~/graphql/generated/generated';
+import { Post, PostStatus, usePostCommentsLazyQuery, useReadArticleMutation } from '~/graphql/generated/generated';
 import { AuthContext } from '~/contexts/AuthContext';
 import { ProposalContext } from '~/contexts/ProposalContext';
-import getString from '~/utils/locales/STRINGS';
+import getString, { getLocale } from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
 import { adjustAttachmentImage, AttachmentFile, AttachmentImage, filterAttachment } from '~/utils/attach';
@@ -19,28 +19,33 @@ import ShortButton from '../button/ShortButton';
 
 const styles = StyleSheet.create({
     bottomWrapper: { alignItems: 'center', flexDirection: 'row', marginTop: 18 },
-    container: { borderBottomWidth: 3, padding: 23 },
-    content: { fontSize: 13, lineHeight: 23 },
-    contentWrapper: { paddingVertical: 30 },
-    regularButton: {
+    commentsHeader: { fontSize: 10, lineHeight: 19 },
+    commentsMain: { fontSize: 13, lineHeight: 21 },
+    commentsWrapperEn: {
         alignItems: 'center',
         borderRadius: 6,
         borderStyle: 'solid',
         borderWidth: 1,
         height: 26,
         justifyContent: 'center',
-        paddingHorizontal: 10,
+        width: 88,
+    },
+    commentsWrapperKo: {
+        alignItems: 'center',
+        borderRadius: 6,
+        borderStyle: 'solid',
+        borderWidth: 1,
+        height: 26,
+        justifyContent: 'center',
         width: 52,
     },
-    regularButtonText: { fontSize: 10, lineHeight: 19 },
-    // separator: {
-    //     borderLeftWidth: 1,
-    //     height: 11,
-    //     marginLeft: 9,
-    //     width: 11,
-    // },
+    container: { borderBottomWidth: 3, padding: 23 },
+    content: { fontSize: 13, lineHeight: 23 },
+    contentWrapper: { paddingVertical: 30 },
+    separator: { borderLeftWidth: 1, height: 11, marginLeft: 9, width: 11 },
     titleText: { flex: 1, fontSize: 14, lineHeight: 22 },
     writeDate: { fontSize: 10, lineHeight: 20, marginLeft: 12 },
+    writeView: { fontSize: 10, lineHeight: 20 },
     writerName: { fontSize: 9, lineHeight: 11 },
 });
 
@@ -92,14 +97,21 @@ function getNoticeCommentsVariables(id: string) {
     };
 }
 
+function selectCommentsWrapper() {
+    const locale = getLocale();
+    return locale.startsWith('ko') ? styles.commentsWrapperKo : styles.commentsWrapperEn;
+}
+
 interface NoticeCardProps {
     noticeData: Post;
     noticeStatus: PostStatus | undefined;
     noticeAId: string;
+    isJoined: boolean;
+    setJoined: () => Promise<void>;
 }
 
 function NoticeCard(props: NoticeCardProps): JSX.Element {
-    const { noticeAId, noticeData, noticeStatus } = props;
+    const { noticeAId, noticeData, noticeStatus, isJoined, setJoined } = props;
     const dispatch = useAppDispatch();
     const themeContext = useContext(ThemeContext);
     const { isGuest } = useContext(AuthContext);
@@ -107,6 +119,7 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
 
     const [text, setText] = useState<string>('');
     const [expanded, setExpanded] = useState(false);
+    const [isRead, setIsRead] = useState(!!noticeStatus?.isRead);
 
     const [replyCount, setReplyCount] = useState(noticeData.commentCount || 0);
     const [replyData, setReplyData] = useState<Post[]>();
@@ -118,6 +131,7 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
     const [getNoticeComments, { data: noticeCommentsData, loading, fetchMore, client }] = usePostCommentsLazyQuery({
         fetchPolicy: 'cache-and-network',
     });
+    const [readArticle] = useReadArticleMutation();
 
     useEffect(() => {
         let canceled = false;
@@ -189,7 +203,9 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
                 }
 
                 if (!data) return;
-
+                if (!isJoined) {
+                    await setJoined();
+                }
                 await createPostComment(noticeAId, noticeData.id, data, {
                     id: noticeData.id,
                     sort: 'createdAt:desc',
@@ -208,11 +224,20 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
                 dispatch(showSnackBar(getString('의견이 등록 되었습니다&#46;')));
             } catch (err) {
                 console.log(err);
-            } finally {
-                // dispatch(ActionCreators.loadingAniModal({ visibility: false }));
             }
         },
-        [createPostComment, dispatch, isGuest, noticeAId, noticeData.id],
+        [createPostComment, dispatch, isGuest, isJoined, noticeAId, noticeData.id, setJoined],
+    );
+
+    const clickRead = useCallback(
+        (id: string, read: boolean) => {
+            setExpanded(read);
+            if (read && !isRead) {
+                setIsRead(true);
+                readArticle({ variables: { id } }).catch(console.log);
+            }
+        },
+        [isRead, readArticle],
     );
 
     const renderFetchMoreButton = () => {
@@ -240,13 +265,11 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
                 { backgroundColor: themeContext.color.white, borderBottomColor: themeContext.color.gray },
             ]}
         >
-            <TouchableOpacity onPress={() => setExpanded(!expanded)}>
+            <TouchableOpacity onPress={() => clickRead(noticeData.id, !expanded)}>
                 <View style={globalStyle.flexRowBetween}>
                     <Text style={[globalStyle.mtext, styles.titleText]}>{getContentTitle(noticeData)}</Text>
-                    <View style={[styles.regularButton, { borderColor: themeContext.color.boxBorder }]}>
-                        <Text
-                            style={[globalStyle.btext, { color: themeContext.color.primary }, styles.regularButtonText]}
-                        >
+                    <View style={[selectCommentsWrapper(), { borderColor: themeContext.color.boxBorder }]}>
+                        <Text style={[globalStyle.btext, { color: themeContext.color.primary }, styles.commentsHeader]}>
                             {getString('답글 #N').replace('#N', replyCount?.toString() || '0')}
                         </Text>
                     </View>
@@ -258,9 +281,10 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
                     <Text style={[globalStyle.rltext, { color: themeContext.color.textBlack }, styles.writeDate]}>
                         {dayjs(noticeData.createdAt as string).format('YYYY.M.D')}
                     </Text>
-                    {/** TODO */}
-                    {/* <View style={[styles.separator, { borderColor: themeContext.color.separator }]} /> */}
-                    {/* <Text style={[globalStyle.ltext, { color: themeContext.color.textBlack }, styles.writeDate]}>조회수</Text> */}
+                    <View style={[styles.separator, { borderColor: themeContext.color.separator }]} />
+                    <Text style={[globalStyle.ltext, { color: themeContext.color.textBlack }, styles.writeView]}>
+                        {getString('조회수 #N').replace('#N', noticeData.readCount?.toString() || '')}
+                    </Text>
                 </View>
             </TouchableOpacity>
             {expanded && (
@@ -286,7 +310,15 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
                     </View>
                     <View style={{ marginVertical: 28 }}>
                         <View style={globalStyle.flexRowBetween}>
-                            <Text>{getString('#N개 답글').replace('#N', replyCount?.toString() || '0')}</Text>
+                            <Text
+                                style={[
+                                    globalStyle.rtext,
+                                    styles.commentsMain,
+                                    { color: themeContext.color.textBlack },
+                                ]}
+                            >
+                                {getString('#N개 답글').replace('#N', replyCount?.toString() || '0')}
+                            </Text>
                             {/* <ShortButton
                                 title={getString('새로고침')}
                                 titleStyle={{ fontSize: 10 }}

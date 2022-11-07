@@ -4,13 +4,13 @@ import { ThemeContext } from 'styled-components/native';
 import { Button, Text } from 'react-native-elements';
 import globalStyle from '~/styles/global';
 import { AuthContext, MetamaskStatus } from '~/contexts/AuthContext';
-import { ProposalContext } from '~/contexts/ProposalContext';
 import getString from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
 import { getCommonPeriodText } from '~/utils/time';
 import CommonButton from '~/components/button/CommonButton';
 import { CheckIcon } from '~/components/icons';
+import { Proposal } from '~/graphql/generated/generated';
 
 const styles = StyleSheet.create({
     buttonsContainer: {
@@ -103,14 +103,13 @@ function EvalComponent(props: EvalProps): JSX.Element {
 
 interface Props {
     onEvaluating: (result: AssessResult[]) => Promise<void>;
-    // reviewData: ReviewProps;
+    proposal: Proposal | undefined;
 }
 
 function Evaluating(props: Props): JSX.Element {
-    const { onEvaluating } = props;
+    const { proposal, onEvaluating } = props;
     const themeContext = useContext(ThemeContext);
     const dispatch = useAppDispatch();
-    const { proposal } = useContext(ProposalContext);
     const { isGuest, metamaskStatus, metamaskProvider, metamaskConnect, metamaskSwitch } = useContext(AuthContext);
     const [completeness, setCompleteness] = useState<number | undefined>(undefined);
     const [realization, setRealization] = useState<number | undefined>(undefined);
@@ -143,13 +142,13 @@ function Evaluating(props: Props): JSX.Element {
             case MetamaskStatus.INITIALIZING:
             case MetamaskStatus.CONNECTING:
                 return (
-                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-evenly' }}>
+                    <View style={[globalStyle.flexRowCenter, { marginTop: 63 }]}>
                         <ActivityIndicator size="large" />
                     </View>
                 );
             case MetamaskStatus.NOT_CONNECTED:
                 return (
-                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-evenly' }}>
+                    <View style={[globalStyle.flexRowCenter, { marginTop: 63 }]}>
                         <CommonButton
                             title={getString('메타마스크 연결하기')}
                             buttonStyle={globalStyle.metaButton}
@@ -161,7 +160,7 @@ function Evaluating(props: Props): JSX.Element {
                 );
             case MetamaskStatus.OTHER_CHAIN:
                 return (
-                    <View style={{ flex: 1, flexDirection: 'row', justifyContent: 'space-evenly' }}>
+                    <View style={[globalStyle.flexRowCenter, { marginTop: 63 }]}>
                         <CommonButton
                             title={getString('메타마스크 체인 변경')}
                             buttonStyle={globalStyle.metaButton}

@@ -10,7 +10,7 @@ import { useAssets } from 'expo-asset';
 import { AuthContext } from '~/contexts/AuthContext';
 import globalStyle, { isLargeScreen } from '~/styles/global';
 import { useIsValidatorLazyQuery } from '~/graphql/generated/generated';
-import getString from '~/utils/locales/STRINGS';
+import getString, { getLocale } from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
 import { RoundDecimalPoint, WeiAmountToString } from '~/utils/votera/voterautil';
@@ -53,7 +53,13 @@ const styles = StyleSheet.create({
     subLabel: { fontSize: 13, lineHeight: 29 },
     subMenu: { marginTop: Platform.OS === 'android' ? 5 : 10 },
     validator: { fontSize: 14, lineHeight: 18 },
+    validatorEn: { fontSize: 11, lineHeight: 18 },
 });
+
+function getValidatorStyle() {
+    const locale = getLocale();
+    return locale.startsWith('ko') ? [globalStyle.btext, styles.validator] : [globalStyle.btext, styles.validatorEn];
+}
 
 enum EnumIconAsset {
     PublicKey = 0,
@@ -204,9 +210,7 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                         </View>
                         {isValidator && !isGuest ? (
                             <View style={[styles.boxValidator, { backgroundColor: themeContext.color.primary }]}>
-                                <Text
-                                    style={[globalStyle.btext, { color: themeContext.color.white }, styles.validator]}
-                                >
+                                <Text style={[{ color: themeContext.color.white }, getValidatorStyle()]}>
                                     {getString('검증자')}
                                 </Text>
                             </View>
