@@ -401,5 +401,7 @@
     "입금 유효 기간이 지났습니다&#46;": "Payment has expired",
     "정족수(총 검증자 수의 1/3)를 채우지 못했습니다&#46;": "Failed to meet quorum (1/3 of total validators)",
     "찬성표 부족으로 부결되었습니다&#46;": "Rejected due to lack of support votes",
-    "조회수 #N": "Views #N"
+    "조회수 #N": "Views #N",
+    "제안ID": "Proposal ID",
+    "제안자": "Proposer"
 }

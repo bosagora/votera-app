@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { View, Image, Dimensions, StyleSheet, ImageStyle } from 'react-native';
+import { View, Image, Dimensions, StyleSheet, ImageStyle, TouchableOpacity } from 'react-native';
 import { Divider, Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
+import { setStringAsync } from 'expo-clipboard';
 import {
     AttachmentFile,
     AttachmentImage,
@@ -26,9 +27,12 @@ import { StringWeiAmountFormat } from '~/utils/votera/voterautil';
 import { useAppDispatch } from '~/state/hooks';
 import { getCommonPeriodText } from '~/utils/time';
 import { getDefaultAssessPeriod, PreviewProposal } from '~/types/proposalType';
+import { CopyIcon } from '~/components/icons';
+import { showSnackBar } from '~/state/features/snackBar';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const IMAGE_MAX_WIDTH = SCREEN_WIDTH - 46;
+const ELLIPSIS_TAIL_SIZE = -10;
 
 function getColumnWidth() {
     const locale = getLocale();
@@ -43,6 +47,7 @@ const styles = StyleSheet.create({
     container: { marginBottom: 90 },
     description: { fontSize: 13, lineHeight: 23, width: '100%' },
     label: { fontSize: 13, lineHeight: 25 },
+    labelId: { fontSize: 13, lineHeight: 25 },
     labelText: { fontSize: 13, lineHeight: 25 },
     logoWrapper: { alignItems: 'center', paddingBottom: 35, paddingTop: 45 },
     title: { fontSize: 13, lineHeight: 26 },
@@ -76,6 +81,8 @@ function Info(props: Props): JSX.Element {
     const [amount, setAmount] = useState<string>();
     const [name, setName] = useState<string>();
     const [description, setDescription] = useState<string>();
+    const [proposalId, setProposalId] = useState('');
+    const [proposer, setProposer] = useState('');
     const [logo, setLogo] = useState<AttachmentImage>();
     const [images, setImages] = useState<(AttachmentImage | undefined)[]>([]);
     const [files, setFiles] = useState<AttachmentFile[]>([]);
@@ -93,6 +100,8 @@ function Info(props: Props): JSX.Element {
             setAmount(StringWeiAmountFormat(previewData.fundingAmount));
             setName(previewData.name);
             setDescription(previewData.description);
+            setProposalId('');
+            setProposer('');
             const logoImage = previewData.logoImage ? imagePickerToAttachmentImage(previewData.logoImage) : undefined;
             if (logoImage) {
                 adjustAttachmentImage(logoImage, IMAGE_MAX_WIDTH)
@@ -126,6 +135,8 @@ function Info(props: Props): JSX.Element {
             setAmount(StringWeiAmountFormat(proposal.fundingAmount));
             setName(proposal.name || '');
             setDescription(proposal.description || '');
+            setProposalId(proposal.proposalId || '');
+            setProposer(proposal.proposer_address || '');
             const logoImage = proposal.logo ? uploadFileToAttachmentImage(proposal.logo) : undefined;
             if (logoImage) {
                 adjustAttachmentImage(logoImage, IMAGE_MAX_WIDTH)
@@ -227,6 +238,49 @@ function Info(props: Props): JSX.Element {
                             {amount} BOA
                         </Text>
                     </View>
+                )}
+                {!isPreview && (
+                    <>
+                        <View style={globalStyle.flexRowAlignCenter}>
+                            <Text style={[globalStyle.rtext, styles.label, { width: columnWidth }]}>
+                                {getString('제안ID')}
+                            </Text>
+                            <View style={{ flexDirection: 'row', width: viewWidth - columnWidth }}>
+                                <Text style={[globalStyle.ltext, styles.labelId]} numberOfLines={1}>
+                                    {proposalId.slice(0, ELLIPSIS_TAIL_SIZE)}
+                                </Text>
+                                <Text style={[globalStyle.ltext, styles.labelId]}>
+                                    {proposalId.slice(ELLIPSIS_TAIL_SIZE)}
+                                </Text>
+                                <TouchableOpacity
+                                    style={{ marginLeft: 8, marginTop: 2 }}
+                                    onPress={() => {
+                                        setStringAsync(proposalId)
+                                            .then(() => {
+                                                dispatch(showSnackBar(getString('클립보드에 복사되었습니다')));
+                                            })
+                                            .catch(console.log);
+                                    }}
+                                >
+                                    <CopyIcon color={themeContext.color.primary} />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                        <View style={globalStyle.flexRowAlignCenter}>
+                            <Text style={[globalStyle.rtext, styles.label, { width: columnWidth }]}>
+                                {getString('제안자')}
+                            </Text>
+                            <View style={{ flexDirection: 'row', width: viewWidth - columnWidth }}>
+                                <Text style={[globalStyle.ltext, styles.labelId]} numberOfLines={1}>
+                                    {proposer.slice(0, ELLIPSIS_TAIL_SIZE)}
+                                </Text>
+                                <Text style={[globalStyle.ltext, styles.labelId]}>
+                                    {proposer.slice(ELLIPSIS_TAIL_SIZE)}
+                                </Text>
+                                <View style={{ marginLeft: 8, width: 20 }} />
+                            </View>
+                        </View>
+                    </>
                 )}
             </View>
 
