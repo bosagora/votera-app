@@ -1,27 +1,36 @@
 /* eslint-disable import/extensions */
 /* eslint-disable global-require */
 import React, { useState, useEffect, useContext, useRef } from 'react';
-import { View, Image, ActivityIndicator, ImageURISource } from 'react-native';
+import { View, Image, ActivityIndicator, ImageURISource, StyleSheet } from 'react-native';
 import { Button, Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import MetaMaskOnboarding from '@metamask/onboarding';
 import { useAssets } from 'expo-asset';
+import { openDappURI } from '@config/ServerConfig';
 import CommonButton from '~/components/button/CommonButton';
 import { AuthContext, MetamaskStatus } from '~/contexts/AuthContext';
 import { AccessScreenProps } from '~/navigation/access/AccessParams';
 import globalStyle from '~/styles/global';
 import getString from '~/utils/locales/STRINGS';
 import { replaceToHome } from '~/navigation/main/MainParams';
+import Anchor from '~/components/anchor/Anchor';
 
 enum EnumIconAsset {
     FullnameLogo = 0,
     ArrowGrad,
+    RightArrow,
 }
 
 const iconAssets = [
     require('@assets/images/votera/voteraFullnameLogo.png'),
     require('@assets/icons/arrow/arrowGrad.png'),
+    require('@assets/icons/arrow/rightArrowWhite.png'),
 ];
+
+const styles = StyleSheet.create({
+    buttonStyle: { borderRadius: 25, height: 50 },
+    titleStyle: { color: 'white', fontSize: 14 },
+});
 
 function LandingScreen({ navigation }: AccessScreenProps<'Landing'>): JSX.Element | null {
     const themeContext = useContext(ThemeContext);
@@ -42,7 +51,7 @@ function LandingScreen({ navigation }: AccessScreenProps<'Landing'>): JSX.Elemen
 
     useEffect(() => {
         if (!onboarding.current) {
-            onboarding.current = new MetaMaskOnboarding();
+            onboarding.current = new MetaMaskOnboarding({ forwarderOrigin: openDappURI });
         }
     }, []);
 
@@ -93,15 +102,18 @@ function LandingScreen({ navigation }: AccessScreenProps<'Landing'>): JSX.Elemen
             <View>
                 {metamaskStatus === MetamaskStatus.INITIALIZING && <ActivityIndicator />}
                 {metamaskStatus === MetamaskStatus.UNAVAILABLE && (
-                    <CommonButton
-                        title={getString('메타마스크 설치하기')}
-                        buttonStyle={globalStyle.metaButton}
-                        filled
-                        onPress={() => {
-                            onboarding.current?.startOnboarding();
-                        }}
-                        raised
-                    />
+                    <Anchor
+                        style={[
+                            globalStyle.flexRowAlignCenter,
+                            globalStyle.metaButton,
+                            styles.buttonStyle,
+                            { backgroundColor: themeContext.color.primary },
+                        ]}
+                        source={openDappURI || ''}
+                    >
+                        <Text style={[globalStyle.btext, styles.titleStyle]}>{getString('메타마스크 설치하기')}</Text>
+                        {assets && <Image source={assets[EnumIconAsset.RightArrow] as ImageURISource} />}
+                    </Anchor>
                 )}
                 {metamaskStatus === MetamaskStatus.NOT_CONNECTED && (
                     <CommonButton
