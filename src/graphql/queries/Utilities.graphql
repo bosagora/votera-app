@@ -19,6 +19,8 @@ query VoteraConfiguration {
         providerUrl
         agoraScanUrl
         boaScanUrl
+        userServiceTermKoUrl
+        privacyTermKoUrl
     }
     feePolicy {
         fundProposalFeePermil
