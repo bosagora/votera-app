@@ -168,6 +168,7 @@ function LoginScreen({ navigation }: AccessScreenProps<'Login'>): JSX.Element {
                                 color: themeContext.color.textGray,
                             }}
                             type="clear"
+                            onPress={() => navigation.push('Common', { screen: 'UserService' })}
                         />
                         <Button
                             title={getString('개인정보보호정책')}
@@ -176,6 +177,7 @@ function LoginScreen({ navigation }: AccessScreenProps<'Login'>): JSX.Element {
                                 color: themeContext.color.textGray,
                             }}
                             type="clear"
+                            onPress={() => navigation.push('Common', { screen: 'Privacy' })}
                         />
                     </View>
                 </View>

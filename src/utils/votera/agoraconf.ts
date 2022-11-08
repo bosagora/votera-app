@@ -2,10 +2,13 @@ import { Platform } from 'react-native';
 import { BigNumber } from 'ethers';
 import { httpLinkURI, httpServerURI } from '../../../config/ServerConfig';
 import { Agora, FeePolicyPayload } from '~/graphql/generated/generated';
+import { getLocale } from '~/utils/locales/STRINGS';
 import { StringToWeiAmount } from './voterautil';
 
 let privacyTermUrl = `${httpLinkURI || ''}/privacy.html`;
+let privacyTermKoUrl = privacyTermUrl;
 let userServiceTermUrl = `${httpLinkURI || ''}/userService.html`;
+let userServiceTermKoUrl = userServiceTermUrl;
 let proposalFundMin = BigNumber.from(0);
 let proposalFundMax: BigNumber | undefined;
 let fundProposalFeePermil = BigNumber.from(1);
@@ -14,6 +17,13 @@ let voterFee = BigNumber.from('400000000000000');
 let withdrawDelayPeriod = 86400;
 let boaScanUrl = '';
 let agoraScanUrl = '';
+
+function normalizeUrl(url: string) {
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+        return url;
+    }
+    return `${Platform.OS === 'web' ? window.location.origin : httpServerURI || ''}${url}`;
+}
 
 export function setAgoraConf(
     agora:
@@ -28,6 +38,8 @@ export function setAgoraConf(
               | 'providerUrl'
               | 'boaScanUrl'
               | 'agoraScanUrl'
+              | 'userServiceTermKoUrl'
+              | 'privacyTermKoUrl'
           >
         | undefined,
 ) {
@@ -36,22 +48,20 @@ export function setAgoraConf(
     }
 
     if (agora.privacyTermUrl) {
-        if (agora.privacyTermUrl.startsWith('http://') || agora.privacyTermUrl.startsWith('https://')) {
-            privacyTermUrl = agora.privacyTermUrl;
-        } else {
-            privacyTermUrl = `${Platform.OS === 'web' ? window.location.origin : httpServerURI || ''}${
-                agora.privacyTermUrl
-            }`;
-        }
+        privacyTermUrl = normalizeUrl(agora.privacyTermUrl);
+    }
+    if (agora.privacyTermKoUrl) {
+        privacyTermKoUrl = normalizeUrl(agora.privacyTermKoUrl);
+    } else {
+        privacyTermKoUrl = privacyTermUrl;
     }
     if (agora.userServiceTermUrl) {
-        if (agora.userServiceTermUrl.startsWith('http://') || agora.userServiceTermUrl.startsWith('https://')) {
-            userServiceTermUrl = agora.userServiceTermUrl;
-        } else {
-            userServiceTermUrl = `${Platform.OS === 'web' ? window.location.origin : httpServerURI || ''}${
-                agora.userServiceTermUrl
-            }`;
-        }
+        userServiceTermUrl = normalizeUrl(agora.userServiceTermUrl);
+    }
+    if (agora.userServiceTermKoUrl) {
+        userServiceTermKoUrl = normalizeUrl(agora.userServiceTermKoUrl);
+    } else {
+        userServiceTermKoUrl = userServiceTermUrl;
     }
     if (agora.proposalFundMin || agora.proposalFundMax) {
         let fundMin = proposalFundMin;
@@ -84,10 +94,16 @@ export function setAgoraConf(
 }
 
 export function getPrivacyTermURL() {
+    if (getLocale().startsWith('ko')) {
+        return privacyTermKoUrl;
+    }
     return privacyTermUrl;
 }
 
 export function getUserServiceTermURL() {
+    if (getLocale().startsWith('ko')) {
+        return userServiceTermKoUrl;
+    }
     return userServiceTermUrl;
 }
 
