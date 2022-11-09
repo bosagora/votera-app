@@ -162,7 +162,7 @@ function LandingScreen({ navigation }: AccessScreenProps<'Landing'>): JSX.Elemen
                     </Text>
                     <View style={{ flexDirection: 'row', marginTop: 12.7 }}>
                         <Button
-                            title={getString('이용약관')}
+                            title={getString('약관')}
                             titleStyle={{
                                 fontSize: 13,
                                 color: themeContext.color.textGray,
@@ -171,7 +171,7 @@ function LandingScreen({ navigation }: AccessScreenProps<'Landing'>): JSX.Elemen
                             onPress={() => navigation.push('Common', { screen: 'UserService' })}
                         />
                         <Button
-                            title={getString('개인정보보호정책')}
+                            title={getString('개인정보보호')}
                             titleStyle={{
                                 fontSize: 13,
                                 color: themeContext.color.textGray,

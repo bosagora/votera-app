@@ -46,7 +46,7 @@ function Terms(props: TermsProps): JSX.Element {
         <View style={{ flex: 1, paddingBottom: 97, marginTop: 22 }}>
             <View style={{ flex: 1 }}>
                 <Text style={{ lineHeight: 23 }}>
-                    {getString('아래의 인증회원 약관과 개인정보수집 및 이용약관을\n확인해 보시고 동의해주세요')}
+                    {getString('아래의 약관과 개인정보처리방침을\n확인해 보시고 동의해주세요')}
                 </Text>
 
                 <View style={[globalStyle.flexRowBetween, { marginTop: 32 }]}>
@@ -58,9 +58,7 @@ function Terms(props: TermsProps): JSX.Element {
                             checkedIcon={checkboxIcon(true)}
                             uncheckedIcon={checkboxIcon(false)}
                         />
-                        <Text style={{ fontSize: 13, letterSpacing: -1 }}>
-                            {getString(`"Congress Function" 인증회원 약관`)}
-                        </Text>
+                        <Text style={{ fontSize: 13, letterSpacing: -1 }}>{getString(`"BOSAGORA" 약관`)}</Text>
                     </View>
                     <TouchableOpacity onPress={() => navigation.push('Common', { screen: 'UserService' })}>
                         <Text style={{ color: color.primary }}>{getString('내용보기')}</Text>
@@ -76,7 +74,9 @@ function Terms(props: TermsProps): JSX.Element {
                             checkedIcon={checkboxIcon(true)}
                             uncheckedIcon={checkboxIcon(false)}
                         />
-                        <Text style={{ fontSize: 13, letterSpacing: -1 }}>{getString('개인정보수집 및 이용약관')}</Text>
+                        <Text style={{ fontSize: 13, letterSpacing: -1 }}>
+                            {getString(`"BOSAGORA" 개인정보처리방침`)}
+                        </Text>
                     </View>
                     <TouchableOpacity onPress={() => navigation.push('Common', { screen: 'Privacy' })}>
                         <Text style={{ color: color.primary }}>{getString('내용보기')}</Text>
