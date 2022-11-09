@@ -6,7 +6,7 @@ import { getFundProposalFeePermil } from './agoraconf';
 import getString from '../locales/STRINGS';
 
 export enum VOTE_SELECT {
-    BLANK,
+    BLANK = 0,
     YES,
     NO,
 }
