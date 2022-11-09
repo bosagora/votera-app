@@ -399,7 +399,7 @@
     "입금 유효 기간이 지났습니다&#46;": "Payment has expired",
     "정족수(총 검증자 수의 1/3)를 채우지 못했습니다&#46;": "Failed to meet quorum (1/3 of total validators)",
     "찬성표 부족으로 부결되었습니다&#46;": "Rejected due to lack of support votes",
-    "찬성표 부족(찬성표와 반대표의 차이가 전체 투표자수의 10%미만)으로 부결되었습니다&#46;": "Rejected due to not enough support votes (difference less then 10% of participants)",
+    "찬성표 부족(찬성표와 반대표의 차이가 전체 투표자수의\n10%미만)으로 부결되었습니다&#46;": "Rejected due to not enough support votes\n(difference less then 10% of participants)",
     "조회수 #N": "Views #N",
     "제안ID": "Proposal ID",
     "제안자": "Proposer"

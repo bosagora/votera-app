@@ -154,10 +154,9 @@ function getRejectedTooltip(state?: EnumVoteProposalState | null, voteResult?: (
         const yesCount = getBigNumberFrom(voteResult ? voteResult[VOTE_SELECT.YES] : '0');
         const noCount = getBigNumberFrom(voteResult ? voteResult[VOTE_SELECT.NO] : '0');
         return yesCount.gt(noCount)
-            ? getString('찬성표 부족(찬성표와 반대표의 차이가 전체 투표자수의 10%미만)으로 부결되었습니다&#46;')
+            ? getString('찬성표 부족(찬성표와 반대표의 차이가 전체 투표자수의\n10%미만)으로 부결되었습니다&#46;')
             : getString('찬성표 부족으로 부결되었습니다&#46;');
     }
-
     return '';
 }
 
@@ -698,7 +697,7 @@ function VoteResult(props: VoteResultProps): JSX.Element {
                                 <TouchableOpacity
                                     style={{
                                         position: 'absolute',
-                                        left: -152,
+                                        left: -182,
                                         top: 16,
                                         width: 304,
                                         height: 52,
