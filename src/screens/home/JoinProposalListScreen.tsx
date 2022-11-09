@@ -6,7 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAssets } from 'expo-asset';
 import FilterButton from '~/components/button/FilterButton';
 import ProposalCard from '~/components/proposal/ProposalCard';
-import { Proposal, useGetMemberRolesLazyQuery } from '~/graphql/generated/generated';
+import { Proposal, useGetJoinProposalsLazyQuery } from '~/graphql/generated/generated';
 import { MainScreenProps, replaceToHome } from '~/navigation/main/MainParams';
 import globalStyle, { TOP_NAV_HEIGHT } from '~/styles/global';
 import { ProposalFilterType } from '~/types/filterType';
@@ -39,8 +39,6 @@ function getJoinProposalVariables(filter: ProposalFilterType, memberId?: string)
     return {
         limit: FETCH_INIT_LIMIT,
         sort: filter === ProposalFilterType.LATEST ? 'createdAt:desc' : 'memberCount:desc,createdAt:desc',
-        // eslint-disable-next-line camelcase
-        where: { scope: 'PROPOSAL', status_in: ['PENDING', 'NORMAL'], member: memberId },
     };
 }
 
@@ -55,14 +53,13 @@ function JoinProposalListScreen({ navigation }: MainScreenProps<'JoinProposalLis
     const [pullRefresh, setPullRefresh] = useState(false);
     const [assets] = useAssets(iconAssets);
 
-    const [getJoinProposals, { data: resMemberRolesData, fetchMore: joinFetchMore, loading: joinLoading, client }] =
-        useGetMemberRolesLazyQuery({
-            fetchPolicy: 'cache-and-network',
-            onError: (error) => {
-                console.log('getJoinProposals error: ', error);
-                setPullRefresh(false);
-            },
-        });
+    const [getJoinProposals, { data, fetchMore: joinFetchMore, loading, client }] = useGetJoinProposalsLazyQuery({
+        fetchPolicy: 'cache-and-network',
+        onError: (error) => {
+            console.log('getJoinProposals error: ', error);
+            setPullRefresh(false);
+        },
+    });
 
     const headerLeft = useCallback(() => {
         return (
@@ -111,16 +108,12 @@ function JoinProposalListScreen({ navigation }: MainScreenProps<'JoinProposalLis
     }, [filter, getJoinProposals, user?.memberId]);
 
     useEffect(() => {
-        if (resMemberRolesData?.memberRolesConnection?.values) {
-            setProposalCount(resMemberRolesData?.memberRolesConnection.aggregate?.count || 0);
-            setProposals(
-                resMemberRolesData?.memberRolesConnection.values.map((memberRole) => {
-                    return memberRole?.proposal as Proposal;
-                }),
-            );
+        if (data?.listJoinProposal) {
+            setProposalCount(data.listJoinProposal.count || 0);
+            setProposals(data.listJoinProposal.values as Proposal[]);
             setPullRefresh(false);
         }
-    }, [resMemberRolesData]);
+    }, [data]);
 
     const renderCountBar = useCallback(() => {
         return (
@@ -172,7 +165,7 @@ function JoinProposalListScreen({ navigation }: MainScreenProps<'JoinProposalLis
             renderItem={renderProposals}
             keyExtractor={(item) => item.id}
             onEndReached={(info) => {
-                if (joinFetchMore && !joinLoading) {
+                if (joinFetchMore && !loading) {
                     joinFetchMore({
                         variables: {
                             limit: FETCH_MORE_LIMIT,
@@ -183,7 +176,7 @@ function JoinProposalListScreen({ navigation }: MainScreenProps<'JoinProposalLis
             }}
             onEndReachedThreshold={0.5}
             onRefresh={() => {
-                if (!joinLoading) {
+                if (!loading) {
                     setPullRefresh(true);
                     const variables = getJoinProposalVariables(filter, user?.memberId);
                     client.cache.evict({

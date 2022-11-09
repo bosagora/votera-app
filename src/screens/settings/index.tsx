@@ -200,7 +200,7 @@ function Settings({ navigation, route }: MainScreenProps<'Settings'>): JSX.Eleme
                     style={[globalStyle.flexRowBetween, { height: 40 }]}
                     onPress={() => navigation.push('Common', { screen: 'Privacy' })}
                 >
-                    <Text style={{ fontSize: 13 }}>{getString('개인정보보호')}</Text>
+                    <Text style={{ fontSize: 13 }}>{getString('개인정보처리방침')}</Text>
                     <ChevronRightIcon color="darkgray" />
                 </TouchableOpacity>
             </ScrollView>

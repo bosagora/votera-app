@@ -47,6 +47,20 @@ query getProposals($sort: String, $limit: Int, $start: Int, $where: JSON) {
     }
 }
 
+query getJoinProposals($sort: String, $limit: Int, $start: Int) {
+    listJoinProposal(sort: $sort, limit: $limit, start: $start) {
+        count
+        values {
+            ...ProposalItem
+        }
+        statuses {
+            id
+            isLike
+            isJoined
+        }
+    }
+}
+
 query getProposalFee($proposalId: String!) {
     proposalFee(proposalId: $proposalId) {
         status
