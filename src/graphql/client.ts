@@ -200,8 +200,8 @@ const client = new ApolloClient({
                     postComments: {
                         keyArgs: ['id', 'sort'],
                     },
-                    memberRolesConnection: {
-                        keyArgs: ['sort', 'where'],
+                    listJoinProposal: {
+                        keyArgs: ['sort'],
                     },
                     listAssessValidators: {
                         keyArgs: ['proposalId'],

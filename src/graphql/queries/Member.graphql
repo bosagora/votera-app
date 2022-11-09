@@ -1,16 +1,3 @@
-query GetMemberRoles($sort: String, $limit: Int, $start: Int, $where: JSON) {
-    memberRolesConnection(sort: $sort, limit: $limit, start: $start, where: $where) {
-        aggregate {
-            count
-        }
-        values {
-            proposal {
-                ...ProposalItem
-            }
-        }
-    }
-}
-
 query CheckUsername($username: String!) {
     checkDupUserName(username: $username) {
         username

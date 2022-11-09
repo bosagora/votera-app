@@ -171,7 +171,7 @@ function LoginScreen({ navigation }: AccessScreenProps<'Login'>): JSX.Element {
                             onPress={() => navigation.push('Common', { screen: 'UserService' })}
                         />
                         <Button
-                            title={getString('개인정보보호')}
+                            title={getString('개인정보처리방침')}
                             titleStyle={{
                                 fontSize: 13,
                                 color: themeContext.color.textGray,
