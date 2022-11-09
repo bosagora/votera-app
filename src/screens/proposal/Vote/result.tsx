@@ -87,9 +87,6 @@ const styles = StyleSheet.create({
         marginTop: 30,
         width: '100%',
     },
-    resultDisagree: {
-        marginTop: 1,
-    },
     resultRowBackground: {
         flex: 1,
         height: 13,
@@ -145,15 +142,23 @@ function isRejectedVoteResult(state?: EnumVoteProposalState | null) {
     }
 }
 
-function getRejectedTooltip(state?: EnumVoteProposalState | null) {
-    switch (state) {
-        case EnumVoteProposalState.InvalidQuorum:
-            return getString('정족수(총 검증자 수의 1/3)를 채우지 못했습니다&#46;');
-        case EnumVoteProposalState.Rejected:
-            return getString('찬성표 부족으로 부결되었습니다&#46;');
-        default:
-            return '';
+function getBigNumberFrom(value?: string | null) {
+    return BigNumber.from(value || '0');
+}
+
+function getRejectedTooltip(state?: EnumVoteProposalState | null, voteResult?: (string | null)[] | null) {
+    if (state === EnumVoteProposalState.InvalidQuorum) {
+        return getString('정족수(총 검증자 수의 1/3)를 채우지 못했습니다&#46;');
     }
+    if (state === EnumVoteProposalState.Rejected) {
+        const yesCount = getBigNumberFrom(voteResult ? voteResult[VOTE_SELECT.YES] : '0');
+        const noCount = getBigNumberFrom(voteResult ? voteResult[VOTE_SELECT.NO] : '0');
+        return yesCount.gt(noCount)
+            ? getString('찬성표 부족(찬성표와 반대표의 차이가 전체 투표자수의 10%미만)으로 부결되었습니다&#46;')
+            : getString('찬성표 부족으로 부결되었습니다&#46;');
+    }
+
+    return '';
 }
 
 interface VoteResultProps {
@@ -261,7 +266,7 @@ function VoteResult(props: VoteResultProps): JSX.Element {
                         <Text
                             style={[
                                 globalStyle.mtext,
-                                { fontSize: 13, lineHeight: 55, width: 40, color: themeContext.color.agree },
+                                { fontSize: 13, lineHeight: 55, width: 50, color: themeContext.color.agree },
                             ]}
                         >
                             {getString('찬성')}
@@ -277,7 +282,7 @@ function VoteResult(props: VoteResultProps): JSX.Element {
                                 style={{
                                     position: 'absolute',
                                     backgroundColor: themeContext.color.agree,
-                                    width: calcWidth(data?.voteResult ? data.voteResult[1] : null),
+                                    width: calcWidth(data?.voteResult ? data.voteResult[VOTE_SELECT.YES] : null),
                                     height: 13,
                                 }}
                             />
@@ -294,14 +299,14 @@ function VoteResult(props: VoteResultProps): JSX.Element {
                                 },
                             ]}
                         >
-                            {data?.voteResult ? data.voteResult[1] : '0'}
+                            {data?.voteResult ? data.voteResult[VOTE_SELECT.YES] : '0'}
                         </Text>
                     </View>
                     <View style={styles.resultRowWrapper}>
                         <Text
                             style={[
                                 globalStyle.mtext,
-                                { fontSize: 13, lineHeight: 55, width: 40, color: themeContext.color.disagree },
+                                { fontSize: 13, lineHeight: 55, width: 50, color: themeContext.color.disagree },
                             ]}
                         >
                             {getString('반대')}
@@ -311,7 +316,7 @@ function VoteResult(props: VoteResultProps): JSX.Element {
                                 style={{
                                     position: 'absolute',
                                     backgroundColor: themeContext.color.disagree,
-                                    width: calcWidth(data?.voteResult ? data.voteResult[2] : null),
+                                    width: calcWidth(data?.voteResult ? data.voteResult[VOTE_SELECT.NO] : null),
                                     height: 13,
                                 }}
                             />
@@ -328,14 +333,14 @@ function VoteResult(props: VoteResultProps): JSX.Element {
                                 },
                             ]}
                         >
-                            {data?.voteResult ? data.voteResult[2] : '0'}
+                            {data?.voteResult ? data.voteResult[VOTE_SELECT.NO] : '0'}
                         </Text>
                     </View>
                     <View style={styles.resultRowWrapper}>
                         <Text
                             style={[
                                 globalStyle.mtext,
-                                { fontSize: 13, lineHeight: 55, width: 40, color: themeContext.color.abstain },
+                                { fontSize: 13, lineHeight: 55, width: 50, color: themeContext.color.abstain },
                             ]}
                         >
                             {getString('기권')}
@@ -345,7 +350,7 @@ function VoteResult(props: VoteResultProps): JSX.Element {
                                 style={{
                                     position: 'absolute',
                                     backgroundColor: themeContext.color.abstain,
-                                    width: calcWidth(data?.voteResult ? data.voteResult[0] : null),
+                                    width: calcWidth(data?.voteResult ? data.voteResult[VOTE_SELECT.BLANK] : null),
                                     height: 13,
                                 }}
                             />
@@ -362,7 +367,7 @@ function VoteResult(props: VoteResultProps): JSX.Element {
                                 },
                             ]}
                         >
-                            {data?.voteResult ? data.voteResult[0] : '0'}
+                            {data?.voteResult ? data.voteResult[VOTE_SELECT.BLANK] : '0'}
                         </Text>
                     </View>
                 </View>
@@ -716,7 +721,7 @@ function VoteResult(props: VoteResultProps): JSX.Element {
                                             { fontSize: 12, lineHeight: 21, color: themeContext.color.textBlack },
                                         ]}
                                     >
-                                        {getRejectedTooltip(data?.voteProposalState)}
+                                        {getRejectedTooltip(data?.voteProposalState, data?.voteResult)}
                                     </Text>
                                 </TouchableOpacity>
                             )}
