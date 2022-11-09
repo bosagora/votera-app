@@ -18,7 +18,7 @@ import { ChevronLeftIcon } from '~/components/icons';
 
 const DEBOUNCER_TIME = 300;
 
-const headerTitle = () => <Text style={globalStyle.headerTitle}>{getString('설정')}</Text>;
+const headerTitle = () => <Text style={globalStyle.headerTitle}>{getString('계정이름 변경')}</Text>;
 
 function AccountInfo({ navigation, route }: MainScreenProps<'AccountInfo'>): JSX.Element {
     const themeContext = useContext(ThemeContext);

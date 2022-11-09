@@ -17,7 +17,7 @@ import { ChevronLeftIcon } from '~/components/icons';
 
 const headerTitle = () => (
     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <Text style={globalStyle.headerTitle}>{getString('알람수신 설정')}</Text>
+        <Text style={globalStyle.headerTitle}>{getString('알림 수신 설정')}</Text>
     </View>
 );
 
@@ -119,8 +119,8 @@ function Alarm({ navigation, route }: MainScreenProps<'Alarm'>): JSX.Element {
                             activeThumbColor="white"
                         />
                     </View>
-                    {/* <View style={[globalStyle.flexRowBetween, { height: 40 }]}>
-                        <Text style={{ fontSize: 13 }}>{getString('관심 제안에 대한 신규 소식')}</Text>
+                    <View style={[globalStyle.flexRowBetween, { height: 40 }]}>
+                        <Text style={{ fontSize: 13 }}>{getString('참여 제안에 대한 신규 소식')}</Text>
                         <Switch
                             style={{ transform: [{ scaleX: 0.9 }, { scaleY: 0.9 }] }}
                             trackColor={{ true: themeContext.color.primary, false: themeContext.color.disabled }}
@@ -137,7 +137,7 @@ function Alarm({ navigation, route }: MainScreenProps<'Alarm'>): JSX.Element {
                             thumbColor="white"
                             activeThumbColor="white"
                         />
-                    </View> */}
+                    </View>
                     <View style={[globalStyle.flexRowBetween, { height: 40 }]}>
                         <Text style={{ fontSize: 13 }}>{getString('신규 제안 등록 소식')}</Text>
                         <Switch
@@ -176,7 +176,7 @@ function Alarm({ navigation, route }: MainScreenProps<'Alarm'>): JSX.Element {
                             activeThumbColor="white"
                         />
                     </View>
-                    <View style={[globalStyle.flexRowBetween, { height: 40 }]}>
+                    {/* <View style={[globalStyle.flexRowBetween, { height: 40 }]}>
                         <Text style={{ fontSize: 13 }}>{getString('기타 소식')}</Text>
                         <Switch
                             style={{ transform: [{ scaleX: 0.9 }, { scaleY: 0.9 }] }}
@@ -194,7 +194,7 @@ function Alarm({ navigation, route }: MainScreenProps<'Alarm'>): JSX.Element {
                             thumbColor="white"
                             activeThumbColor="white"
                         />
-                    </View>
+                    </View> */}
                 </View>
             </ScrollView>
         </View>

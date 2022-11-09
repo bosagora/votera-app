@@ -10,7 +10,7 @@ import { ChevronLeftIcon } from '~/components/icons';
 import { replaceToHome } from '~/navigation/main/MainParams';
 
 function UserServiceScreen({ route, navigation }: CommonScreenProps<'UserService'>): JSX.Element {
-    const [title] = useState(getString('인증회원약관'));
+    const [title] = useState(getString('약관'));
     const [uri] = useState(getUserServiceTermURL());
 
     const headerLeft = useCallback(() => {

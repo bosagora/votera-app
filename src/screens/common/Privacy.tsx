@@ -10,7 +10,7 @@ import { ChevronLeftIcon } from '~/components/icons';
 import { replaceToHome } from '~/navigation/main/MainParams';
 
 function PrivacyScreen({ route, navigation }: CommonScreenProps<'Privacy'>): JSX.Element {
-    const [title] = useState(getString('개인정보수집약관'));
+    const [title] = useState(getString('개인정보처리방침'));
     const [uri] = useState(getPrivacyTermURL());
 
     const headerLeft = useCallback(() => {

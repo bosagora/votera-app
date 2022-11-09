@@ -179,7 +179,7 @@ function Settings({ navigation, route }: MainScreenProps<'Settings'>): JSX.Eleme
                         style={[globalStyle.flexRowBetween, { height: 40 }]}
                         onPress={() => navigation.push('RootUser', { screen: 'AccountInfo' })}
                     >
-                        <Text style={{ fontSize: 13 }}>{getString('계정이름 변경하기')}</Text>
+                        <Text style={{ fontSize: 13 }}>{getString('계정이름 변경')}</Text>
                         <ChevronRightIcon color="darkgray" />
                     </TouchableOpacity>
                 </View>
@@ -192,7 +192,7 @@ function Settings({ navigation, route }: MainScreenProps<'Settings'>): JSX.Eleme
                     style={[globalStyle.flexRowBetween, { height: 40 }]}
                     onPress={() => navigation.push('Common', { screen: 'UserService' })}
                 >
-                    <Text style={{ fontSize: 13 }}>{getString('이용약관')}</Text>
+                    <Text style={{ fontSize: 13 }}>{getString('약관')}</Text>
                     <ChevronRightIcon color="darkgray" />
                 </TouchableOpacity>
 
@@ -200,7 +200,7 @@ function Settings({ navigation, route }: MainScreenProps<'Settings'>): JSX.Eleme
                     style={[globalStyle.flexRowBetween, { height: 40 }]}
                     onPress={() => navigation.push('Common', { screen: 'Privacy' })}
                 >
-                    <Text style={{ fontSize: 13 }}>{getString('개인정보보호정책')}</Text>
+                    <Text style={{ fontSize: 13 }}>{getString('개인정보보호')}</Text>
                     <ChevronRightIcon color="darkgray" />
                 </TouchableOpacity>
             </ScrollView>
