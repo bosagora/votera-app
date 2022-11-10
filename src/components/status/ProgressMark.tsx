@@ -34,7 +34,7 @@ export const getProposalStatusString = (status: EnumProposalStatus | undefined, 
         case EnumProposalStatus.Vote:
             return getString('투표중');
         case EnumProposalStatus.Reject:
-            return getString('사전평가탈락');
+            return getString('사전평가 탈락');
         case EnumProposalStatus.Closed:
             return getString('결과보기');
         default:

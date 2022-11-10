@@ -84,7 +84,7 @@ function ProposalTop(props: ProposalTopProps): JSX.Element | null {
                 resizeMode="cover"
             >
                 <View style={{ alignItems: 'flex-end' }}>
-                    <DdayMark top deadline={votePeriod?.end as string} type={type} />
+                    <DdayMark top deadline={votePeriod?.end as string} type={type} status={status} />
                 </View>
                 <View style={globalStyle.flexRowAlignCenter}>
                     <StatusMark type={type} transparent />

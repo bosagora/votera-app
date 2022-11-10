@@ -553,51 +553,59 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
         }
     };
 
-    const title = () => {
-        const opacity = scroll.interpolate({
-            inputRange: [-20, 0, 250 - HEADER_HEIGHT],
-            outputRange: [1, 1, 0],
-            extrapolate: 'clamp',
-        });
-        const pos = scroll.interpolate({
-            inputRange: [-20, 0, 250 - HEADER_HEIGHT],
-            outputRange: [22, 22, 0],
-            extrapolate: 'clamp',
-        });
-        return (
-            <View style={styles.titleContainer}>
-                <Animated.View style={[styles.typeBox, { opacity }, { top: pos }]}>
-                    <Text style={[globalStyle.mtext, styles.typeText]}>
-                        {proposal?.type === EnumProposalType.Business ? getString('사업제안') : getString('시스템제안')}
-                    </Text>
-                </Animated.View>
-                <Text style={[globalStyle.btext, styles.titleText]} numberOfLines={numberOfLines}>
-                    {proposal?.name}
-                </Text>
-                <Animated.View style={[styles.dateBox, { opacity }, { bottom: pos }]}>
-                    {proposal?.type === EnumProposalType.Business && (
-                        <Period
-                            type={getString('평가 기간')}
-                            typeStyle={styles.periodText}
-                            periodStyle={styles.period}
-                            top
-                            created={proposal?.assessPeriod?.begin as string}
-                            deadline={proposal?.assessPeriod?.end as string}
-                        />
+    const title = useCallback(
+        (scrollValue: Animated.Value) => {
+            const opacity = scrollValue.interpolate({
+                inputRange: [-20, 0, 250 - HEADER_HEIGHT],
+                outputRange: [1, 1, 0],
+                extrapolate: 'clamp',
+            });
+            const pos = scrollValue.interpolate({
+                inputRange: [-20, 0, 250 - HEADER_HEIGHT],
+                outputRange: [22, 22, 0],
+                extrapolate: 'clamp',
+            });
+            return (
+                <View style={styles.titleContainer}>
+                    {proposal?.type !== undefined && (
+                        <Animated.View style={[styles.typeBox, { opacity }, { top: pos }]}>
+                            <Text style={[globalStyle.mtext, styles.typeText]}>
+                                {proposal?.type === EnumProposalType.Business
+                                    ? getString('사업제안')
+                                    : getString('시스템제안')}
+                            </Text>
+                        </Animated.View>
                     )}
-
-                    <Period
-                        type={getString('투표 기간')}
-                        typeStyle={styles.periodText}
-                        periodStyle={styles.period}
-                        top
-                        created={proposal?.votePeriod?.begin as string}
-                        deadline={proposal?.votePeriod?.end as string}
-                    />
-                </Animated.View>
-            </View>
-        );
-    };
+                    <Text style={[globalStyle.btext, styles.titleText]} numberOfLines={numberOfLines}>
+                        {proposal?.name}
+                    </Text>
+                    <Animated.View style={[styles.dateBox, { opacity }, { bottom: pos }]}>
+                        {proposal?.type === EnumProposalType.Business && (
+                            <Period
+                                type={getString('평가 기간')}
+                                typeStyle={styles.periodText}
+                                periodStyle={styles.period}
+                                top
+                                created={proposal?.assessPeriod?.begin as string}
+                                deadline={proposal?.assessPeriod?.end as string}
+                            />
+                        )}
+                        {proposal?.votePeriod && (
+                            <Period
+                                type={getString('투표 기간')}
+                                typeStyle={styles.periodText}
+                                periodStyle={styles.period}
+                                top
+                                created={proposal?.votePeriod?.begin as string}
+                                deadline={proposal?.votePeriod?.end as string}
+                            />
+                        )}
+                    </Animated.View>
+                </View>
+            );
+        },
+        [numberOfLines, proposal],
+    );
 
     const renderNavBar = () => {
         const opacity = scroll.interpolate({
@@ -622,7 +630,12 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
                     />
 
                     <Animated.View style={{ opacity: isLargeScreen(width) ? 1 : opacity }}>
-                        <DdayMark top deadline={proposal?.votePeriod?.end as string} type={proposal?.type} />
+                        <DdayMark
+                            top
+                            deadline={proposal?.votePeriod?.end as string}
+                            type={proposal?.type}
+                            status={proposal?.status}
+                        />
                     </Animated.View>
                 </View>
             </View>
@@ -757,7 +770,7 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
                 headerMinHeight={HEADER_HEIGHT}
                 headerMaxHeight={250}
                 extraScrollHeight={20}
-                title={title()}
+                title={title(scroll)}
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, global-require, import/extensions
                 backgroundImage={require('@assets/images/header/proposalBg.png')}
                 backgroundImageScale={1.2}

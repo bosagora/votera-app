@@ -135,7 +135,7 @@ function ProposalPreviewScreen({ navigation, route }: MainScreenProps<'ProposalP
                         type="clear"
                     />
 
-                    <DdayMark top deadline={preview?.votePeriod?.end} type={preview?.type} />
+                    <DdayMark top deadline={preview?.votePeriod?.end} type={preview?.type} status={undefined} />
                 </View>
             </Animated.View>
         );

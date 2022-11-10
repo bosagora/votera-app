@@ -32,7 +32,7 @@ function StatusBar(props: StatusBarProps): JSX.Element {
                 <StatusMark type={type} transparent={false} />
                 <ProgressMark style={{ marginLeft: 10 }} status={status} type={type} temp={temp} />
             </View>
-            {!temp && <DdayMark deadline={deadline} type={type} />}
+            {!temp && <DdayMark deadline={deadline} type={type} status={status} />}
         </View>
     );
 }

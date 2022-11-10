@@ -6,7 +6,6 @@ import { debounce } from 'lodash';
 import globalStyle from '~/styles/global';
 import NowNode from '~/components/input/SingleLineInput2';
 import { AuthContext } from '~/contexts/AuthContext';
-import { getAppUpdate, getCurrentVersion } from '~/utils/device';
 import FocusAwareStatusBar from '~/components/statusbar/FocusAwareStatusBar';
 import getString from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
@@ -128,21 +127,6 @@ function AccountInfo({ navigation, route }: MainScreenProps<'AccountInfo'>): JSX
                 contentContainerStyle={{ paddingVertical: 50 }}
                 style={{ paddingHorizontal: 22, paddingTop: 0 }}
             >
-                <View>
-                    <Text style={{ fontSize: 13 }}>{getAppUpdate()}</Text>
-                    <Text
-                        style={[
-                            globalStyle.gbtext,
-                            {
-                                marginTop: 8.5,
-                                color: themeContext.color.primary,
-                            },
-                        ]}
-                    >
-                        Ver {getCurrentVersion()}
-                    </Text>
-                </View>
-
                 <View style={{ marginTop: 60 }}>
                     <Text style={[globalStyle.btext, { marginBottom: 15, color: 'black' }]}>
                         {getString('현재 로그인한 계정')}
