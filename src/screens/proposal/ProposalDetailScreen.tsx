@@ -30,6 +30,7 @@ import {
     useUpdateReceiptMutation,
     Validator,
     useGetProposalByIdLazyQuery,
+    useNoticeStatusLazyQuery,
 } from '~/graphql/generated/generated';
 import { OpinionFilterType } from '~/types/filterType';
 import { ProposalContext } from '~/contexts/ProposalContext';
@@ -156,6 +157,7 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
     const [numberOfLines, setNumberOfLines] = useState(3);
     const isFocused = useIsFocused();
     const { width } = useWindowDimensions();
+    const [newNotice, setNewNotice] = useState(false);
 
     const [sceneHeight, setSceneHeight] = useState<HeightType>('auto');
     const [tab0Height, setTab0Height] = useState<HeightType>('auto');
@@ -190,6 +192,9 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
             fetchPolicy: 'cache-and-network',
             notifyOnNetworkStatusChange: true,
         });
+    const [getNoticeStatus, { data: noticeStatusData }] = useNoticeStatusLazyQuery({
+        fetchPolicy: 'cache-and-network',
+    });
     const [submitAssess] = useSubmitAssessMutation();
     const [submitBallot] = useSubmitBallotMutation();
     const [recordBallot] = useRecordBallotMutation();
@@ -316,6 +321,7 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
                     setDiscussionAId(activity?.id);
                 } else if (boardType === 'NOTICE') {
                     setNoticeAId(activity.id);
+                    getNoticeStatus({ variables: { activityId: activity.id } }).catch(console.log);
                 }
             });
             if (proposal.type === EnumProposalType.Business) {
@@ -329,7 +335,7 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
 
             getValidators();
         }
-    }, [getAssessResult, getValidators, isFocused, isGuest, proposal, user]);
+    }, [getAssessResult, getNoticeStatus, getValidators, isFocused, isGuest, proposal, user]);
 
     useEffect(() => {
         if (discussionAId) {
@@ -370,6 +376,20 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
             }
         }
     }, [proposal?.status, ballotValidatorData]);
+
+    useEffect(() => {
+        if (noticeStatusData?.noticeStatus) {
+            const lastUnread = noticeStatusData.noticeStatus.lastUnreadAt as string;
+            const lastRead = noticeStatusData.noticeStatus.lastUpdateAt as string;
+            if (!lastUnread) {
+                setNewNotice(false);
+            } else if (!lastRead) {
+                setNewNotice(true);
+            } else {
+                setNewNotice(lastUnread > lastRead);
+            }
+        }
+    }, [noticeStatusData]);
 
     const onChangeStatus = useCallback(() => {
         fetchProposal(id);
@@ -693,6 +713,7 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
                             onLayout={(height) => {
                                 setTab1Height(height);
                             }}
+                            newNotice={newNotice}
                             moveToNotice={() => {
                                 navigation.push('RootUser', { screen: 'Notice', params: { id: noticeAId } });
                             }}
