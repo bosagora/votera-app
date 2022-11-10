@@ -120,3 +120,11 @@ query voteStatus($proposalId: String!, $actor: String!) {
         canWithdrawAt
     }
 }
+
+query noticeStatus($activityId: String!) {
+    noticeStatus(activityId: $activityId) {
+        id
+        lastUpdateAt
+        lastUnreadAt
+    }
+}

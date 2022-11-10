@@ -17,6 +17,17 @@ const styles = StyleSheet.create({
     filterRow: { alignItems: 'center', flexDirection: 'row', paddingTop: 12 },
     filterSeparator: { height: 9, marginHorizontal: 5, width: 1 },
     moreButton: { marginTop: 10 },
+    newNotice: {
+        alignItems: 'center',
+        borderRadius: 7,
+        height: 15,
+        justifyContent: 'center',
+        position: 'absolute',
+        right: 2,
+        top: -7,
+        width: 14,
+    },
+    newNoticeLabel: { color: 'white', fontSize: 7, lineHeight: 8 },
 });
 
 interface DiscussionProps {
@@ -30,6 +41,7 @@ interface DiscussionProps {
     refetch: () => void;
     fetchMore: () => void;
     onLayout: (h: number) => void;
+    newNotice: boolean;
     moveToNotice: () => void;
     isJoined: boolean;
     setJoined: () => Promise<void>;
@@ -46,6 +58,7 @@ function Discussion(props: DiscussionProps): JSX.Element {
         createActivityComment,
         refetch,
         fetchMore,
+        newNotice,
         moveToNotice,
         onLayout,
         isJoined,
@@ -121,6 +134,11 @@ function Discussion(props: DiscussionProps): JSX.Element {
                         buttonStyle={globalStyle.shortSmall}
                         onPress={moveToNotice}
                     />
+                    {newNotice && (
+                        <View style={[styles.newNotice, { backgroundColor: themeContext.color.disagree }]}>
+                            <Text style={[globalStyle.gmtext, styles.newNoticeLabel]}>N</Text>
+                        </View>
+                    )}
                 </View>
             </View>
             <MultilineInput
