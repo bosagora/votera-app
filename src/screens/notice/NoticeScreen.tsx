@@ -1,12 +1,20 @@
 import React, { useContext, useState, useEffect, useRef, useCallback } from 'react';
-import { View, Image, FlatList, RefreshControl, ImageURISource, ActivityIndicator } from 'react-native';
+import {
+    View,
+    Animated,
+    FlatList,
+    RefreshControl,
+    ActivityIndicator,
+    useWindowDimensions,
+    NativeScrollEvent,
+} from 'react-native';
 import { Button, Text } from 'react-native-elements';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAssets } from 'expo-asset';
-import globalStyle, { TOP_NAV_HEIGHT } from '~/styles/global';
+import { ThemeContext } from 'styled-components/native';
+import globalStyle, { isLargeScreen } from '~/styles/global';
 import { MainScreenProps, replaceToHome } from '~/navigation/main/MainParams';
 import {
     Enum_Post_Type as EnumPostType,
+    Enum_Proposal_Type as EnumProposalType,
     Post,
     PostStatus,
     Proposal,
@@ -16,22 +24,18 @@ import {
 import NoticeCard from '~/components/notice/NoticeCard';
 import FocusAwareStatusBar from '~/components/statusbar/FocusAwareStatusBar';
 import ListFooterButton from '~/components/button/ListFooterButton';
+import ReactNativeParallaxHeader from '~/components/ui/RNParallax';
+import Period from '~/components/status/Period';
+import DdayMark from '~/components/status/DdayMark';
 import { ProposalContext } from '~/contexts/ProposalContext';
 import { AuthContext } from '~/contexts/AuthContext';
 import getString from '~/utils/locales/STRINGS';
 import { isCloseToBottom } from '~/utils';
 import { AddIcon, ChevronLeftIcon } from '~/components/icons';
+import styles, { HEADER_HEIGHT } from '../proposal/styles';
 
 const FETCH_INIT_LIMIT = 5;
 const FETCH_MORE_LIMIT = 5;
-// const HEADER_BG_WIDTH = Dimensions.get('window').width;
-
-enum EnumIconAsset {
-    Background = 0,
-}
-
-// eslint-disable-next-line global-require, import/extensions
-const iconAssets = [require('@assets/images/header/bg.png')];
 
 function getActivityPostsVariables(id: string) {
     return {
@@ -44,7 +48,8 @@ function getActivityPostsVariables(id: string) {
 
 function NoticeScreen({ navigation, route }: MainScreenProps<'Notice'>): JSX.Element {
     const { id: activityId } = route.params;
-    const insets = useSafeAreaInsets();
+    const scroll = useRef(new Animated.Value(0)).current;
+    const themeContext = useContext(ThemeContext);
     const { user } = useContext(AuthContext);
     const { joinProposal } = useContext(ProposalContext);
     const [proposal, setProposal] = useState<Proposal>();
@@ -55,8 +60,8 @@ function NoticeScreen({ navigation, route }: MainScreenProps<'Notice'>): JSX.Ele
     const [isCreator, setIsCreator] = useState(true);
     const [isStopFetchMore, setStopFetchMore] = useState(false);
     const [pullRefresh, setPullRefresh] = useState(false);
-    const scrollViewRef = useRef<FlatList<any>>(null);
-    const [assets] = useAssets(iconAssets);
+    const { width } = useWindowDimensions();
+    const [numberOfLines, setNumberOfLines] = useState(3);
 
     const [getProposalByActivity] = useGetProposalByActivityLazyQuery({
         fetchPolicy: 'cache-and-network',
@@ -85,62 +90,9 @@ function NoticeScreen({ navigation, route }: MainScreenProps<'Notice'>): JSX.Ele
         },
     });
 
-    const headerLeft = useCallback(() => {
-        return (
-            <Button
-                onPress={() => {
-                    if (navigation.canGoBack()) {
-                        navigation.pop();
-                    } else {
-                        navigation.dispatch(replaceToHome());
-                    }
-                }}
-                icon={<ChevronLeftIcon color="white" />}
-                type="clear"
-            />
-        );
-    }, [navigation]);
-
-    const headerRight = useCallback(() => {
-        return isCreator ? (
-            <Button
-                onPress={() => {
-                    navigation.push('RootUser', { screen: 'CreateNotice', params: { id: route.params.id } });
-                }}
-                icon={<AddIcon color="white" />}
-                type="clear"
-            />
-        ) : null;
-    }, [isCreator, navigation, route.params.id]);
-
-    const headerBackground = useCallback(() => {
-        return (
-            <>
-                {assets && (
-                    <Image
-                        style={{ height: TOP_NAV_HEIGHT + insets.top, width: '100%' }}
-                        source={assets[EnumIconAsset.Background] as ImageURISource}
-                    />
-                )}
-                <View style={globalStyle.headerBackground} />
-            </>
-        );
-    }, [assets, insets.top]);
-
-    React.useLayoutEffect(() => {
-        navigation.setOptions({
-            headerShown: true,
-            title: getString('공지사항'),
-            headerTitleStyle: [globalStyle.headerTitle, { color: 'white' }],
-            headerTitleAlign: 'center',
-            headerLeft,
-            headerRight,
-            headerBackground,
-        });
-    }, [headerBackground, headerLeft, headerRight, navigation]);
-
     useEffect(() => {
         getProposalByActivity({ variables: { activityId } }).catch(console.log);
+        setNumberOfLines(3);
     }, [activityId, getProposalByActivity]);
 
     useEffect(() => {
@@ -178,58 +130,193 @@ function NoticeScreen({ navigation, route }: MainScreenProps<'Notice'>): JSX.Ele
         );
     };
 
+    const title = useCallback(
+        (scrollValue: Animated.Value) => {
+            const opacity = scrollValue.interpolate({
+                inputRange: [-20, 0, 250 - HEADER_HEIGHT],
+                outputRange: [1, 1, 0],
+                extrapolate: 'clamp',
+            });
+            const pos = scrollValue.interpolate({
+                inputRange: [-20, 0, 250 - HEADER_HEIGHT],
+                outputRange: [22, 22, 0],
+                extrapolate: 'clamp',
+            });
+            return (
+                <View style={styles.titleContainer}>
+                    {proposal?.type !== undefined && (
+                        <Animated.View style={[styles.typeBox, { opacity }, { top: pos }]}>
+                            <Text style={[globalStyle.mtext, styles.typeText]}>
+                                {proposal?.type === EnumProposalType.Business
+                                    ? getString('사업제안')
+                                    : getString('시스템제안')}
+                            </Text>
+                        </Animated.View>
+                    )}
+                    <Text style={[globalStyle.btext, styles.titleText]} numberOfLines={numberOfLines}>
+                        {proposal?.name}
+                    </Text>
+                    <Animated.View style={[styles.dateBox, { opacity }, { bottom: pos }]}>
+                        {proposal?.type === EnumProposalType.Business && (
+                            <Period
+                                type={getString('평가 기간')}
+                                typeStyle={styles.periodText}
+                                periodStyle={styles.period}
+                                top
+                                created={proposal?.assessPeriod?.begin as string}
+                                deadline={proposal?.assessPeriod?.end as string}
+                            />
+                        )}
+                        {proposal?.votePeriod && (
+                            <Period
+                                type={getString('투표 기간')}
+                                typeStyle={styles.periodText}
+                                periodStyle={styles.period}
+                                top
+                                created={proposal?.votePeriod?.begin as string}
+                                deadline={proposal?.votePeriod?.end as string}
+                            />
+                        )}
+                    </Animated.View>
+                </View>
+            );
+        },
+        [numberOfLines, proposal],
+    );
+
+    const renderNavBar = () => {
+        const opacity = scroll.interpolate({
+            inputRange: [-20, 0, 250 - HEADER_HEIGHT],
+            outputRange: [1, 1, 0],
+            extrapolate: 'clamp',
+        });
+        return (
+            <View style={{ paddingHorizontal: 20, marginTop: 0 }}>
+                <View style={styles.statusBar} />
+                <View style={styles.navBar}>
+                    <Button
+                        onPress={() => {
+                            if (navigation.canGoBack()) {
+                                navigation.pop();
+                            } else {
+                                navigation.dispatch(replaceToHome());
+                            }
+                        }}
+                        icon={<ChevronLeftIcon color="white" />}
+                        type="clear"
+                    />
+
+                    <Animated.View style={{ opacity: isLargeScreen(width) ? 1 : opacity }}>
+                        <DdayMark
+                            top
+                            deadline={proposal?.votePeriod?.end as string}
+                            type={proposal?.type}
+                            status={proposal?.status}
+                        />
+                    </Animated.View>
+                </View>
+            </View>
+        );
+    };
+
     return (
         <View style={{ flex: 1, backgroundColor: 'rgb(242,244,250)' }}>
             <FocusAwareStatusBar barStyle="light-content" />
-
-            <FlatList
-                ref={scrollViewRef}
-                data={noticeData}
-                renderItem={renderNotices}
-                onScroll={({ nativeEvent }) => {
-                    if (isCloseToBottom(nativeEvent) && !isStopFetchMore && !loading) {
-                        const currentLength = noticeData?.length || 0;
-
-                        if (fetchMore) {
-                            fetchMore({
-                                variables: { limit: FETCH_MORE_LIMIT, start: currentLength },
-                            }).catch(console.log);
-                        }
-                    }
+            <ReactNativeParallaxHeader
+                headerMinHeight={HEADER_HEIGHT}
+                headerMaxHeight={250}
+                extraScrollHeight={20}
+                title={title(scroll)}
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, global-require, import/extensions
+                backgroundImage={require('@assets/images/header/proposalBg.png')}
+                backgroundImageScale={1.2}
+                renderNavBar={renderNavBar}
+                renderContent={() => {
+                    return (
+                        <FlatList
+                            data={noticeData}
+                            renderItem={renderNotices}
+                            refreshControl={
+                                <RefreshControl
+                                    refreshing={pullRefresh}
+                                    onRefresh={() => {
+                                        setPullRefresh(true);
+                                        const variables = getActivityPostsVariables(activityId);
+                                        client.cache.evict({
+                                            fieldName: 'activityPosts',
+                                            args: variables,
+                                            broadcast: false,
+                                        });
+                                        refetch(variables).catch(console.log);
+                                    }}
+                                />
+                            }
+                            contentContainerStyle={{ paddingBottom: 86 }}
+                            ListHeaderComponent={
+                                <View
+                                    style={{
+                                        height: 53,
+                                        backgroundColor: 'white',
+                                        borderTopLeftRadius: 25,
+                                        borderTopRightRadius: 25,
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        paddingHorizontal: 22,
+                                        marginTop: 36,
+                                    }}
+                                >
+                                    <Text
+                                        style={[
+                                            globalStyle.ltext,
+                                            { fontSize: 13, lineHeight: 21, color: themeContext.color.textBlack },
+                                        ]}
+                                    >
+                                        {getString('공지글 #N').replace('#N', noticeCount.toString())}
+                                    </Text>
+                                    {isCreator ? (
+                                        <Button
+                                            onPress={() => {
+                                                navigation.push('RootUser', {
+                                                    screen: 'CreateNotice',
+                                                    params: { id: route.params.id },
+                                                });
+                                            }}
+                                            icon={<AddIcon color="black" />}
+                                            type="clear"
+                                        />
+                                    ) : null}
+                                </View>
+                            }
+                            ListFooterComponent={loading ? <ActivityIndicator /> : null}
+                        />
+                    );
                 }}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={pullRefresh}
-                        onRefresh={() => {
-                            setPullRefresh(true);
-                            const variables = getActivityPostsVariables(activityId);
-                            client.cache.evict({
-                                fieldName: 'activityPosts',
-                                args: variables,
-                                broadcast: false,
-                            });
-                            refetch(variables).catch(console.log);
-                        }}
-                    />
-                }
-                contentContainerStyle={{ paddingBottom: 86 }}
-                ListHeaderComponent={
-                    <View
-                        style={{
-                            height: 53,
-                            backgroundColor: 'white',
-                            borderTopLeftRadius: 25,
-                            borderTopRightRadius: 25,
-                            justifyContent: 'center',
-                            paddingHorizontal: 22,
-                        }}
-                    >
-                        <Text style={globalStyle.ltext}>
-                            {getString('공지글 #N').replace('#N', noticeCount.toString())}
-                        </Text>
-                    </View>
-                }
-                ListFooterComponent={loading ? <ActivityIndicator /> : null}
+                scrollViewProps={{
+                    removeClippedSubviews: false,
+                    onScroll: Animated.event([{ nativeEvent: { contentOffset: { y: scroll } } }], {
+                        useNativeDriver: false,
+                        listener: (event) => {
+                            const ne = event.nativeEvent as NativeScrollEvent;
+                            if (isCloseToBottom(ne) && !isStopFetchMore && !loading) {
+                                const currentLength = noticeData?.length || 0;
+                                if (fetchMore) {
+                                    fetchMore({
+                                        variables: { limit: FETCH_MORE_LIMIT, start: currentLength },
+                                    }).catch(console.log);
+                                }
+                            }
+                            const { y } = ne.contentOffset;
+                            if (y < 90) {
+                                setNumberOfLines(3);
+                            } else if (y < 160) {
+                                setNumberOfLines(2);
+                            } else {
+                                setNumberOfLines(1);
+                            }
+                        },
+                    }),
+                }}
             />
         </View>
     );
