@@ -153,7 +153,7 @@ function Voting(props: Props): JSX.Element {
             case MetamaskStatus.CONNECTING:
                 return (
                     <View style={[globalStyle.flexRowAlignCenter, styles.buttonContainer]}>
-                        <ActivityIndicator />
+                        <ActivityIndicator style={{ height: 50 }} />
                     </View>
                 );
             case MetamaskStatus.NOT_CONNECTED:
@@ -187,7 +187,7 @@ function Voting(props: Props): JSX.Element {
         if (loading) {
             return (
                 <View style={styles.buttonContainer}>
-                    <ActivityIndicator />
+                    <ActivityIndicator style={{ height: 50 }} />
                 </View>
             );
         }

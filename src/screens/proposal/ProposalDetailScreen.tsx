@@ -1,5 +1,5 @@
 import React, { useContext, useRef, useState, useCallback, useEffect } from 'react';
-import { View, Animated, Dimensions, useWindowDimensions, NativeScrollEvent } from 'react-native';
+import { View, Animated, useWindowDimensions, NativeScrollEvent } from 'react-native';
 import { Button, Text } from 'react-native-elements';
 import { TabView, SceneRendererProps } from 'react-native-tab-view';
 import { BigNumber } from 'ethers';
