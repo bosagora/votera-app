@@ -58,6 +58,7 @@ function LandingScreen({ navigation }: AccessScreenProps<'Landing'>): JSX.Elemen
     React.useLayoutEffect(() => {
         navigation.setOptions({
             headerShown: false,
+            title: 'Votera',
         });
     }, [navigation]);
 

@@ -64,6 +64,7 @@ function AccountInfo({ navigation, route }: MainScreenProps<'AccountInfo'>): JSX
         navigation.setOptions({
             headerShown: true,
             headerTitleAlign: 'center',
+            title: getString('계정이름 변경'),
             headerTitle,
             headerLeft,
         });

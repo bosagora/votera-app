@@ -95,6 +95,13 @@ function NoticeScreen({ navigation, route }: MainScreenProps<'Notice'>): JSX.Ele
         setNumberOfLines(3);
     }, [activityId, getProposalByActivity]);
 
+    React.useLayoutEffect(() => {
+        navigation.setOptions({
+            headerShown: false,
+            title: proposal?.name || '',
+        });
+    }, [navigation, proposal?.name]);
+
     useEffect(() => {
         if (proposal) {
             setIsCreator(proposal.creator?.id === user?.memberId);

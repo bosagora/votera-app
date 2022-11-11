@@ -161,6 +161,7 @@ function HomeScreen({ navigation, route }: MainScreenProps<'Home'>): JSX.Element
 
     useLayoutEffect(() => {
         navigation.setOptions({
+            title: 'Votera',
             headerTitle,
             headerLeft,
             headerRight,

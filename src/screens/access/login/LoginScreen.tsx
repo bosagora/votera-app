@@ -61,6 +61,7 @@ function LoginScreen({ navigation }: AccessScreenProps<'Login'>): JSX.Element {
     React.useLayoutEffect(() => {
         navigation.setOptions({
             headerShown: false,
+            title: 'Votera',
         });
     }, [navigation]);
 

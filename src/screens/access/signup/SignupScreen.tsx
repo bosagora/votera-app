@@ -220,7 +220,7 @@ function SignupScreen({ navigation }: AccessScreenProps<'Signup'>): JSX.Element 
 
     React.useLayoutEffect(() => {
         navigation.setOptions({
-            headerTitle: getString('계정만들기'),
+            title: getString('계정만들기'),
             headerTitleStyle: [globalStyle.headerTitle, { color: 'white' }],
             headerTitleAlign: 'center',
             headerLeft,

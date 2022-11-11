@@ -40,11 +40,12 @@ function PrivacyScreen({ route, navigation }: CommonScreenProps<'Privacy'>): JSX
     React.useLayoutEffect(() => {
         navigation.setOptions({
             headerShown: true,
+            title,
             headerTitle,
             headerLeft,
             headerStyle: { shadowOffset: { height: 0, width: 0 }, elevation: 0 },
         });
-    }, [navigation, headerLeft, headerTitle]);
+    }, [navigation, headerLeft, headerTitle, title]);
 
     return <WebFrameView title={title} uri={uri} />;
 }

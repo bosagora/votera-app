@@ -113,6 +113,7 @@ function Settings({ navigation, route }: MainScreenProps<'Settings'>): JSX.Eleme
         navigation.setOptions({
             headerShown: true,
             headerTitleAlign: 'center',
+            title: getString('설정'),
             headerTitle,
             headerLeft,
             headerStyle: { shadowOffset: { height: 0, width: 0 }, elevation: 0 },
