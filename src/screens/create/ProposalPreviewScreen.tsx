@@ -57,8 +57,9 @@ function ProposalPreviewScreen({ navigation, route }: MainScreenProps<'ProposalP
     React.useLayoutEffect(() => {
         navigation.setOptions({
             headerShown: false,
+            title: preview?.name || '',
         });
-    }, [navigation]);
+    }, [navigation, preview?.name]);
 
     const titleRender = () => {
         const opacity = scroll.interpolate({

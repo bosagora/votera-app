@@ -264,6 +264,7 @@ function Search({ navigation, route }: MainScreenProps<'Search'>): JSX.Element {
     React.useLayoutEffect(() => {
         navigation.setOptions({
             headerTitleAlign: 'center',
+            title: getString('검색'),
             headerTitle,
             headerLeft,
             headerShown: true,

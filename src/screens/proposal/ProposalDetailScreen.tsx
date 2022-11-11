@@ -203,6 +203,13 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
         setNumberOfLines(3);
     }, [id]);
 
+    React.useLayoutEffect(() => {
+        navigation.setOptions({
+            headerShown: false,
+            title: proposal?.name || '',
+        });
+    }, [navigation, proposal?.name]);
+
     const fetchProposal = useCallback(
         (proposalId: string) => {
             getProposalDetail({ variables: { proposalId } }).catch((err) => {

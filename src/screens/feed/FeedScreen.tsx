@@ -136,6 +136,7 @@ function Feed({ navigation }: MainScreenProps<'Feed'>): JSX.Element {
     React.useLayoutEffect(() => {
         navigation.setOptions({
             headerTitleAlign: 'center',
+            title: getString('알림'),
             headerTitle,
             headerLeft,
             headerBackground,

@@ -87,6 +87,7 @@ function Alarm({ navigation, route }: MainScreenProps<'Alarm'>): JSX.Element {
         navigation.setOptions({
             headerShown: true,
             headerTitleAlign: 'center',
+            title: getString('알림 수신 설정'),
             headerTitle,
             headerLeft,
         });
