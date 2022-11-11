@@ -1,6 +1,7 @@
+/* eslint-disable react/require-default-props */
 import React from 'react';
 import { ColorValue } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons, Octicons } from '@expo/vector-icons';
 import { Icon } from 'react-native-elements';
 
 export async function loadFont() {
@@ -13,7 +14,7 @@ interface IconColorProps {
 
 interface IconColorSizeProps {
     color: ColorValue | undefined;
-    size?: number;
+    size?: number | undefined;
 }
 
 export function SearchIcon(props: IconColorProps) {
@@ -42,7 +43,7 @@ export function KeyboardArrowUpIcon(props: IconColorProps) {
 }
 
 export function KeyboardArrowDownIcon(props: IconColorSizeProps) {
-    const { size = 24, color } = props;
+    const { color, size = 24 } = props;
     return <Icon name="keyboard-arrow-down" size={size} color={color} tvParallaxProperties={undefined} />;
 }
 
@@ -113,4 +114,18 @@ export function HomeIcon(props: IconColorProps) {
 export function NotificationIcon(props: IconColorProps) {
     const { color } = props;
     return <Icon name="notifications" size={28} color={color} tvParallaxProperties={undefined} />;
+}
+
+interface IconSizeProps {
+    size?: number | undefined;
+}
+
+export function PublicKeyIcon(props: IconSizeProps) {
+    const { size = 18 } = props;
+    return <Octicons name="key" size={size} />;
+}
+
+export function AddressIcon(props: IconSizeProps) {
+    const { size = 18 } = props;
+    return <Octicons name="globe" size={size} />;
 }

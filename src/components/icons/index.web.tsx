@@ -1,5 +1,7 @@
+/* eslint-disable react/require-default-props */
 import React from 'react';
 import { ColorValue, StyleSheet, Text } from 'react-native';
+import { GlobeIcon, KeyIcon } from '@primer/octicons-react';
 
 export async function loadFont() {
     const linkElement = document.createElement('link');
@@ -26,7 +28,7 @@ interface IconColorProps {
 
 interface IconColorSizeProps {
     color: ColorValue | undefined;
-    size?: number;
+    size?: number | undefined;
 }
 
 export function SearchIcon(props: IconColorProps) {
@@ -126,4 +128,18 @@ export function HomeIcon(props: IconColorProps) {
 export function NotificationIcon(props: IconColorProps) {
     const { color } = props;
     return <Text style={[styles.materialIcon, { color, fontSize: 28, lineHeight: 28 }]}>&#xe7f4;</Text>;
+}
+
+interface IconSizeProps {
+    size?: number | undefined;
+}
+
+export function PublicKeyIcon(props: IconSizeProps) {
+    const { size = 18 } = props;
+    return <KeyIcon size={size} />;
+}
+
+export function AddressIcon(props: IconSizeProps) {
+    const { size = 18 } = props;
+    return <GlobeIcon size={size} />;
 }
