@@ -292,22 +292,26 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
                     <Text style={[globalStyle.ltext, { color: themeContext.color.black }, styles.content]}>
                         {getContentText(noticeData)}
                     </Text>
-                    <View>
-                        {noticeImgs?.map((image) =>
-                            image ? (
-                                <Image
-                                    key={`noticeImage.${image.id || ''}`}
-                                    style={{ width: image.width, height: image.height }}
-                                    source={{ uri: image.url }}
-                                />
-                            ) : null,
-                        )}
-                    </View>
-                    <View style={{ marginTop: 20 }}>
-                        {noticeFiles.map((file) => {
-                            return <DownloadComponent key={`file_${file.name || ''}`} file={file} />;
-                        })}
-                    </View>
+                    {noticeImgs?.length && (
+                        <View style={{ marginTop: 10 }}>
+                            {noticeImgs?.map((image) =>
+                                image ? (
+                                    <Image
+                                        key={`noticeImage.${image.id || ''}`}
+                                        style={{ width: image.width, height: image.height, marginTop: 10 }}
+                                        source={{ uri: image.url }}
+                                    />
+                                ) : null,
+                            )}
+                        </View>
+                    )}
+                    {noticeFiles?.length && (
+                        <View style={{ marginTop: 20 }}>
+                            {noticeFiles.map((file) => {
+                                return <DownloadComponent key={`file_${file.name || ''}`} file={file} />;
+                            })}
+                        </View>
+                    )}
                     <View style={{ marginVertical: 28 }}>
                         <View style={globalStyle.flexRowBetween}>
                             <Text

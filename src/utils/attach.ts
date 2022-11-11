@@ -88,17 +88,17 @@ export async function adjustAttachmentImage(
     if (image.width !== undefined && image.height !== undefined) {
         if (image.width > maxWidth) {
             const imageRatio = maxWidth / image.width;
-            return { url: image.url, width: maxWidth, height: image.height * imageRatio };
+            return { id: image.id, url: image.url, width: maxWidth, height: image.height * imageRatio };
         }
-        return { url: image.url, width: image.width, height: image.height };
+        return { id: image.id, url: image.url, width: image.width, height: image.height };
     }
     try {
         const size = await getImageSize(image.url);
         if (size.width > maxWidth) {
             const imageRatio = maxWidth / size.width;
-            return { url: image.url, width: maxWidth, height: size.height * imageRatio };
+            return { id: image.id, url: image.url, width: maxWidth, height: size.height * imageRatio };
         }
-        return { url: image.url, width: size.width, height: size.height };
+        return { id: image.id, url: image.url, width: size.width, height: size.height };
     } catch (err) {
         return undefined;
     }
