@@ -15,7 +15,7 @@ import { ExpandLessIcon } from '~/components/icons';
 import MultilineInput from '../input/MultiLineInput';
 import DownloadComponent from '../ui/Download';
 import CommentCard from '../opinion/CommentCard';
-import ShortButton from '../button/ShortButton';
+// import ShortButton from '../button/ShortButton';
 
 const styles = StyleSheet.create({
     bottomWrapper: { alignItems: 'center', flexDirection: 'row', marginTop: 18 },
@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     },
     container: { borderBottomWidth: 3, padding: 23 },
     content: { fontSize: 13, lineHeight: 23 },
-    contentWrapper: { paddingVertical: 30 },
+    contentWrapper: { marginTop: 30 },
     separator: { borderLeftWidth: 1, height: 11, marginLeft: 9, width: 11 },
     titleText: { flex: 1, fontSize: 14, lineHeight: 22 },
     writeDate: { fontSize: 10, lineHeight: 20, marginLeft: 12 },
@@ -126,6 +126,7 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
     const [replyStatus, setReplyStatus] = useState<PostStatus[]>();
     const [noticeImgs, setNoticeImgs] = useState<(AttachmentImage | undefined)[]>([]);
     const [noticeFiles, setNoticeFiles] = useState<AttachmentFile[]>([]);
+    const [attachLoaded, setAttachLoaded] = useState(false);
     const [isStopFetchMore, setStopFetchMore] = useState(false);
 
     const [getNoticeComments, { data: noticeCommentsData, loading, fetchMore, client }] = usePostCommentsLazyQuery({
@@ -134,14 +135,17 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
     const [readArticle] = useReadArticleMutation();
 
     useEffect(() => {
-        let canceled = false;
         if (expanded) {
-            if (
-                noticeData.attachment &&
-                noticeData.attachment?.length > 0 &&
-                noticeImgs.length === 0 &&
-                noticeFiles.length === 0
-            ) {
+            if (!attachLoaded) {
+                setAttachLoaded(true);
+            }
+        }
+    }, [expanded, attachLoaded]);
+
+    useEffect(() => {
+        let canceled = false;
+        if (attachLoaded) {
+            if (noticeData.attachment && noticeData.attachment.length > 0) {
                 const filter = filterAttachment(noticeData.attachment);
                 setNoticeFiles(filter.files);
                 Promise.all(filter.images.map((a) => adjustAttachmentImage(a, IMAGE_MAX_WIDTH)))
@@ -156,7 +160,7 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
         return () => {
             canceled = true;
         };
-    }, [noticeData, expanded, noticeImgs, noticeFiles]);
+    }, [attachLoaded, noticeData.attachment]);
 
     useEffect(() => {
         if (noticeCommentsData?.postComments) {
@@ -292,9 +296,9 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
                     <Text style={[globalStyle.ltext, { color: themeContext.color.black }, styles.content]}>
                         {getContentText(noticeData)}
                     </Text>
-                    {noticeImgs?.length && (
+                    {noticeImgs.length > 0 ? (
                         <View style={{ marginTop: 10 }}>
-                            {noticeImgs?.map((image) =>
+                            {noticeImgs.map((image) =>
                                 image ? (
                                     <Image
                                         key={`noticeImage.${image.id || ''}`}
@@ -304,14 +308,14 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
                                 ) : null,
                             )}
                         </View>
-                    )}
-                    {noticeFiles?.length && (
+                    ) : null}
+                    {noticeFiles.length > 0 ? (
                         <View style={{ marginTop: 20 }}>
                             {noticeFiles.map((file) => {
                                 return <DownloadComponent key={`file_${file.name || ''}`} file={file} />;
                             })}
                         </View>
-                    )}
+                    ) : null}
                     <View style={{ marginVertical: 28 }}>
                         <View style={globalStyle.flexRowBetween}>
                             <Text
