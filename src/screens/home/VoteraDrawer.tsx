@@ -1,12 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { View, TouchableOpacity, Platform, useWindowDimensions, StyleSheet, Image, ImageURISource } from 'react-native';
+import { View, TouchableOpacity, Platform, useWindowDimensions, StyleSheet } from 'react-native';
 import { DrawerContentScrollView, DrawerContentComponentProps } from '@react-navigation/drawer';
 import { StackActions } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemeContext } from 'styled-components/native';
 import { Button, Text } from 'react-native-elements';
 import { setStringAsync } from 'expo-clipboard';
-import { useAssets } from 'expo-asset';
 import { AuthContext } from '~/contexts/AuthContext';
 import globalStyle, { isLargeScreen } from '~/styles/global';
 import { useIsValidatorLazyQuery } from '~/graphql/generated/generated';
@@ -16,7 +15,15 @@ import { showSnackBar } from '~/state/features/snackBar';
 import { RoundDecimalPoint, WeiAmountToString } from '~/utils/votera/voterautil';
 import { getBoaScanUrl, getAgoraScanUrl } from '~/utils/votera/agoraconf';
 import Anchor from '~/components/anchor/Anchor';
-import { CopyIcon, ChevronRightIcon, CloseIcon, HomeIcon, NotificationIcon } from '~/components/icons';
+import {
+    CopyIcon,
+    ChevronRightIcon,
+    CloseIcon,
+    HomeIcon,
+    NotificationIcon,
+    PublicKeyIcon,
+    AddressIcon,
+} from '~/components/icons';
 
 const styles = StyleSheet.create({
     anchor: {
@@ -61,14 +68,6 @@ function getValidatorStyle() {
     return locale.startsWith('ko') ? [globalStyle.btext, styles.validator] : [globalStyle.btext, styles.validatorEn];
 }
 
-enum EnumIconAsset {
-    PublicKey = 0,
-    Address,
-}
-
-// eslint-disable-next-line global-require, import/extensions
-const iconAssets = [require('@assets/icons/key.png'), require('@assets/icons/globe.png')];
-
 function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element {
     const insets = useSafeAreaInsets();
     const themeContext = useContext(ThemeContext);
@@ -88,7 +87,6 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
         },
     });
     const { width } = useWindowDimensions();
-    const [assets] = useAssets(iconAssets);
 
     const onClickSignout = () => {
         if (isGuest) {
@@ -218,14 +216,14 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                     </View>
                     {!isGuest && (
                         <>
-                            {publicKey && assets && (
+                            {publicKey && (
                                 <View
                                     style={[
                                         globalStyle.flexRowBetween,
                                         { marginTop: Platform.OS === 'android' ? 5 : 14 },
                                     ]}
                                 >
-                                    <Image source={assets[EnumIconAsset.PublicKey] as ImageURISource} />
+                                    <PublicKeyIcon />
                                     <Anchor style={styles.anchor} source={getAgoraScanUrl(publicKey)}>
                                         <Text
                                             style={[
@@ -261,9 +259,9 @@ function VoteraDrawer({ navigation }: DrawerContentComponentProps): JSX.Element 
                                     </TouchableOpacity>
                                 </View>
                             )}
-                            {metamaskAccount && assets && (
+                            {metamaskAccount && (
                                 <View style={[globalStyle.flexRowBetween, { marginTop: 14 }]}>
-                                    <Image source={assets[EnumIconAsset.Address] as ImageURISource} />
+                                    <AddressIcon />
                                     <Anchor style={styles.anchor} source={getBoaScanUrl(metamaskAccount)}>
                                         <Text
                                             style={[

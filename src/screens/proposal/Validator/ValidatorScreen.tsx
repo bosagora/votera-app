@@ -1,5 +1,3 @@
-/* eslint-disable import/extensions */
-/* eslint-disable global-require */
 import React, { useCallback, useContext } from 'react';
 import { View, Image, StyleSheet, TouchableOpacity, ImageURISource, ActivityIndicator } from 'react-native';
 import { useAssets } from 'expo-asset';
@@ -21,7 +19,7 @@ import { VOTE_SELECT } from '~/utils/votera/voterautil';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
 import { getBoaScanUrl, getAgoraScanUrl } from '~/utils/votera/agoraconf';
-import { CopyIcon, CloseIcon } from '~/components/icons';
+import { CopyIcon, CloseIcon, PublicKeyIcon, AddressIcon } from '~/components/icons';
 
 const styles = StyleSheet.create({
     anchor: {
@@ -166,18 +164,11 @@ function ClosedListHeaderComponent(): JSX.Element {
 }
 
 enum EnumIconAsset {
-    PublicKey = 0,
-    Copy,
-    Address,
-    Abstain,
+    Abstain = 0,
 }
 
-const iconAssets = [
-    require('@assets/icons/key.png'),
-    require('@assets/icons/copySimple.png'),
-    require('@assets/icons/globe.png'),
-    require('@assets/icons/prohibit.png'),
-];
+// eslint-disable-next-line global-require, import/extensions
+const iconAssets = [require('@assets/icons/prohibit.png')];
 
 interface SubProps {
     proposal: Proposal | undefined;
@@ -208,7 +199,6 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
     const { total, participated, validators, onRefresh, loading } = props;
     const themeContext = useContext(ThemeContext);
     const dispatch = useAppDispatch();
-    const [assets] = useAssets(iconAssets);
 
     const renderItem = useCallback(
         (item: Validator) => {
@@ -218,7 +208,7 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
                 <View style={styles.rowContainer}>
                     <View style={styles.nameColumn}>
                         <View style={styles.nameKeyRow}>
-                            {assets && <Image source={assets[EnumIconAsset.PublicKey] as ImageURISource} />}
+                            <PublicKeyIcon />
                             <Anchor style={styles.anchor} source={getAgoraScanUrl(publicKey)}>
                                 <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
                                     {publicKey.slice(0, ELLIPSIS_TAIL_SIZE)}
@@ -240,7 +230,7 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
                             </TouchableOpacity>
                         </View>
                         <View style={styles.nameGlobeRow}>
-                            {assets && <Image source={assets[EnumIconAsset.Address] as ImageURISource} />}
+                            <AddressIcon />
                             <Anchor style={styles.anchor} source={getBoaScanUrl(address)}>
                                 <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
                                     {address.slice(0, ELLIPSIS_TAIL_SIZE)}
@@ -275,7 +265,7 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
                 </View>
             );
         },
-        [assets, themeContext.color.primary, themeContext.color.textBlack, dispatch],
+        [themeContext.color.primary, themeContext.color.textBlack, dispatch],
     );
 
     return (
@@ -297,13 +287,12 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
             </View>
             <LineComponent />
             <AssessListHeaderComponent onRefresh={onRefresh} />
-            {assets &&
-                validators.map((validator) => (
-                    <View key={`assess.${validator.id}`}>
-                        {renderItem(validator)}
-                        <LineComponent />
-                    </View>
-                ))}
+            {validators.map((validator) => (
+                <View key={`assess.${validator.id}`}>
+                    {renderItem(validator)}
+                    <LineComponent />
+                </View>
+            ))}
             {loading && <ActivityIndicator />}
             {!loading && total > validators.length && <Text style={styles.moreText}>......</Text>}
         </View>
@@ -314,7 +303,6 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
     const { total, participated, validators, onRefresh, loading } = props;
     const themeContext = useContext(ThemeContext);
     const dispatch = useAppDispatch();
-    const [assets] = useAssets(iconAssets);
 
     const renderItem = useCallback(
         (item: Validator) => {
@@ -324,7 +312,7 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
                 <View style={styles.rowContainer}>
                     <View style={styles.nameColumn}>
                         <View style={styles.nameKeyRow}>
-                            {assets && <Image source={assets[EnumIconAsset.PublicKey] as ImageURISource} />}
+                            <PublicKeyIcon />
                             <Anchor style={styles.anchor} source={getAgoraScanUrl(publicKey)}>
                                 <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
                                     {publicKey.slice(0, ELLIPSIS_TAIL_SIZE)}
@@ -346,7 +334,7 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
                             </TouchableOpacity>
                         </View>
                         <View style={styles.nameGlobeRow}>
-                            {assets && <Image source={assets[EnumIconAsset.Address] as ImageURISource} />}
+                            <AddressIcon />
                             <Anchor style={styles.anchor} source={getBoaScanUrl(address)}>
                                 <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
                                     {address.slice(0, ELLIPSIS_TAIL_SIZE)}
@@ -381,7 +369,7 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
                 </View>
             );
         },
-        [assets, dispatch, themeContext.color.primary, themeContext.color.textBlack],
+        [dispatch, themeContext.color.primary, themeContext.color.textBlack],
     );
 
     return (
@@ -403,13 +391,12 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
             </View>
             <LineComponent />
             <VoteListHeaderComponent onRefresh={onRefresh} />
-            {assets &&
-                validators.map((validator) => (
-                    <View key={`vote.${validator.id}`}>
-                        {renderItem(validator)}
-                        <LineComponent />
-                    </View>
-                ))}
+            {validators.map((validator) => (
+                <View key={`vote.${validator.id}`}>
+                    {renderItem(validator)}
+                    <LineComponent />
+                </View>
+            ))}
             {loading && <ActivityIndicator />}
             {!loading && total > validators.length && <Text style={styles.moreText}>......</Text>}
         </View>
@@ -462,7 +449,7 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                 <View style={styles.rowContainer}>
                     <View style={styles.nameColumn}>
                         <View style={styles.nameKeyRow}>
-                            {assets && <Image source={assets[EnumIconAsset.PublicKey] as ImageURISource} />}
+                            <PublicKeyIcon />
                             <Anchor style={styles.anchor} source={getAgoraScanUrl(publicKey)}>
                                 <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
                                     {publicKey.slice(0, ELLIPSIS_TAIL_SIZE)}
@@ -484,7 +471,7 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                             </TouchableOpacity>
                         </View>
                         <View style={styles.nameGlobeRow}>
-                            {assets && <Image source={assets[EnumIconAsset.Address] as ImageURISource} />}
+                            <AddressIcon />
                             <Anchor style={styles.anchor} source={getBoaScanUrl(address)}>
                                 <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
                                     {address.slice(0, ELLIPSIS_TAIL_SIZE)}
@@ -521,7 +508,7 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                 </View>
             );
         },
-        [assets, themeContext.color.primary, themeContext.color.textBlack, showBallotResult, dispatch],
+        [themeContext.color.primary, themeContext.color.textBlack, showBallotResult, dispatch],
     );
 
     return (
