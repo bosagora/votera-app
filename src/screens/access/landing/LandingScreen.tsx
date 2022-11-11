@@ -30,6 +30,7 @@ const iconAssets = [
 const styles = StyleSheet.create({
     buttonStyle: { borderRadius: 25, height: 50 },
     titleStyle: { color: 'white', fontSize: 14 },
+    waiting: { height: 50, width: 271 },
 });
 
 function LandingScreen({ navigation }: AccessScreenProps<'Landing'>): JSX.Element | null {
@@ -101,7 +102,7 @@ function LandingScreen({ navigation }: AccessScreenProps<'Landing'>): JSX.Elemen
                 </View>
             )}
             <View>
-                {metamaskStatus === MetamaskStatus.INITIALIZING && <ActivityIndicator />}
+                {metamaskStatus === MetamaskStatus.INITIALIZING && <ActivityIndicator style={styles.waiting} />}
                 {metamaskStatus === MetamaskStatus.UNAVAILABLE && (
                     <Anchor
                         style={[
@@ -125,7 +126,7 @@ function LandingScreen({ navigation }: AccessScreenProps<'Landing'>): JSX.Elemen
                         raised
                     />
                 )}
-                {metamaskStatus === MetamaskStatus.CONNECTING && <ActivityIndicator />}
+                {metamaskStatus === MetamaskStatus.CONNECTING && <ActivityIndicator style={styles.waiting} />}
                 {metamaskStatus === MetamaskStatus.OTHER_CHAIN && (
                     <CommonButton
                         title={getString('메타마스크 체인 변경')}

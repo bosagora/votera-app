@@ -185,7 +185,7 @@ function Evaluating(props: Props): JSX.Element {
                 </View>
 
                 <View style={{ alignItems: 'center', marginTop: 22 }}>
-                    {loading && <ActivityIndicator />}
+                    {loading && <ActivityIndicator style={{ height: 50 }} />}
                     {!loading && (
                         <Button
                             onPress={() => {

@@ -1,6 +1,6 @@
 /* eslint-disable import/extensions */
 /* eslint-disable global-require */
-import React, { useContext, useRef, useEffect } from 'react';
+import React, { useContext, useRef, useEffect, useState } from 'react';
 import { View, Image, ActivityIndicator, ImageURISource, StyleSheet } from 'react-native';
 import { Button, Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
@@ -32,6 +32,7 @@ const iconAssets = [
 const styles = StyleSheet.create({
     buttonStyle: { borderRadius: 25, height: 50 },
     titleStyle: { color: 'white', fontSize: 14 },
+    waiting: { height: 50, width: 271 },
 });
 
 function LoginScreen({ navigation }: AccessScreenProps<'Login'>): JSX.Element {
@@ -51,6 +52,7 @@ function LoginScreen({ navigation }: AccessScreenProps<'Login'>): JSX.Element {
     } = useContext(AuthContext);
     const onboarding = useRef<MetaMaskOnboarding>();
     const [assets] = useAssets(iconAssets);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (!onboarding.current) {
@@ -80,6 +82,7 @@ function LoginScreen({ navigation }: AccessScreenProps<'Login'>): JSX.Element {
     }, [isGuest, navigation, routeLoaded]);
 
     const onClickSignIn = () => {
+        setLoading(true);
         login(false)
             .then((result) => {
                 if (!result.succeeded) {
@@ -90,6 +93,9 @@ function LoginScreen({ navigation }: AccessScreenProps<'Login'>): JSX.Element {
             .catch((err) => {
                 console.log('login error = ', err);
                 dispatch(showSnackBar(getString('로그인 통신 중 오류 발생')));
+            })
+            .finally(() => {
+                setLoading(false);
             });
     };
 
@@ -101,7 +107,7 @@ function LoginScreen({ navigation }: AccessScreenProps<'Login'>): JSX.Element {
                 </View>
             )}
             <View>
-                {metamaskStatus === MetamaskStatus.INITIALIZING && <ActivityIndicator />}
+                {metamaskStatus === MetamaskStatus.INITIALIZING && <ActivityIndicator style={styles.waiting} />}
                 {metamaskStatus === MetamaskStatus.UNAVAILABLE && (
                     <Anchor
                         style={[
@@ -125,7 +131,7 @@ function LoginScreen({ navigation }: AccessScreenProps<'Login'>): JSX.Element {
                         raised
                     />
                 )}
-                {metamaskStatus === MetamaskStatus.CONNECTING && <ActivityIndicator />}
+                {metamaskStatus === MetamaskStatus.CONNECTING && <ActivityIndicator style={styles.waiting} />}
                 {metamaskStatus === MetamaskStatus.OTHER_CHAIN && (
                     <CommonButton
                         title={getString('메타마스크 체인 변경')}
@@ -135,7 +141,8 @@ function LoginScreen({ navigation }: AccessScreenProps<'Login'>): JSX.Element {
                         raised
                     />
                 )}
-                {metamaskStatus === MetamaskStatus.CONNECTED && (
+                {metamaskStatus === MetamaskStatus.CONNECTED && loading && <ActivityIndicator style={styles.waiting} />}
+                {metamaskStatus === MetamaskStatus.CONNECTED && !loading && (
                     <CommonButton
                         title={getString('로그인')}
                         buttonStyle={globalStyle.metaButton}

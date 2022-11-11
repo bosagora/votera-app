@@ -418,6 +418,21 @@ function VoteResult(props: VoteResultProps): JSX.Element {
         total,
     ]);
 
+    const callWithdraw = useCallback(() => {
+        setRunningTx(true);
+        runWithdraw()
+            .then((msg) => {
+                setErrorMessage(msg);
+            })
+            .catch((err) => {
+                console.log('runWithdraw error = ', err);
+                setErrorMessage(getString('자금인출 시 알 수 없는 오류가 발생헀습니다&#46;'));
+            })
+            .finally(() => {
+                setRunningTx(false);
+            });
+    }, [runWithdraw]);
+
     const renderWithdraw = useCallback(() => {
         if (!data?.isProposer) {
             return null;
@@ -491,7 +506,7 @@ function VoteResult(props: VoteResultProps): JSX.Element {
                 case MetamaskStatus.CONNECTING:
                     return (
                         <View style={styles.withdrawContainer}>
-                            <ActivityIndicator />
+                            <ActivityIndicator style={{ height: 50 }} />
                         </View>
                     );
                 case MetamaskStatus.NOT_CONNECTED:
@@ -532,18 +547,7 @@ function VoteResult(props: VoteResultProps): JSX.Element {
                         disabledStyle={styles.metaDisabled}
                         disabledTitleStyle={styles.metaDisableTitle}
                         onPress={() => {
-                            setRunningTx(true);
-                            runWithdraw()
-                                .then((msg) => {
-                                    setErrorMessage(msg);
-                                })
-                                .catch((err) => {
-                                    console.log('runWithdraw error = ', err);
-                                    setErrorMessage(getString('자금인출 시 알 수 없는 오류가 발생헀습니다&#46;'));
-                                })
-                                .finally(() => {
-                                    setRunningTx(false);
-                                });
+                            callWithdraw();
                         }}
                         raised
                     />
@@ -555,6 +559,7 @@ function VoteResult(props: VoteResultProps): JSX.Element {
         }
         return null;
     }, [
+        callWithdraw,
         data?.canWithdrawAt,
         data?.isProposer,
         data?.voteProposalState,
@@ -563,7 +568,6 @@ function VoteResult(props: VoteResultProps): JSX.Element {
         metamaskProvider,
         metamaskStatus,
         metamaskSwitch,
-        runWithdraw,
         runningTx,
         themeContext.color.error,
     ]);
