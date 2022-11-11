@@ -20,12 +20,11 @@ import PaymentInfo from '~/components/proposal/PaymentInfo';
 
 interface Props {
     proposal: Proposal;
-    onLayout: (h: number) => void;
     onChangeStatus: () => void;
 }
 
 function CreateScreen(props: Props): JSX.Element {
-    const { proposal, onChangeStatus, onLayout } = props;
+    const { proposal, onChangeStatus } = props;
     const { metamaskProvider, isGuest, metamaskUpdateBalance } = useContext(AuthContext);
     const dispatch = useAppDispatch();
     const [loading, setLoading] = useState(false);
@@ -184,21 +183,19 @@ function CreateScreen(props: Props): JSX.Element {
     );
 
     return (
-        <View onLayout={(event) => onLayout(event.nativeEvent.layout.height)}>
-            <View style={{ paddingHorizontal: 20, backgroundColor: 'white', flex: 1 }}>
-                <PaymentInfo
-                    proposal={proposal}
-                    proposalFee={data?.proposalFee}
-                    onCallBudget={() => {
-                        if (isGuest) {
-                            dispatch(showSnackBar(getString('둘러보기 중에는 사용할 수 없습니다')));
-                        } else {
-                            callCommonsBudget(proposal?.proposalId || '', data?.proposalFee).catch(console.log);
-                        }
-                    }}
-                    loading={loading}
-                />
-            </View>
+        <View style={{ paddingHorizontal: 20, backgroundColor: 'white', flex: 1 }}>
+            <PaymentInfo
+                proposal={proposal}
+                proposalFee={data?.proposalFee}
+                onCallBudget={() => {
+                    if (isGuest) {
+                        dispatch(showSnackBar(getString('둘러보기 중에는 사용할 수 없습니다')));
+                    } else {
+                        callCommonsBudget(proposal?.proposalId || '', data?.proposalFee).catch(console.log);
+                    }
+                }}
+                loading={loading}
+            />
         </View>
     );
 }

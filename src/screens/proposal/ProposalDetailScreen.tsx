@@ -159,12 +159,6 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
     const { width } = useWindowDimensions();
     const [newNotice, setNewNotice] = useState(false);
 
-    const [sceneHeight, setSceneHeight] = useState<HeightType>('auto');
-    const [tab0Height, setTab0Height] = useState<HeightType>('auto');
-    const [tab1Height, setTab1Height] = useState<HeightType>('auto');
-    const [tab2Height, setTab2Height] = useState<HeightType>('auto');
-    const [tab3Height, setTab3Height] = useState<HeightType>('auto');
-
     const [getProposalDetail, { loading }] = useGetProposalByIdLazyQuery({
         fetchPolicy: 'cache-and-network',
         onCompleted: (data) => {
@@ -546,33 +540,6 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
         ],
     );
 
-    const setCurrentTabHeight = (newHeight: HeightType) => {
-        const deviceHeight = Dimensions.get('window').height;
-        const tabHeight = newHeight !== 'auto' && newHeight < deviceHeight ? deviceHeight : newHeight;
-        if (sceneHeight !== tabHeight) {
-            setSceneHeight(tabHeight);
-        }
-    };
-
-    const onTabChange = (i: number) => {
-        switch (i) {
-            case 0:
-                setCurrentTabHeight(tab0Height);
-                break;
-            case 1:
-                setCurrentTabHeight(tab1Height);
-                break;
-            case 2:
-                setCurrentTabHeight(tab2Height);
-                break;
-            case 3:
-                setCurrentTabHeight(tab3Height);
-                break;
-            default:
-                break;
-        }
-    };
-
     const title = useCallback(
         (scrollValue: Animated.Value) => {
             const opacity = scrollValue.interpolate({
@@ -671,9 +638,6 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
                         previewData={undefined}
                         isPreview={false}
                         assessResultData={assessResultData?.assessResult as AssessResultPayload}
-                        onLayout={(height) => {
-                            setTab0Height(height);
-                        }}
                     />
                 );
             case 'discussion':
@@ -710,30 +674,20 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
                                     variables: { limit: FETCH_MORE_LIMIT, start: currentLength },
                                 }).catch(console.log);
                             }}
-                            onLayout={(height) => {
-                                setTab1Height(height);
-                            }}
                             newNotice={newNotice}
                             moveToNotice={() => {
                                 navigation.push('RootUser', { screen: 'Notice', params: { id: noticeAId } });
                             }}
                             isJoined={isJoined}
                             setJoined={setJoined}
+                            focused={index === 1}
                         />
                     );
                 }
                 return null;
             case 'vote':
                 if (proposal?.status === EnumProposalStatus.Created && proposal.id) {
-                    return (
-                        <CreateScreen
-                            proposal={proposal}
-                            onLayout={(value) => {
-                                setTab2Height(value);
-                            }}
-                            onChangeStatus={onChangeStatus}
-                        />
-                    );
+                    return <CreateScreen proposal={proposal} onChangeStatus={onChangeStatus} />;
                 }
                 if (
                     (proposal?.status === EnumProposalStatus.Assess ||
@@ -745,39 +699,25 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
                         <AssessScreen
                             proposal={proposal}
                             assessResultData={assessResultData?.assessResult as AssessResultPayload}
-                            onLayout={(value) => {
-                                setTab2Height(value);
-                            }}
                             onSubmitAssess={onSubmitAssess}
                         />
                     );
                 }
-                return (
-                    <VoteScreen
-                        proposal={proposal}
-                        onLayout={(value) => {
-                            setTab2Height(value);
-                        }}
-                        onSubmitBallot={onSubmitBallot}
-                    />
-                );
+                return <VoteScreen proposal={proposal} onSubmitBallot={onSubmitBallot} />;
             case 'validator':
-                return (
+                return index === 3 ? (
                     <ValidatorScreen
                         proposal={proposal}
                         total={total}
                         participated={participated}
                         validators={validators}
-                        onLayout={(value) => {
-                            setTab3Height(value);
-                        }}
                         onRefresh={() => {
                             console.log('ValidatorScreen.onRefresh');
                             getValidators();
                         }}
                         loading={assessLoading || ballotLoading}
                     />
-                );
+                ) : null;
             default:
                 break;
         }
@@ -804,15 +744,10 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
                                 paddingHorizontal: 22,
                                 paddingTop: 25,
                                 marginBottom: 60,
-                                height: sceneHeight,
                             }}
                             navigationState={{ index, routes }}
                             renderScene={renderScene}
-                            onIndexChange={(i) => {
-                                setIndex(i);
-                                onTabChange(i);
-                            }}
-                            lazy
+                            onIndexChange={setIndex}
                             // eslint-disable-next-line react/jsx-props-no-spreading
                             renderTabBar={(props) => <TabBarContainer {...props} />}
                         />

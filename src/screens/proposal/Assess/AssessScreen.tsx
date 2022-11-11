@@ -16,12 +16,11 @@ import EvaluationResult from './result';
 interface Props {
     proposal: Proposal;
     assessResultData: AssessResultPayload;
-    onLayout: (h: number) => void;
     onSubmitAssess: (data: AssessResult[]) => Promise<void>;
 }
 
 function AssessScreen(props: Props): JSX.Element {
-    const { proposal, assessResultData, onLayout, onSubmitAssess } = props;
+    const { proposal, assessResultData, onSubmitAssess } = props;
     const dispatch = useAppDispatch();
     const { isGuest } = useContext(AuthContext);
     const [needEvaluation, setNeedEvaluation] = useState(!!assessResultData?.needEvaluation);
@@ -36,7 +35,7 @@ function AssessScreen(props: Props): JSX.Element {
                 return;
             }
             try {
-                await onSubmitAssess(data)
+                await onSubmitAssess(data);
                 setNeedEvaluation(false);
             } catch (err) {
                 dispatch(showSnackBar(getString('평가 처리 중 오류가 발생헀습니다&#46;')));
@@ -62,11 +61,7 @@ function AssessScreen(props: Props): JSX.Element {
         [isGuest, needEvaluation, proposal, submitResponse],
     );
 
-    return (
-        <View onLayout={(event) => onLayout(event.nativeEvent.layout.height)}>
-            {renderAssessContent(proposal, assessResultData)}
-        </View>
-    );
+    return <View>{renderAssessContent(proposal, assessResultData)}</View>;
 }
 
 export default AssessScreen;

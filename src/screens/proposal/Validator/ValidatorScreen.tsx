@@ -180,27 +180,23 @@ const iconAssets = [
 ];
 
 interface SubProps {
-    onLayout: (h: number) => void;
     proposal: Proposal | undefined;
 }
 
 function PendingValidatorScreen(props: SubProps): JSX.Element {
-    const { proposal, onLayout } = props;
+    const { proposal } = props;
     const themeContext = useContext(ThemeContext);
 
     return (
-        <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)}>
-            <View style={styles.header}>
-                <Text style={{ color: themeContext.color.primary }}>
-                    {getString('제안 생성 절차가 완료된 후, 검증자 리스트가 표시됩니다&#46;')}
-                </Text>
-            </View>
+        <View style={styles.header}>
+            <Text style={{ color: themeContext.color.primary }}>
+                {getString('제안 생성 절차가 완료된 후, 검증자 리스트가 표시됩니다&#46;')}
+            </Text>
         </View>
     );
 }
 
 interface ValidatorProps {
-    onLayout: (h: number) => void;
     onRefresh: () => void;
     total: number;
     participated: number;
@@ -209,7 +205,7 @@ interface ValidatorProps {
 }
 
 function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
-    const { total, participated, validators, onLayout, onRefresh, loading } = props;
+    const { total, participated, validators, onRefresh, loading } = props;
     const themeContext = useContext(ThemeContext);
     const dispatch = useAppDispatch();
     const [assets] = useAssets(iconAssets);
@@ -283,7 +279,7 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
     );
 
     return (
-        <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)}>
+        <View>
             <View style={styles.header}>
                 <View style={styles.headerFirstLine}>
                     <Text style={[styles.headerText, { color: themeContext.color.primary }]}>
@@ -315,7 +311,7 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
 }
 
 function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
-    const { total, participated, validators, onLayout, onRefresh, loading } = props;
+    const { total, participated, validators, onRefresh, loading } = props;
     const themeContext = useContext(ThemeContext);
     const dispatch = useAppDispatch();
     const [assets] = useAssets(iconAssets);
@@ -389,7 +385,7 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
     );
 
     return (
-        <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)}>
+        <View>
             <View style={styles.header}>
                 <View style={styles.headerFirstLine}>
                     <Text style={[styles.headerText, { color: themeContext.color.primary }]}>
@@ -421,7 +417,7 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
 }
 
 function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
-    const { total, participated, validators, onLayout, onRefresh, loading } = props;
+    const { total, participated, validators, onRefresh, loading } = props;
     const themeContext = useContext(ThemeContext);
     const [assets] = useAssets(iconAssets);
     const dispatch = useAppDispatch();
@@ -529,7 +525,7 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
     );
 
     return (
-        <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)}>
+        <View>
             <View style={styles.header}>
                 <View style={styles.headerFirstLine}>
                     <Text style={[styles.headerText, { color: themeContext.color.primary }]}>
@@ -561,7 +557,6 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
 }
 
 interface Props {
-    onLayout: (h: number) => void;
     onRefresh: () => void;
     proposal: Proposal | undefined;
     total: number;
@@ -571,10 +566,10 @@ interface Props {
 }
 
 function ValidatorScreen(props: Props): JSX.Element {
-    const { onLayout, onRefresh, proposal, total, participated, validators, loading } = props;
+    const { onRefresh, proposal, total, participated, validators, loading } = props;
 
     if (!proposal || proposal?.status === EnumProposalStatus.Created) {
-        return <PendingValidatorScreen proposal={proposal} onLayout={onLayout} />;
+        return <PendingValidatorScreen proposal={proposal} />;
     }
 
     switch (proposal.status) {
@@ -586,7 +581,6 @@ function ValidatorScreen(props: Props): JSX.Element {
                     total={total}
                     participated={participated}
                     validators={validators}
-                    onLayout={onLayout}
                     onRefresh={onRefresh}
                     loading={loading}
                 />
@@ -598,7 +592,6 @@ function ValidatorScreen(props: Props): JSX.Element {
                         total={total}
                         participated={participated}
                         validators={validators}
-                        onLayout={onLayout}
                         onRefresh={onRefresh}
                         loading={loading}
                     />
@@ -609,7 +602,6 @@ function ValidatorScreen(props: Props): JSX.Element {
                     total={total}
                     participated={participated}
                     validators={validators}
-                    onLayout={onLayout}
                     onRefresh={onRefresh}
                     loading={loading}
                 />
@@ -620,7 +612,6 @@ function ValidatorScreen(props: Props): JSX.Element {
                     total={total}
                     participated={participated}
                     validators={validators}
-                    onLayout={onLayout}
                     onRefresh={onRefresh}
                     loading={loading}
                 />
@@ -631,7 +622,6 @@ function ValidatorScreen(props: Props): JSX.Element {
                     total={total}
                     participated={participated}
                     validators={validators}
-                    onLayout={onLayout}
                     onRefresh={onRefresh}
                     loading={loading}
                 />
@@ -642,7 +632,6 @@ function ValidatorScreen(props: Props): JSX.Element {
                     total={total}
                     participated={participated}
                     validators={validators}
-                    onLayout={onLayout}
                     onRefresh={onRefresh}
                     loading={loading}
                 />

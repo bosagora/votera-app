@@ -67,13 +67,12 @@ interface Props {
     previewData: PreviewProposal | undefined;
     isPreview: boolean;
     assessResultData: AssessResultPayload;
-    onLayout: (h: number) => void;
 }
 
 function Info(props: Props): JSX.Element {
     const themeContext = useContext(ThemeContext);
     const dispatch = useAppDispatch();
-    const { proposal, previewData, assessResultData, isPreview, onLayout } = props;
+    const { proposal, previewData, assessResultData, isPreview } = props;
     const [type, setType] = useState<EnumProposalType>();
     const [proposalStatus, setProposalStatus] = useState<string>();
     const [assessPeriod, setAssessPeriod] = useState<string>();
@@ -173,7 +172,6 @@ function Info(props: Props): JSX.Element {
         <View
             style={styles.container}
             onLayout={(event) => {
-                onLayout(event.nativeEvent.layout.height);
                 setViewWidth(event.nativeEvent.layout.width);
             }}
         >
