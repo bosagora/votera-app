@@ -181,7 +181,7 @@ function Feed({ navigation }: MainScreenProps<'Feed'>): JSX.Element {
                         {getString('새알림')}
                     </Text>
                     <Text style={[globalStyle.ltext, styles.countNumber, { color: themeContext.color.textBlack }]}>
-                        {notReadCount || 0}/{count || 0}
+                        {filter === FeedFilterType.READ ? 0 : notReadCount || 0}/{count || 0}
                     </Text>
                 </View>
                 <FilterButton

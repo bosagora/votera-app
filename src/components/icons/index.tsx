@@ -6,6 +6,7 @@ import { Icon } from 'react-native-elements';
 
 export async function loadFont() {
     await MaterialIcons.loadFont();
+    await Octicons.loadFont();
 }
 
 interface IconColorProps {
