@@ -40,11 +40,11 @@ interface DiscussionProps {
     createActivityComment: (value: string) => Promise<void>;
     refetch: () => void;
     fetchMore: () => void;
-    onLayout: (h: number) => void;
     newNotice: boolean;
     moveToNotice: () => void;
     isJoined: boolean;
     setJoined: () => Promise<void>;
+    focused: boolean;
 }
 
 function Discussion(props: DiscussionProps): JSX.Element {
@@ -60,9 +60,9 @@ function Discussion(props: DiscussionProps): JSX.Element {
         fetchMore,
         newNotice,
         moveToNotice,
-        onLayout,
         isJoined,
         setJoined,
+        focused,
     } = props;
     const { user, isGuest } = useContext(AuthContext);
     const themeContext = useContext(ThemeContext);
@@ -114,7 +114,7 @@ function Discussion(props: DiscussionProps): JSX.Element {
     );
 
     return (
-        <View onLayout={(event) => onLayout(event.nativeEvent.layout.height)}>
+        <View>
             <View style={[globalStyle.flexRowBetween, { marginBottom: 20 }]}>
                 <Text style={[globalStyle.gbtext, { color: themeContext.color.black, lineHeight: 13, fontSize: 11 }]}>
                     {user?.username}
@@ -176,17 +176,18 @@ function Discussion(props: DiscussionProps): JSX.Element {
                     </Text>
                 </TouchableOpacity>
             </View>
-            {commentsData?.map((comment, index) => (
-                <OpinionCard
-                    key={`comment_${comment.id}`}
-                    activityId={id}
-                    post={comment}
-                    status={commentsStatus ? commentsStatus[index] : undefined}
-                    isJoined={isJoined}
-                    setJoined={setJoined}
-                />
-            ))}
-            {commentsData && commentsData.length < commentsCount && (
+            {focused &&
+                commentsData?.map((comment, index) => (
+                    <OpinionCard
+                        key={`comment_${comment.id}`}
+                        activityId={id}
+                        post={comment}
+                        status={commentsStatus ? commentsStatus[index] : undefined}
+                        isJoined={isJoined}
+                        setJoined={setJoined}
+                    />
+                ))}
+            {focused && commentsData && commentsData.length < commentsCount && (
                 <Button
                     title={getString('더보기')}
                     onPress={() => {

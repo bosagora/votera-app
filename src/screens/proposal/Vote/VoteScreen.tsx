@@ -17,12 +17,11 @@ import PendingVote from './pendingVote';
 
 interface Props {
     proposal: Proposal | undefined;
-    onLayout: (h: number) => void;
     onSubmitBallot: (vote: VOTE_SELECT) => Promise<boolean>;
 }
 
 function VoteScreen(props: Props): JSX.Element {
-    const { proposal, onLayout, onSubmitBallot } = props;
+    const { proposal, onSubmitBallot } = props;
     const { user, isGuest, metamaskStatus, metamaskProvider, metamaskUpdateBalance } = useContext(AuthContext);
     const [isValidator, setIsValidator] = useState(false);
     const [needVote, setNeedVote] = useState(false);
@@ -148,11 +147,7 @@ function VoteScreen(props: Props): JSX.Element {
         [isGuest, isValidator, loading, metamaskStatus, needVote, runVote, runWithdraw, voteProposalState],
     );
 
-    return (
-        <View onLayout={(event) => onLayout(event.nativeEvent.layout.height + 50)}>
-            {renderVoteContent(proposal, voteStatusData?.voteStatus)}
-        </View>
-    );
+    return <View>{renderVoteContent(proposal, voteStatusData?.voteStatus)}</View>;
 }
 
 export default VoteScreen;
