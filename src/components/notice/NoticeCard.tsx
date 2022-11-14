@@ -3,7 +3,7 @@ import { View, TouchableOpacity, Dimensions, StyleSheet } from 'react-native';
 import { ThemeContext } from 'styled-components/native';
 import { Button, Text, Image } from 'react-native-elements';
 import dayjs from 'dayjs';
-import globalStyle from '~/styles/global';
+import globalStyle, { MAX_WIDTH } from '~/styles/global';
 import { Post, PostStatus, usePostCommentsLazyQuery, useReadArticleMutation } from '~/graphql/generated/generated';
 import { AuthContext } from '~/contexts/AuthContext';
 import { ProposalContext } from '~/contexts/ProposalContext';
@@ -18,32 +18,24 @@ import CommentCard from '../opinion/CommentCard';
 // import ShortButton from '../button/ShortButton';
 
 const styles = StyleSheet.create({
-    bottomWrapper: { alignItems: 'center', flexDirection: 'row', marginTop: 18 },
+    bottomWrapper: { alignItems: 'center', flexDirection: 'row' },
     commentsHeader: { fontSize: 10, lineHeight: 19 },
     commentsMain: { fontSize: 13, lineHeight: 21 },
-    commentsWrapperEn: {
+    commentsWrapper: {
         alignItems: 'center',
         borderRadius: 6,
         borderStyle: 'solid',
         borderWidth: 1,
         height: 26,
         justifyContent: 'center',
-        width: 88,
-    },
-    commentsWrapperKo: {
-        alignItems: 'center',
-        borderRadius: 6,
-        borderStyle: 'solid',
-        borderWidth: 1,
-        height: 26,
-        justifyContent: 'center',
-        width: 52,
     },
     container: { borderBottomWidth: 3, padding: 23 },
     content: { fontSize: 13, lineHeight: 23 },
     contentWrapper: { marginTop: 30 },
+    dotColumn: { flexDirection: 'row', justifyContent: 'flex-end' },
     separator: { borderLeftWidth: 1, height: 11, marginLeft: 9, width: 11 },
     titleText: { flex: 1, fontSize: 14, lineHeight: 22 },
+    unreadDot: { borderRadius: 4, height: 7, width: 7 },
     writeDate: { fontSize: 10, lineHeight: 20, marginLeft: 12 },
     writeView: { fontSize: 10, lineHeight: 20 },
     writerName: { fontSize: 9, lineHeight: 11 },
@@ -97,9 +89,9 @@ function getNoticeCommentsVariables(id: string) {
     };
 }
 
-function selectCommentsWrapper() {
+function selectCommentsWidth() {
     const locale = getLocale();
-    return locale.startsWith('ko') ? styles.commentsWrapperKo : styles.commentsWrapperEn;
+    return locale.startsWith('ko') ? 52 : 88;
 }
 
 interface NoticeCardProps {
@@ -128,8 +120,9 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
     const [noticeFiles, setNoticeFiles] = useState<AttachmentFile[]>([]);
     const [attachLoaded, setAttachLoaded] = useState(false);
     const [isStopFetchMore, setStopFetchMore] = useState(false);
+    const [viewWidth, setViewWidth] = useState(MAX_WIDTH);
 
-    const [getNoticeComments, { data: noticeCommentsData, loading, fetchMore, client }] = usePostCommentsLazyQuery({
+    const [getNoticeComments, { data: noticeCommentsData, loading, fetchMore }] = usePostCommentsLazyQuery({
         fetchPolicy: 'cache-and-network',
     });
     const [readArticle] = useReadArticleMutation();
@@ -249,33 +242,52 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
         );
     };
 
+    const commentsWidth = selectCommentsWidth();
+
     return (
         <View
             style={[
                 styles.container,
                 { backgroundColor: themeContext.color.white, borderBottomColor: themeContext.color.gray },
             ]}
+            onLayout={(event) => {
+                setViewWidth(event.nativeEvent.layout.width);
+            }}
         >
             <TouchableOpacity onPress={() => clickRead(noticeData.id, !expanded)}>
                 <View style={globalStyle.flexRowBetween}>
-                    <Text style={[globalStyle.mtext, styles.titleText]}>{getContentTitle(noticeData)}</Text>
-                    <View style={[selectCommentsWrapper(), { borderColor: themeContext.color.boxBorder }]}>
+                    <Text style={[globalStyle.mtext, styles.titleText, { maxWidth: viewWidth - commentsWidth }]}>
+                        {getContentTitle(noticeData)}
+                    </Text>
+                    <View style={[styles.dotColumn, { width: commentsWidth }]}>
+                        {!noticeStatus?.isRead && (
+                            <View style={[styles.unreadDot, { backgroundColor: themeContext.color.disagree }]} />
+                        )}
+                    </View>
+                </View>
+                <View style={[globalStyle.flexRowBetween, { marginTop: 18 }]}>
+                    <View style={styles.bottomWrapper}>
+                        <Text style={[globalStyle.gmtext, { color: themeContext.color.black }, styles.writerName]}>
+                            {noticeData.writer?.username || 'username'}
+                        </Text>
+                        <Text style={[globalStyle.rltext, { color: themeContext.color.textBlack }, styles.writeDate]}>
+                            {dayjs(noticeData.createdAt as string).format('YYYY.M.D')}
+                        </Text>
+                        <View style={[styles.separator, { borderColor: themeContext.color.separator }]} />
+                        <Text style={[globalStyle.ltext, { color: themeContext.color.textBlack }, styles.writeView]}>
+                            {getString('조회수 #N').replace('#N', noticeData.readCount?.toString() || '')}
+                        </Text>
+                    </View>
+                    <View
+                        style={[
+                            styles.commentsWrapper,
+                            { borderColor: themeContext.color.boxBorder, width: commentsWidth },
+                        ]}
+                    >
                         <Text style={[globalStyle.btext, { color: themeContext.color.primary }, styles.commentsHeader]}>
                             {getString('답글 #N').replace('#N', replyCount?.toString() || '0')}
                         </Text>
                     </View>
-                </View>
-                <View style={styles.bottomWrapper}>
-                    <Text style={[globalStyle.gmtext, { color: themeContext.color.black }, styles.writerName]}>
-                        {noticeData.writer?.username || 'username'}
-                    </Text>
-                    <Text style={[globalStyle.rltext, { color: themeContext.color.textBlack }, styles.writeDate]}>
-                        {dayjs(noticeData.createdAt as string).format('YYYY.M.D')}
-                    </Text>
-                    <View style={[styles.separator, { borderColor: themeContext.color.separator }]} />
-                    <Text style={[globalStyle.ltext, { color: themeContext.color.textBlack }, styles.writeView]}>
-                        {getString('조회수 #N').replace('#N', noticeData.readCount?.toString() || '')}
-                    </Text>
                 </View>
             </TouchableOpacity>
             {expanded && (
