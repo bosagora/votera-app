@@ -328,8 +328,8 @@ function Info(props: Props): JSX.Element {
                     <View style={styles.titleWrapper}>
                         <Text style={[globalStyle.rtext, styles.title]}>{getString('첨부파일')}</Text>
                     </View>
-                    {files.map((file) => {
-                        return <DownloadComponent key={`file_${file.id || ''}`} file={file} />;
+                    {files.map((file, index) => {
+                        return <DownloadComponent key={`file_${file.id || index.toString()}`} file={file} />;
                     })}
                 </>
             ) : null}

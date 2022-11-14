@@ -125,17 +125,16 @@ function NoticeScreen({ navigation, route }: MainScreenProps<'Notice'>): JSX.Ele
         }
     }, [noticeQueryData]);
 
-    const renderNotices = ({ item, index }: { item: Post; index: number }) => {
-        return (
-            <NoticeCard
-                noticeAId={activityId}
-                noticeData={item}
-                noticeStatus={noticeStatus ? noticeStatus[index] : undefined}
-                isJoined={isJoined}
-                setJoined={setJoined}
-            />
-        );
-    };
+    const onRefresh = useCallback(() => {
+        setPullRefresh(true);
+        const variables = getActivityPostsVariables(activityId);
+        client.cache.evict({
+            fieldName: 'activityPosts',
+            args: variables,
+            broadcast: false,
+        });
+        refetch(variables).catch(console.log);
+    }, [activityId, client.cache, refetch]);
 
     const title = useCallback(
         (scrollValue: Animated.Value) => {
@@ -191,6 +190,18 @@ function NoticeScreen({ navigation, route }: MainScreenProps<'Notice'>): JSX.Ele
         [numberOfLines, proposal],
     );
 
+    const renderNotices = ({ item, index }: { item: Post; index: number }) => {
+        return (
+            <NoticeCard
+                noticeAId={activityId}
+                noticeData={item}
+                noticeStatus={noticeStatus ? noticeStatus[index] : undefined}
+                isJoined={isJoined}
+                setJoined={setJoined}
+            />
+        );
+    };
+
     const renderNavBar = () => {
         const opacity = scroll.interpolate({
             inputRange: [-20, 0, 250 - HEADER_HEIGHT],
@@ -242,22 +253,9 @@ function NoticeScreen({ navigation, route }: MainScreenProps<'Notice'>): JSX.Ele
                     return (
                         <FlatList
                             data={noticeData}
+                            keyExtractor={(item) => `notice.${item.id}`}
                             renderItem={renderNotices}
-                            refreshControl={
-                                <RefreshControl
-                                    refreshing={pullRefresh}
-                                    onRefresh={() => {
-                                        setPullRefresh(true);
-                                        const variables = getActivityPostsVariables(activityId);
-                                        client.cache.evict({
-                                            fieldName: 'activityPosts',
-                                            args: variables,
-                                            broadcast: false,
-                                        });
-                                        refetch(variables).catch(console.log);
-                                    }}
-                                />
-                            }
+                            refreshControl={<RefreshControl refreshing={pullRefresh} onRefresh={onRefresh} />}
                             contentContainerStyle={{ paddingBottom: 86 }}
                             ListHeaderComponent={
                                 <View
