@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     contentWrapper: { paddingBottom: 18 },
     headerButton: { fontSize: 10, lineHeight: 20 },
     headerWrapper: { flexDirection: 'row', justifyContent: 'space-between', paddingBottom: 11 },
-    likeButton: { marginLeft: 6.5 },
+    likeButton: { marginLeft: 6 },
     report: { alignItems: 'center', height: 72, justifyContent: 'center' },
     separator: {
         borderLeftWidth: 1,
