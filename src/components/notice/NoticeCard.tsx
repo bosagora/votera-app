@@ -182,19 +182,6 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
             }).catch((err) => {
                 console.log('getNoticeComments error', err);
             });
-            // if (noticeData.attachment?.length) {
-            //     noticeData.attachment.map((a) => console.log('mime : ', a?.mime));
-            // }
-            // if (props.noticeData.attachment?.) {
-            //     getImageSize(props.mainImage.url).then((result) => {
-            //         if (result.width > SCREEN_WIDTH - 46) {
-            //             const imageRatio = (SCREEN_WIDTH - 46) / result.width;
-            //             setImageSize({ width: SCREEN_WIDTH - 46, height: result.height * imageRatio });
-            //         } else {
-            //             setImageSize(result);
-            //         }
-            //     });
-            // }
         }
     }, [expanded, getNoticeComments, noticeData.id]);
 
@@ -298,10 +285,10 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
                     </Text>
                     {noticeImgs.length > 0 ? (
                         <View style={{ marginTop: 10 }}>
-                            {noticeImgs.map((image) =>
+                            {noticeImgs.map((image, index) =>
                                 image ? (
                                     <Image
-                                        key={`noticeImage.${image.id || ''}`}
+                                        key={`noticeImage.${image.id || index.toString()}`}
                                         style={{ width: image.width, height: image.height, marginTop: 10 }}
                                         source={{ uri: image.url }}
                                     />
@@ -311,8 +298,8 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
                     ) : null}
                     {noticeFiles.length > 0 ? (
                         <View style={{ marginTop: 20 }}>
-                            {noticeFiles.map((file) => {
-                                return <DownloadComponent key={`file_${file.name || ''}`} file={file} />;
+                            {noticeFiles.map((file, index) => {
+                                return <DownloadComponent key={`file_${file.id || index.toString()}`} file={file} />;
                             })}
                         </View>
                     ) : null}

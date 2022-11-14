@@ -105,7 +105,7 @@ export const getNavigationType = (type: EnumFeedsType, navigationParams: Compone
     switch (type) {
         case EnumFeedsType.NewProposalNotice:
             // return `/notice/${activityId || ''}`;
-            return StackActions.push('RootUser', { screen: 'Notice', params: { id: activityId || '' } });
+            return StackActions.push('RootUser', { screen: 'Notice', params: { id: activityId.toString() || '' } });
         case EnumFeedsType.NewProposal:
         case EnumFeedsType.Assess_24HrDeadline:
         case EnumFeedsType.AssessClosed:
