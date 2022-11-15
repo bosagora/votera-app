@@ -35,7 +35,7 @@ import {
 import { OpinionFilterType } from '~/types/filterType';
 import { ProposalContext } from '~/contexts/ProposalContext';
 import getString from '~/utils/locales/STRINGS';
-import isCloseToBottom from '~/utils';
+import { isCloseToBottom } from '~/utils';
 import VoteraVote from '~/utils/votera/VoteraVote';
 import { VOTE_SELECT } from '~/utils/votera/voterautil';
 import { useAppDispatch } from '~/state/hooks';
