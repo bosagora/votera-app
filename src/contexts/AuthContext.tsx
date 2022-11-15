@@ -436,10 +436,12 @@ export function AuthProvider({ children }: AuthProviderProps): JSX.Element {
                         setEnrolled(true);
                         setUserState(undefined);
                         setFeedCount(0);
+                        client.clearStore().catch(console.log);
                     } else {
                         if (userState) {
                             setUserState(undefined);
                             setFeedCount(0);
+                            client.clearStore().catch(console.log);
                         }
                         isMemberQuery({ variables: { address: account } })
                             .then((response) => {
