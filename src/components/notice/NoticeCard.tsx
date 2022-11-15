@@ -111,7 +111,7 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
 
     const [text, setText] = useState<string>('');
     const [expanded, setExpanded] = useState(false);
-    const [isRead, setIsRead] = useState(!!noticeStatus?.isRead);
+    const [isRead, setIsRead] = useState(true);
 
     const [replyCount, setReplyCount] = useState(noticeData.commentCount || 0);
     const [replyData, setReplyData] = useState<Post[]>();
@@ -126,6 +126,10 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
         fetchPolicy: 'cache-and-network',
     });
     const [readArticle] = useReadArticleMutation();
+
+    useEffect(() => {
+        setIsRead(!!noticeStatus?.isRead);
+    }, [noticeStatus]);
 
     useEffect(() => {
         if (expanded) {
@@ -260,7 +264,7 @@ function NoticeCard(props: NoticeCardProps): JSX.Element {
                         {getContentTitle(noticeData)}
                     </Text>
                     <View style={[styles.dotColumn, { width: commentsWidth }]}>
-                        {!noticeStatus?.isRead && (
+                        {!isRead && (
                             <View style={[styles.unreadDot, { backgroundColor: themeContext.color.disagree }]} />
                         )}
                     </View>
