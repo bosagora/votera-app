@@ -4,6 +4,8 @@ import { Divider, Text, Overlay } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import { setStringAsync } from 'expo-clipboard';
 import { proposalInfoURI } from '@config/ServerConfig';
+import { keccak256 } from 'ethers/lib/utils';
+import { AuthContext } from '~/contexts/AuthContext';
 import {
     AttachmentFile,
     AttachmentImage,
@@ -15,6 +17,7 @@ import {
 import DownloadComponent from '~/components/ui/Download';
 import {
     Enum_Proposal_Type as EnumProposalType,
+    Enum_Proposal_Status as EnumProposalStatus,
     AssessResultPayload,
     Enum_Assess_Proposal_State as EnumAssessProposalState,
     ComponentCommonPeriodInput,
@@ -31,6 +34,8 @@ import { getDefaultAssessPeriod, PreviewProposal } from '~/types/proposalType';
 import { CopyIcon } from '~/components/icons';
 import { showSnackBar } from '~/state/features/snackBar';
 import { fetchJson } from '~/utils';
+import { getCommonsBudgetAddress } from '~/utils/votera/agoraconf';
+import CommonsBudget from '~/utils/votera/CommonsBudget';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const IMAGE_MAX_WIDTH = SCREEN_WIDTH - 46;
@@ -85,6 +90,7 @@ function Info(props: Props): JSX.Element {
     const themeContext = useContext(ThemeContext);
     const dispatch = useAppDispatch();
     const { proposal, previewData, assessResultData, isPreview } = props;
+    const { metamaskProvider } = useContext(AuthContext);
     const [type, setType] = useState<EnumProposalType>();
     const [proposalStatus, setProposalStatus] = useState<string>();
     const [assessPeriod, setAssessPeriod] = useState<string>();
@@ -99,7 +105,10 @@ function Info(props: Props): JSX.Element {
     const [files, setFiles] = useState<AttachmentFile[]>([]);
     const [viewWidth, setViewWidth] = useState(MAX_WIDTH);
     const [visible, setVisible] = useState(false);
+    const [docHash, setDocHash] = useState('');
+    const [calcHash, setCalcHash] = useState('');
     const [jsonDoc, setJsonDoc] = useState('');
+    const [verified, setVerified] = useState(false);
 
     const columnWidth = getColumnWidth();
     const labelWidth = viewWidth - columnWidth;
@@ -183,18 +192,38 @@ function Info(props: Props): JSX.Element {
         };
     }, [proposal, isPreview, previewData]);
 
+    const getProposalDocHash = useCallback(async () => {
+        if (!metamaskProvider || !proposal?.proposalId) {
+            return proposal?.doc_hash;
+        }
+        if (proposal?.status === EnumProposalStatus.Created || proposal?.status === EnumProposalStatus.Cancel) {
+            return proposal?.doc_hash;
+        }
+        const commonsBudget = new CommonsBudget(getCommonsBudgetAddress(), metamaskProvider.getSigner());
+        const proposalData = await commonsBudget.getProposalData(proposal?.proposalId, {});
+        return proposalData.docHash;
+    }, [metamaskProvider, proposal?.doc_hash, proposal?.proposalId, proposal?.status]);
+
     const toggleOverlay = useCallback(() => {
         if (!jsonDoc) {
             fetchJson(getProposalInfoUrl(proposal))
                 .then((json) => {
                     setJsonDoc(json);
-                    setVisible(!visible);
+                    getProposalDocHash()
+                        .then((value) => {
+                            setDocHash(value || '');
+                            const hash = keccak256(`0x${Buffer.from(json, 'utf-8').toString('hex')}`);
+                            setCalcHash(hash);
+                            setVerified(hash === value);
+                            setVisible(!visible);
+                        })
+                        .catch(console.log);
                 })
                 .catch(console.log);
         } else {
             setVisible(!visible);
         }
-    }, [visible, jsonDoc, proposal]);
+    }, [jsonDoc, proposal, getProposalDocHash, visible]);
 
     return (
         <View
@@ -366,10 +395,23 @@ function Info(props: Props): JSX.Element {
 
             <Overlay isVisible={visible} onBackdropPress={toggleOverlay}>
                 <Text style={globalStyle.btext}>Proposal Information</Text>
-                <Text style={globalStyle.btext}>Document Hash (keccak256)</Text>
-                <Text style={[globalStyle.ltext, { fontSize: 12, maxWidth: viewWidth - 40 }]}>
-                    {proposal?.doc_hash || ''}
+                <Text style={[globalStyle.btext, { color: verified ? 'black' : 'red' }]}>
+                    Document Hash (keccak256)
                 </Text>
+                <Text
+                    style={[
+                        globalStyle.ltext,
+                        { fontSize: 12, maxWidth: viewWidth - 40, color: verified ? 'black' : 'red' },
+                    ]}
+                >
+                    {docHash}
+                </Text>
+                {!verified && (
+                    <>
+                        <Text style={[globalStyle.btext, { color: 'red' }]}>Hash from JSON Document</Text>
+                        <Text style={[globalStyle.ltext, { fontSize: 12, color: 'red' }]}>{calcHash}</Text>
+                    </>
+                )}
                 <Text style={globalStyle.btext}>JSON Document</Text>
                 <Text style={[globalStyle.ltext, { fontSize: 12, maxWidth: viewWidth - 40 }]}>{jsonDoc}</Text>
             </Overlay>
