@@ -17,6 +17,7 @@ let voterFee = BigNumber.from('400000000000000');
 let withdrawDelayPeriod = 86400;
 let boaScanUrl = '';
 let agoraScanUrl = '';
+let commonsBudgetAddress = '';
 
 function normalizeUrl(url: string) {
     if (url.startsWith('http://') || url.startsWith('https://')) {
@@ -91,6 +92,9 @@ export function setAgoraConf(
     if (agora.agoraScanUrl) {
         agoraScanUrl = agora.agoraScanUrl;
     }
+    if (agora.commonsBudgetAddress) {
+        commonsBudgetAddress = agora.commonsBudgetAddress;
+    }
 }
 
 export function getPrivacyTermURL() {
@@ -152,4 +156,8 @@ export function setFeePolicy(feePolicy: FeePolicyPayload) {
     if (feePolicy.withdrawDelayPeriod) {
         withdrawDelayPeriod = feePolicy.withdrawDelayPeriod;
     }
+}
+
+export function getCommonsBudgetAddress(): string {
+    return commonsBudgetAddress;
 }
