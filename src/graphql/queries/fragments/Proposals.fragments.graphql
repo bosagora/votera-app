@@ -59,6 +59,7 @@ fragment ProposalItem on Proposal {
     proposer_address
     paidComplete
     createTx
+    doc_hash
 }
 
 fragment NewProposalStatus on ProposalStatus {

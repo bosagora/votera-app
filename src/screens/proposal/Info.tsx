@@ -1,8 +1,9 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useCallback } from 'react';
 import { View, Image, Dimensions, StyleSheet, ImageStyle, TouchableOpacity } from 'react-native';
-import { Divider, Text } from 'react-native-elements';
+import { Divider, Text, Overlay } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import { setStringAsync } from 'expo-clipboard';
+import { proposalInfoURI } from '@config/ServerConfig';
 import {
     AttachmentFile,
     AttachmentImage,
@@ -29,6 +30,7 @@ import { getCommonPeriodText } from '~/utils/time';
 import { getDefaultAssessPeriod, PreviewProposal } from '~/types/proposalType';
 import { CopyIcon } from '~/components/icons';
 import { showSnackBar } from '~/state/features/snackBar';
+import { fetchJson } from '~/utils';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const IMAGE_MAX_WIDTH = SCREEN_WIDTH - 46;
@@ -44,6 +46,8 @@ function LineComponent(): JSX.Element {
 }
 
 const styles = StyleSheet.create({
+    anchorBig: { flexDirection: 'row' },
+    anchorSmall: { flex: 1, flexDirection: 'row' },
     container: { marginBottom: 90 },
     description: { fontSize: 13, lineHeight: 23, width: '100%' },
     label: { fontSize: 13, lineHeight: 25 },
@@ -60,6 +64,14 @@ function getResizedImageSize(image: AttachmentImage, width: number): ImageStyle 
         return { width, height: ((image?.height || 0) * width) / image.width };
     }
     return { width: image.width, height: image.height };
+}
+
+function getProposalInfoUrl(proposal?: Proposal) {
+    return `${proposalInfoURI || ''}/${proposal?.doc_hash || ''}`;
+}
+
+function selectProposalInfoStyle(width: number) {
+    return width < 475 ? styles.anchorSmall : styles.anchorBig;
 }
 
 interface Props {
@@ -86,8 +98,11 @@ function Info(props: Props): JSX.Element {
     const [images, setImages] = useState<(AttachmentImage | undefined)[]>([]);
     const [files, setFiles] = useState<AttachmentFile[]>([]);
     const [viewWidth, setViewWidth] = useState(MAX_WIDTH);
+    const [visible, setVisible] = useState(false);
+    const [jsonDoc, setJsonDoc] = useState('');
 
     const columnWidth = getColumnWidth();
+    const labelWidth = viewWidth - columnWidth;
 
     useEffect(() => {
         let canceled = false;
@@ -168,6 +183,19 @@ function Info(props: Props): JSX.Element {
         };
     }, [proposal, isPreview, previewData]);
 
+    const toggleOverlay = useCallback(() => {
+        if (!jsonDoc) {
+            fetchJson(getProposalInfoUrl(proposal))
+                .then((json) => {
+                    setJsonDoc(json);
+                    setVisible(!visible);
+                })
+                .catch(console.log);
+        } else {
+            setVisible(!visible);
+        }
+    }, [visible, jsonDoc, proposal]);
+
     return (
         <View
             style={styles.container}
@@ -243,13 +271,15 @@ function Info(props: Props): JSX.Element {
                             <Text style={[globalStyle.rtext, styles.label, { width: columnWidth }]}>
                                 {getString('제안ID')}
                             </Text>
-                            <View style={{ flexDirection: 'row', width: viewWidth - columnWidth }}>
-                                <Text style={[globalStyle.ltext, styles.labelId]} numberOfLines={1}>
-                                    {proposalId.slice(0, ELLIPSIS_TAIL_SIZE)}
-                                </Text>
-                                <Text style={[globalStyle.ltext, styles.labelId]}>
-                                    {proposalId.slice(ELLIPSIS_TAIL_SIZE)}
-                                </Text>
+                            <View style={{ flexDirection: 'row', width: labelWidth }}>
+                                <TouchableOpacity style={selectProposalInfoStyle(labelWidth)} onPress={toggleOverlay}>
+                                    <Text style={[globalStyle.ltext, styles.labelId]} numberOfLines={1}>
+                                        {proposalId.slice(0, ELLIPSIS_TAIL_SIZE)}
+                                    </Text>
+                                    <Text style={[globalStyle.ltext, styles.labelId]}>
+                                        {proposalId.slice(ELLIPSIS_TAIL_SIZE)}
+                                    </Text>
+                                </TouchableOpacity>
                                 <TouchableOpacity
                                     style={{ marginLeft: 8, marginTop: 2 }}
                                     onPress={() => {
@@ -268,7 +298,7 @@ function Info(props: Props): JSX.Element {
                             <Text style={[globalStyle.rtext, styles.label, { width: columnWidth }]}>
                                 {getString('제안자')}
                             </Text>
-                            <View style={{ flexDirection: 'row', width: viewWidth - columnWidth }}>
+                            <View style={{ flexDirection: 'row', width: labelWidth }}>
                                 <Text style={[globalStyle.ltext, styles.labelId]} numberOfLines={1}>
                                     {proposer.slice(0, ELLIPSIS_TAIL_SIZE)}
                                 </Text>
@@ -333,6 +363,16 @@ function Info(props: Props): JSX.Element {
                     })}
                 </>
             ) : null}
+
+            <Overlay isVisible={visible} onBackdropPress={toggleOverlay}>
+                <Text style={globalStyle.btext}>Proposal Information</Text>
+                <Text style={globalStyle.btext}>Document Hash (keccak256)</Text>
+                <Text style={[globalStyle.ltext, { fontSize: 12, maxWidth: viewWidth - 40 }]}>
+                    {proposal?.doc_hash || ''}
+                </Text>
+                <Text style={globalStyle.btext}>JSON Document</Text>
+                <Text style={[globalStyle.ltext, { fontSize: 12, maxWidth: viewWidth - 40 }]}>{jsonDoc}</Text>
+            </Overlay>
         </View>
     );
 }
