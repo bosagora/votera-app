@@ -48,7 +48,7 @@ function AssessScreen(props: Props): JSX.Element {
     const renderAssessContent = useCallback(
         (item: Proposal | undefined, assessResult: AssessResultPayload) => {
             if (item?.status === EnumProposalStatus.PendingAssess) {
-                return <PendingAssess />;
+                return <PendingAssess proposal={proposal} />;
             }
             if (isGuest) {
                 return <EvaluationResult assessResultData={assessResult} />;

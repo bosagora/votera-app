@@ -3,12 +3,16 @@ import { View } from 'react-native';
 import { Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import globalStyle from '~/styles/global';
-import { ProposalContext } from '~/contexts/ProposalContext';
 import getString from '~/utils/locales/STRINGS';
 import { getCommonPeriodText } from '~/utils/time';
+import { Proposal } from '~/graphql/generated/generated';
 
-function PendingAssess(): JSX.Element {
-    const { proposal } = useContext(ProposalContext);
+interface Props {
+    proposal: Proposal | undefined;
+}
+
+function PendingAssess(props: Props): JSX.Element {
+    const { proposal } = props;
     const themeContext = useContext(ThemeContext);
 
     return (
@@ -29,7 +33,7 @@ function PendingAssess(): JSX.Element {
                         },
                     ]}
                 >
-                    {getString('해당 제안을 평가해주세요&#46;\n평가된 평균점수가 ')}
+                    {getString('본 제안을 평가해주세요&#46;\n평가된 평균점수가 ')}
                     <Text style={{ color: themeContext.color.primary }}>{getString('7점 이상일 경우')}</Text>
                     {getString('에 한해\n정식제안으로 오픈됩니다&#46;')}
                 </Text>
