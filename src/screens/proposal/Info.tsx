@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState, useCallback } from 'react';
-import { View, Image, Dimensions, StyleSheet, ImageStyle, TouchableOpacity } from 'react-native';
+import { View, Image, Dimensions, StyleSheet, ImageStyle, TouchableOpacity, useWindowDimensions } from 'react-native';
 import { Divider, Text, Overlay } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
 import { setStringAsync } from 'expo-clipboard';
@@ -109,9 +109,12 @@ function Info(props: Props): JSX.Element {
     const [calcHash, setCalcHash] = useState('');
     const [jsonDoc, setJsonDoc] = useState('');
     const [verified, setVerified] = useState(false);
+    const [showScroll, setShowScroll] = useState(false);
+    const { height } = useWindowDimensions();
 
     const columnWidth = getColumnWidth();
     const labelWidth = viewWidth - columnWidth;
+    const maxHeight = height - 300;
 
     useEffect(() => {
         let canceled = false;
@@ -413,7 +416,20 @@ function Info(props: Props): JSX.Element {
                     </>
                 )}
                 <Text style={globalStyle.btext}>JSON Document</Text>
-                <Text style={[globalStyle.ltext, { fontSize: 12, maxWidth: viewWidth - 40 }]}>{jsonDoc}</Text>
+                <View style={{ overflow: showScroll ? 'scroll' : 'hidden', maxHeight, maxWidth: viewWidth - 40 }}>
+                    <Text
+                        style={[globalStyle.ltext, { fontSize: 12, maxWidth: viewWidth - 40 }]}
+                        onLayout={(event) => {
+                            if (event.nativeEvent.layout.height > maxHeight) {
+                                setShowScroll(true);
+                            } else {
+                                setShowScroll(false);
+                            }
+                        }}
+                    >
+                        {jsonDoc}
+                    </Text>
+                </View>
             </Overlay>
         </View>
     );
