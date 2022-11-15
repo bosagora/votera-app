@@ -263,7 +263,7 @@ function Evaluating(props: Props): JSX.Element {
                         },
                     ]}
                 >
-                    {getString('해당 제안을 평가해주세요&#46;\n평가된 평균점수가 ')}
+                    {getString('본 제안을 평가해주세요&#46;\n평가된 평균점수가 ')}
                     <Text style={{ color: themeContext.color.primary }}>{getString('7점 이상일 경우')}</Text>
                     {getString('에 한해\n정식제안으로 오픈됩니다&#46;')}
                 </Text>
