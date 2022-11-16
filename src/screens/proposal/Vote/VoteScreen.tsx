@@ -79,6 +79,8 @@ function VoteScreen(props: Props): JSX.Element {
             switch (voteStatus.voteProposalState) {
                 case EnumVoteProposalState.Approved:
                     break;
+                case EnumVoteProposalState.Notallowed:
+                    return getString('거부권이 행사되어 자금인출 불가');
                 case EnumVoteProposalState.Withdrawn:
                     return getString('펀딩자금이 이미 지급되었습니다&#46;');
                 case EnumVoteProposalState.Rejected:

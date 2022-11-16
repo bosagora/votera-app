@@ -401,5 +401,6 @@
     "찬성표 부족(찬성표와 반대표의 차이가 전체 투표자수의\n10%미만)으로 부결되었습니다&#46;": "Rejected due to not enough support votes\n(difference less then 10% of participants)",
     "조회수 #N": "Views #N",
     "제안ID": "Proposal ID",
-    "제안자": "Proposer"
+    "제안자": "Proposer",
+    "거부권이 행사되어 자금인출 불가": "Not allowed to withdraw"
 }
