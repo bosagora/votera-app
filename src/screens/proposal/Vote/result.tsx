@@ -106,6 +106,7 @@ const styles = StyleSheet.create({
 function selectResultText(state?: EnumVoteProposalState | null) {
     switch (state) {
         case EnumVoteProposalState.Approved:
+        case EnumVoteProposalState.Notallowed:
         case EnumVoteProposalState.Withdrawn:
             return getString('통과!');
         case EnumVoteProposalState.InvalidQuorum:
@@ -123,6 +124,7 @@ function selectResultText(state?: EnumVoteProposalState | null) {
 function isValidVoteResult(state?: EnumVoteProposalState | null) {
     switch (state) {
         case EnumVoteProposalState.Approved:
+        case EnumVoteProposalState.Notallowed:
         case EnumVoteProposalState.Withdrawn:
         case EnumVoteProposalState.InvalidQuorum:
         case EnumVoteProposalState.Rejected:
@@ -217,6 +219,7 @@ function VoteResult(props: VoteResultProps): JSX.Element {
     const selectResultColor = (state?: EnumVoteProposalState | null) => {
         switch (state) {
             case EnumVoteProposalState.Approved:
+            case EnumVoteProposalState.Notallowed:
             case EnumVoteProposalState.Withdrawn:
                 return themeContext.color.agree;
             case EnumVoteProposalState.InvalidQuorum:
@@ -443,6 +446,23 @@ function VoteResult(props: VoteResultProps): JSX.Element {
                 <View style={styles.withdrawContainer}>
                     <CommonButton
                         title={getString('자금인출완료')}
+                        containerStyle={styles.metaContainer}
+                        buttonStyle={styles.metaButton}
+                        titleStyle={styles.metaTitle}
+                        filled
+                        disabledStyle={styles.metaDisabled}
+                        disabledTitleStyle={styles.metaDisableTitle}
+                        disabled
+                        raised
+                    />
+                </View>
+            );
+        }
+        if (data.voteProposalState === EnumVoteProposalState.Notallowed) {
+            return (
+                <View style={styles.withdrawContainer}>
+                    <CommonButton
+                        title={getString('거부권이 행사되어 자금인출 불가')}
                         containerStyle={styles.metaContainer}
                         buttonStyle={styles.metaButton}
                         titleStyle={styles.metaTitle}
