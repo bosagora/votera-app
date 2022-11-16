@@ -38,6 +38,18 @@ const styles = StyleSheet.create({
         height: 16,
         width: 16,
     },
+    infoContainer: {
+        alignItems: 'center',
+        backgroundColor: 'rgb(182,175,198)',
+        borderRadius: 25,
+        height: 50,
+        justifyContent: 'center',
+        width: 360,
+    },
+    infoText: {
+        color: 'white',
+        fontSize: 14,
+    },
     itemBallotContainer: {
         flexDirection: 'row',
         justifyContent: 'flex-end',
@@ -50,13 +62,6 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         borderRadius: 25,
         width: 360,
-    },
-    metaDisableTitle: {
-        color: 'white',
-    },
-    metaDisabled: {
-        backgroundColor: 'rgb(235,231,245)',
-        borderColor: 'rgb(235,231,245)',
     },
     metaTitle: {
         marginRight: 12,
@@ -97,6 +102,7 @@ const styles = StyleSheet.create({
         marginVertical: 4,
     },
     withdrawContainer: {
+        alignItems: 'center',
         flex: 1,
         justifyContent: 'center',
         marginVertical: 25,
@@ -444,34 +450,20 @@ function VoteResult(props: VoteResultProps): JSX.Element {
         if (data.voteProposalState === EnumVoteProposalState.Withdrawn) {
             return (
                 <View style={styles.withdrawContainer}>
-                    <CommonButton
-                        title={getString('자금인출완료')}
-                        containerStyle={styles.metaContainer}
-                        buttonStyle={styles.metaButton}
-                        titleStyle={styles.metaTitle}
-                        filled
-                        disabledStyle={styles.metaDisabled}
-                        disabledTitleStyle={styles.metaDisableTitle}
-                        disabled
-                        raised
-                    />
+                    <View style={styles.infoContainer}>
+                        <Text style={[globalStyle.btext, styles.infoText]}>{getString('자금인출완료')}</Text>
+                    </View>
                 </View>
             );
         }
         if (data.voteProposalState === EnumVoteProposalState.Notallowed) {
             return (
                 <View style={styles.withdrawContainer}>
-                    <CommonButton
-                        title={getString('거부권이 행사되어 자금인출 불가')}
-                        containerStyle={styles.metaContainer}
-                        buttonStyle={styles.metaButton}
-                        titleStyle={styles.metaTitle}
-                        filled
-                        disabledStyle={styles.metaDisabled}
-                        disabledTitleStyle={styles.metaDisableTitle}
-                        disabled
-                        raised
-                    />
+                    <View style={styles.infoContainer}>
+                        <Text style={[globalStyle.btext, styles.infoText]}>
+                            {getString('거부권이 행사되어 자금인출 불가')}
+                        </Text>
+                    </View>
                 </View>
             );
         }
@@ -479,17 +471,9 @@ function VoteResult(props: VoteResultProps): JSX.Element {
             if (runningTx) {
                 return (
                     <View style={styles.withdrawContainer}>
-                        <CommonButton
-                            title={getString('자금인출처리중')}
-                            containerStyle={styles.metaContainer}
-                            buttonStyle={styles.metaButton}
-                            titleStyle={styles.metaTitle}
-                            filled
-                            disabledStyle={styles.metaDisabled}
-                            disabledTitleStyle={styles.metaDisableTitle}
-                            disabled
-                            raised
-                        />
+                        <View style={styles.infoContainer}>
+                            <Text style={[globalStyle.btext, styles.infoText]}>{getString('자금인출처리중')}</Text>
+                        </View>
                     </View>
                 );
             }
@@ -500,17 +484,11 @@ function VoteResult(props: VoteResultProps): JSX.Element {
                 if (diff > 0) {
                     return (
                         <View style={styles.withdrawContainer}>
-                            <CommonButton
-                                title={getString('{} 후부터 자금인출가능').replace('{}', afterCalc(diff))}
-                                containerStyle={styles.metaContainer}
-                                buttonStyle={styles.metaButton}
-                                titleStyle={styles.metaTitle}
-                                filled
-                                disabledStyle={styles.metaDisabled}
-                                disabledTitleStyle={styles.metaDisableTitle}
-                                disabled
-                                raised
-                            />
+                            <View style={styles.infoContainer}>
+                                <Text style={[globalStyle.btext, styles.infoText]}>
+                                    {getString('{} 후부터 자금인출가능').replace('{}', afterCalc(diff))}
+                                </Text>
+                            </View>
                             <Text style={{ marginTop: 13 }}>
                                 {getString('자금은 개표 마감 시간 24시간 이후부터 인출할 수 있습니다&#46;')}
                             </Text>
@@ -564,8 +542,6 @@ function VoteResult(props: VoteResultProps): JSX.Element {
                         buttonStyle={styles.metaButton}
                         titleStyle={styles.metaTitle}
                         filled
-                        disabledStyle={styles.metaDisabled}
-                        disabledTitleStyle={styles.metaDisableTitle}
                         onPress={() => {
                             callWithdraw();
                         }}
