@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
     anchorText: {
         borderBottomColor: 'black',
         borderBottomWidth: 1,
-        fontSize: 14,
+        fontSize: 13,
         lineHeight: 18,
     },
     header: {
@@ -46,12 +46,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         marginTop: 5,
     },
-    headerText: {
-        marginRight: 5,
-    },
-    headerValue: {
-        marginLeft: 5,
-    },
+    headerText: { fontSize: 13, marginRight: 5 },
+    headerValue: { fontSize: 13, marginLeft: 5 },
     itemBallotAgree: {
         borderRadius: 9,
         borderWidth: 2,
@@ -73,7 +69,7 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     itemStatus: {
-        fontSize: 14,
+        fontSize: 13,
         lineHeight: 18,
         textAlign: 'right',
     },
@@ -83,10 +79,12 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     listHeaderText: {
+        fontSize: 13,
         marginHorizontal: 19,
         marginVertical: 23,
     },
     moreText: {
+        fontSize: 13,
         textAlign: 'center',
     },
     nameColumn: {
@@ -128,7 +126,7 @@ function AssessListHeaderComponent(props: HeaderProps): JSX.Element {
 
     return (
         <View style={[globalStyle.flexRowBetween, styles.listHeader]}>
-            <Text style={[globalStyle.ltext, styles.listHeaderText]}>{getString('검증자 평가 현황')}</Text>
+            <Text style={[globalStyle.btext, styles.listHeaderText]}>{getString('검증자 평가 현황')}</Text>
             <ShortButton
                 title={getString('새로고침')}
                 buttonStyle={globalStyle.shortSmall}
@@ -144,7 +142,7 @@ function VoteListHeaderComponent(props: HeaderProps): JSX.Element {
 
     return (
         <View style={[globalStyle.flexRowBetween, styles.listHeader]}>
-            <Text style={[globalStyle.ltext, styles.listHeaderText]}>{getString('검증자 투표 현황')}</Text>
+            <Text style={[globalStyle.btext, styles.listHeaderText]}>{getString('검증자 투표 현황')}</Text>
             <ShortButton
                 title={getString('새로고침')}
                 buttonStyle={globalStyle.shortSmall}
@@ -158,7 +156,7 @@ function VoteListHeaderComponent(props: HeaderProps): JSX.Element {
 function ClosedListHeaderComponent(): JSX.Element {
     return (
         <View style={[globalStyle.flexRowBetween, styles.listHeader]}>
-            <Text style={[globalStyle.ltext, styles.listHeaderText]}>{getString('검증자 투표 결과')}</Text>
+            <Text style={[globalStyle.btext, styles.listHeaderText]}>{getString('검증자 투표 결과')}</Text>
         </View>
     );
 }
@@ -180,7 +178,7 @@ function PendingValidatorScreen(props: SubProps): JSX.Element {
 
     return (
         <View style={styles.header}>
-            <Text style={{ color: themeContext.color.primary }}>
+            <Text style={[globalStyle.rtext, { fontSize: 13, color: themeContext.color.primary }]}>
                 {getString('제안 생성 절차가 완료된 후, 검증자 리스트가 표시됩니다&#46;')}
             </Text>
         </View>
@@ -258,7 +256,7 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
                         </Text>
                     </View>
                     {item.assessUpdate && (
-                        <Text style={[globalStyle.ltext, { color: themeContext.color.textBlack }, styles.itemDate]}>
+                        <Text style={[globalStyle.ltext, styles.itemDate, { color: themeContext.color.textBlack }]}>
                             {getValidatorDateString(item.assessUpdate)}
                         </Text>
                     )}
@@ -272,17 +270,21 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
         <View>
             <View style={styles.header}>
                 <View style={styles.headerFirstLine}>
-                    <Text style={[styles.headerText, { color: themeContext.color.primary }]}>
+                    <Text style={[globalStyle.rtext, styles.headerText, { color: themeContext.color.primary }]}>
                         {getString('평가에 참여한 검증자 수')}
                     </Text>
-                    <Text style={[styles.headerValue, { color: themeContext.color.primary }]}>{participated}</Text>
+                    <Text style={[globalStyle.rtext, styles.headerValue, { color: themeContext.color.primary }]}>
+                        {participated}
+                    </Text>
                 </View>
 
                 <View style={styles.headerNextLine}>
-                    <Text style={[styles.headerText, { color: themeContext.color.primary }]}>
+                    <Text style={[globalStyle.rtext, styles.headerText, { color: themeContext.color.primary }]}>
                         {getString('총 검증자 수')}
                     </Text>
-                    <Text style={[styles.headerValue, { color: themeContext.color.primary }]}>{total}</Text>
+                    <Text style={[globalStyle.rtext, styles.headerValue, { color: themeContext.color.primary }]}>
+                        {total}
+                    </Text>
                 </View>
             </View>
             <LineComponent />
@@ -294,7 +296,7 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
                 </View>
             ))}
             {loading && <ActivityIndicator />}
-            {!loading && total > validators.length && <Text style={styles.moreText}>......</Text>}
+            {!loading && total > validators.length && <Text style={[globalStyle.rtext, styles.moreText]}>......</Text>}
         </View>
     );
 }
@@ -362,7 +364,7 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
                         </Text>
                     </View>
                     {item.ballotUpdate && (
-                        <Text style={[globalStyle.ltext, { color: themeContext.color.textBlack }, styles.itemDate]}>
+                        <Text style={[globalStyle.ltext, styles.itemDate, { color: themeContext.color.textBlack }]}>
                             {getValidatorDateString(item.ballotUpdate)}
                         </Text>
                     )}
@@ -376,17 +378,21 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
         <View>
             <View style={styles.header}>
                 <View style={styles.headerFirstLine}>
-                    <Text style={[styles.headerText, { color: themeContext.color.primary }]}>
+                    <Text style={[globalStyle.rtext, styles.headerText, { color: themeContext.color.primary }]}>
                         {getString('투표에 참여한 검증자 수')}
                     </Text>
-                    <Text style={[styles.headerValue, { color: themeContext.color.primary }]}>{participated}</Text>
+                    <Text style={[globalStyle.rtext, styles.headerValue, { color: themeContext.color.primary }]}>
+                        {participated}
+                    </Text>
                 </View>
 
                 <View style={styles.headerNextLine}>
-                    <Text style={[styles.headerText, { color: themeContext.color.primary }]}>
+                    <Text style={[globalStyle.rtext, styles.headerText, { color: themeContext.color.primary }]}>
                         {getString('총 검증자 수')}
                     </Text>
-                    <Text style={[styles.headerValue, { color: themeContext.color.primary }]}>{total}</Text>
+                    <Text style={[globalStyle.rtext, styles.headerValue, { color: themeContext.color.primary }]}>
+                        {total}
+                    </Text>
                 </View>
             </View>
             <LineComponent />
@@ -398,7 +404,7 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
                 </View>
             ))}
             {loading && <ActivityIndicator />}
-            {!loading && total > validators.length && <Text style={styles.moreText}>......</Text>}
+            {!loading && total > validators.length && <Text style={[globalStyle.rtext, styles.moreText]}>......</Text>}
         </View>
     );
 }
@@ -415,7 +421,7 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                 return (
                     <View style={styles.itemBallotContainer}>
                         <View style={[styles.itemBallotAgree, { borderColor: themeContext.color.agree }]} />
-                        <Text style={[globalStyle.rtext, { color: themeContext.color.agree }]}>
+                        <Text style={[globalStyle.rtext, styles.itemStatus, { color: themeContext.color.agree }]}>
                             {getString('찬성')}
                         </Text>
                     </View>
@@ -425,7 +431,7 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                 return (
                     <View style={styles.itemBallotContainer}>
                         <CloseIcon color={themeContext.color.disagree} />
-                        <Text style={[globalStyle.rtext, { color: themeContext.color.disagree }]}>
+                        <Text style={[globalStyle.rtext, styles.itemStatus, { color: themeContext.color.disagree }]}>
                             {getString('반대')}
                         </Text>
                     </View>
@@ -434,7 +440,9 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
             return (
                 <View style={styles.itemBallotContainer}>
                     {assets && <Image source={assets[EnumIconAsset.Abstain] as ImageURISource} />}
-                    <Text style={[globalStyle.rtext, { color: themeContext.color.abstain }]}>{getString('기권')}</Text>
+                    <Text style={[globalStyle.rtext, styles.itemStatus, { color: themeContext.color.abstain }]}>
+                        {getString('기권')}
+                    </Text>
                 </View>
             );
         },
@@ -501,7 +509,7 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                         )}
                     </View>
                     {item.ballotUpdate && (
-                        <Text style={[globalStyle.ltext, { color: themeContext.color.textBlack }, styles.itemDate]}>
+                        <Text style={[globalStyle.ltext, styles.itemDate, { color: themeContext.color.textBlack }]}>
                             {getValidatorDateString(item.ballotUpdate)}
                         </Text>
                     )}
@@ -515,17 +523,21 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
         <View>
             <View style={styles.header}>
                 <View style={styles.headerFirstLine}>
-                    <Text style={[styles.headerText, { color: themeContext.color.primary }]}>
+                    <Text style={[globalStyle.rtext, styles.headerText, { color: themeContext.color.primary }]}>
                         {getString('투표에 참여한 검증자 수')}
                     </Text>
-                    <Text style={[styles.headerValue, { color: themeContext.color.primary }]}>{participated}</Text>
+                    <Text style={[globalStyle.rtext, styles.headerValue, { color: themeContext.color.primary }]}>
+                        {participated}
+                    </Text>
                 </View>
 
                 <View style={styles.headerNextLine}>
-                    <Text style={[styles.headerText, { color: themeContext.color.primary }]}>
+                    <Text style={[globalStyle.rtext, styles.headerText, { color: themeContext.color.primary }]}>
                         {getString('총 검증자 수')}
                     </Text>
-                    <Text style={[styles.headerValue, { color: themeContext.color.primary }]}>{total}</Text>
+                    <Text style={[globalStyle.rtext, styles.headerValue, { color: themeContext.color.primary }]}>
+                        {total}
+                    </Text>
                 </View>
             </View>
             <LineComponent />
@@ -538,7 +550,7 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                     </View>
                 ))}
             {loading && <ActivityIndicator />}
-            {!loading && total > validators.length && <Text style={styles.moreText}>......</Text>}
+            {!loading && total > validators.length && <Text style={[globalStyle.rtext, styles.moreText]}>......</Text>}
         </View>
     );
 }
