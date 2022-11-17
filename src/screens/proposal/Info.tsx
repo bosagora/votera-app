@@ -5,7 +5,7 @@ import { ThemeContext } from 'styled-components/native';
 import { setStringAsync } from 'expo-clipboard';
 import { proposalInfoURI } from '@config/ServerConfig';
 import { keccak256 } from 'ethers/lib/utils';
-import { AuthContext } from '~/contexts/AuthContext';
+import { AuthContext, MetamaskStatus } from '~/contexts/AuthContext';
 import {
     AttachmentFile,
     AttachmentImage,
@@ -90,7 +90,7 @@ function Info(props: Props): JSX.Element {
     const themeContext = useContext(ThemeContext);
     const dispatch = useAppDispatch();
     const { proposal, previewData, assessResultData, isPreview } = props;
-    const { metamaskProvider } = useContext(AuthContext);
+    const { metamaskProvider, metamaskStatus } = useContext(AuthContext);
     const [type, setType] = useState<EnumProposalType>();
     const [proposalStatus, setProposalStatus] = useState<string>();
     const [assessPeriod, setAssessPeriod] = useState<string>();
@@ -199,13 +199,16 @@ function Info(props: Props): JSX.Element {
         if (!metamaskProvider || !proposal?.proposalId) {
             return proposal?.doc_hash;
         }
+        if (metamaskStatus !== MetamaskStatus.CONNECTED) {
+            return proposal?.doc_hash;
+        }
         if (proposal?.status === EnumProposalStatus.Created || proposal?.status === EnumProposalStatus.Cancel) {
             return proposal?.doc_hash;
         }
-        const commonsBudget = new CommonsBudget(getCommonsBudgetAddress(), metamaskProvider.getSigner());
+        const commonsBudget = new CommonsBudget(getCommonsBudgetAddress(), metamaskProvider);
         const proposalData = await commonsBudget.getProposalData(proposal?.proposalId, {});
         return proposalData.docHash;
-    }, [metamaskProvider, proposal?.doc_hash, proposal?.proposalId, proposal?.status]);
+    }, [metamaskProvider, metamaskStatus, proposal?.doc_hash, proposal?.proposalId, proposal?.status]);
 
     const toggleOverlay = useCallback(() => {
         if (!jsonDoc) {

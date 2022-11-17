@@ -4,6 +4,7 @@ import { useAssets } from 'expo-asset';
 import { setStringAsync } from 'expo-clipboard';
 import { Text } from 'react-native-elements';
 import { ThemeContext } from 'styled-components/native';
+import { exportValidatorURI } from '@config/ServerConfig';
 import {
     Enum_Proposal_Status as EnumProposalStatus,
     Enum_Proposal_Type as EnumProposalType,
@@ -22,30 +23,26 @@ import { getBoaScanUrl, getAgoraScanUrl } from '~/utils/votera/agoraconf';
 import { CopyIcon, CloseIcon, PublicKeyIcon, AddressIcon } from '~/components/icons';
 
 const styles = StyleSheet.create({
-    anchor: {
-        flex: 1,
-        flexDirection: 'row',
-        marginHorizontal: 10,
-    },
+    anchor: { flex: 1, flexDirection: 'row', marginHorizontal: 10 },
     anchorText: {
         borderBottomColor: 'black',
         borderBottomWidth: 1,
         fontSize: 13,
         lineHeight: 18,
     },
-    header: {
+    exportAnchor: {
         alignItems: 'center',
-        height: 35,
+        borderRadius: 6,
+        borderWidth: 1,
+        height: 26,
+        justifyContent: 'center',
+        marginLeft: 4,
+        width: 61,
     },
-    headerFirstLine: {
-        alignItems: 'center',
-        flexDirection: 'row',
-    },
-    headerNextLine: {
-        alignItems: 'center',
-        flexDirection: 'row',
-        marginTop: 5,
-    },
+    exportText: { fontSize: 10 },
+    header: { alignItems: 'center', height: 35 },
+    headerFirstLine: { alignItems: 'center', flexDirection: 'row' },
+    headerNextLine: { alignItems: 'center', flexDirection: 'row', marginTop: 5 },
     headerText: { fontSize: 13, marginRight: 5 },
     headerValue: { fontSize: 13, marginLeft: 5 },
     itemBallotAgree: {
@@ -55,10 +52,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 7,
         width: 17,
     },
-    itemBallotContainer: {
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-    },
+    itemBallotContainer: { flexDirection: 'row', justifyContent: 'flex-end' },
     itemDate: {
         fontSize: 12,
         left: 0,
@@ -68,48 +62,30 @@ const styles = StyleSheet.create({
         top: 60,
         width: '100%',
     },
-    itemStatus: {
-        fontSize: 13,
-        lineHeight: 18,
-        textAlign: 'right',
-    },
-    listHeader: {
-        backgroundColor: 'white',
-        height: 66,
-        width: '100%',
-    },
-    listHeaderText: {
-        fontSize: 13,
-        marginHorizontal: 19,
-        marginVertical: 23,
-    },
-    moreText: {
-        fontSize: 13,
-        textAlign: 'center',
-    },
+    itemStatus: { fontSize: 13, lineHeight: 18, textAlign: 'right' },
+    listHeader: { backgroundColor: 'white', height: 66, width: '100%' },
+    listHeaderText: { fontSize: 13, marginHorizontal: 19, marginVertical: 23 },
+    moreText: { fontSize: 13, textAlign: 'center' },
     nameColumn: {
         flex: 1,
         flexDirection: 'column',
         height: '100%',
         justifyContent: 'space-between',
     },
-    nameGlobeRow: {
-        flexDirection: 'row',
-    },
-    nameKeyRow: {
-        flexDirection: 'row',
-    },
+    nameGlobeRow: { flexDirection: 'row' },
+    nameKeyRow: { flexDirection: 'row' },
     rowContainer: {
         backgroundColor: 'white',
         flexDirection: 'row',
         height: 52,
         width: '100%',
     },
-    statusColumn: {
-        justifyContent: 'center',
-        width: 140,
-    },
+    statusColumn: { justifyContent: 'center', width: 140 },
 });
+
+function getExportValidatorUrl(proposal: Proposal | undefined) {
+    return `${exportValidatorURI}/${proposal?.proposalId || ''}`;
+}
 
 const ELLIPSIS_TAIL_SIZE = -10;
 
@@ -118,45 +94,79 @@ function LineComponent(): JSX.Element {
 }
 
 interface HeaderProps {
+    proposal: Proposal | undefined;
     onRefresh: () => void;
 }
 
 function AssessListHeaderComponent(props: HeaderProps): JSX.Element {
-    const { onRefresh } = props;
+    const { onRefresh, proposal } = props;
+    const themeContext = useContext(ThemeContext);
 
     return (
         <View style={[globalStyle.flexRowBetween, styles.listHeader]}>
-            <Text style={[globalStyle.btext, styles.listHeaderText]}>{getString('검증자 평가 현황')}</Text>
-            <ShortButton
-                title={getString('새로고침')}
-                buttonStyle={globalStyle.shortSmall}
-                titleStyle={{ fontSize: 10 }}
-                onPress={onRefresh}
-            />
+            <Text style={[globalStyle.rtext, styles.listHeaderText]}>{getString('검증자 평가 현황')}</Text>
+            <View style={[globalStyle.flexRowAlignCenter]}>
+                <ShortButton
+                    title={getString('새로고침')}
+                    buttonStyle={globalStyle.shortSmall}
+                    titleStyle={{ fontSize: 10 }}
+                    onPress={onRefresh}
+                />
+                <Anchor
+                    style={[styles.exportAnchor, { borderColor: themeContext.color.boxBorder }]}
+                    source={getExportValidatorUrl(proposal)}
+                >
+                    <Text style={[globalStyle.btext, styles.exportText, { color: themeContext.color.primary }]}>
+                        {getString('내보내기')}
+                    </Text>
+                </Anchor>
+            </View>
         </View>
     );
 }
 
 function VoteListHeaderComponent(props: HeaderProps): JSX.Element {
-    const { onRefresh } = props;
+    const { onRefresh, proposal } = props;
+    const themeContext = useContext(ThemeContext);
 
     return (
         <View style={[globalStyle.flexRowBetween, styles.listHeader]}>
-            <Text style={[globalStyle.btext, styles.listHeaderText]}>{getString('검증자 투표 현황')}</Text>
-            <ShortButton
-                title={getString('새로고침')}
-                buttonStyle={globalStyle.shortSmall}
-                titleStyle={{ fontSize: 10 }}
-                onPress={onRefresh}
-            />
+            <Text style={[globalStyle.rtext, styles.listHeaderText]}>{getString('검증자 투표 현황')}</Text>
+            <View style={[globalStyle.flexRowAlignCenter]}>
+                <ShortButton
+                    title={getString('새로고침')}
+                    buttonStyle={globalStyle.shortSmall}
+                    titleStyle={{ fontSize: 10 }}
+                    onPress={onRefresh}
+                />
+                <Anchor
+                    style={[styles.exportAnchor, { borderColor: themeContext.color.boxBorder }]}
+                    source={getExportValidatorUrl(proposal)}
+                >
+                    <Text style={[globalStyle.btext, styles.exportText, { color: themeContext.color.primary }]}>
+                        {getString('내보내기')}
+                    </Text>
+                </Anchor>
+            </View>
         </View>
     );
 }
 
-function ClosedListHeaderComponent(): JSX.Element {
+function ClosedListHeaderComponent(props: HeaderProps): JSX.Element {
+    const { proposal, onRefresh } = props;
+    const themeContext = useContext(ThemeContext);
+
     return (
         <View style={[globalStyle.flexRowBetween, styles.listHeader]}>
-            <Text style={[globalStyle.btext, styles.listHeaderText]}>{getString('검증자 투표 결과')}</Text>
+            <Text style={[globalStyle.rtext, styles.listHeaderText]}>{getString('검증자 투표 결과')}</Text>
+            <Anchor
+                style={[styles.exportAnchor, { borderColor: themeContext.color.boxBorder }]}
+                source={getExportValidatorUrl(proposal)}
+            >
+                <Text style={[globalStyle.btext, styles.exportText, { color: themeContext.color.primary }]}>
+                    {getString('내보내기')}
+                </Text>
+            </Anchor>
         </View>
     );
 }
@@ -186,6 +196,7 @@ function PendingValidatorScreen(props: SubProps): JSX.Element {
 }
 
 interface ValidatorProps {
+    proposal: Proposal | undefined;
     onRefresh: () => void;
     total: number;
     participated: number;
@@ -194,7 +205,7 @@ interface ValidatorProps {
 }
 
 function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
-    const { total, participated, validators, onRefresh, loading } = props;
+    const { total, participated, validators, onRefresh, loading, proposal } = props;
     const themeContext = useContext(ThemeContext);
     const dispatch = useAppDispatch();
 
@@ -208,10 +219,10 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
                         <View style={styles.nameKeyRow}>
                             <PublicKeyIcon />
                             <Anchor style={styles.anchor} source={getAgoraScanUrl(publicKey)}>
-                                <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
+                                <Text style={[globalStyle.ltext, styles.anchorText]} numberOfLines={1}>
                                     {publicKey.slice(0, ELLIPSIS_TAIL_SIZE)}
                                 </Text>
-                                <Text style={[globalStyle.rtext, styles.anchorText]}>
+                                <Text style={[globalStyle.ltext, styles.anchorText]}>
                                     {publicKey.slice(ELLIPSIS_TAIL_SIZE)}
                                 </Text>
                             </Anchor>
@@ -230,10 +241,10 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
                         <View style={styles.nameGlobeRow}>
                             <AddressIcon />
                             <Anchor style={styles.anchor} source={getBoaScanUrl(address)}>
-                                <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
+                                <Text style={[globalStyle.ltext, styles.anchorText]} numberOfLines={1}>
                                     {address.slice(0, ELLIPSIS_TAIL_SIZE)}
                                 </Text>
-                                <Text style={[globalStyle.rtext, styles.anchorText]}>
+                                <Text style={[globalStyle.ltext, styles.anchorText]}>
                                     {address.slice(ELLIPSIS_TAIL_SIZE)}
                                 </Text>
                             </Anchor>
@@ -251,7 +262,7 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
                         </View>
                     </View>
                     <View style={styles.statusColumn}>
-                        <Text style={[globalStyle.rtext, styles.itemStatus]}>
+                        <Text style={[globalStyle.ltext, styles.itemStatus]}>
                             {item.assessUpdate ? getString('평가완료') : getString('미평가')}
                         </Text>
                     </View>
@@ -288,7 +299,7 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
                 </View>
             </View>
             <LineComponent />
-            <AssessListHeaderComponent onRefresh={onRefresh} />
+            <AssessListHeaderComponent onRefresh={onRefresh} proposal={proposal} />
             {validators.map((validator) => (
                 <View key={`assess.${validator.id}`}>
                     {renderItem(validator)}
@@ -296,13 +307,13 @@ function AssessValidatorScreen(props: ValidatorProps): JSX.Element {
                 </View>
             ))}
             {loading && <ActivityIndicator />}
-            {!loading && total > validators.length && <Text style={[globalStyle.rtext, styles.moreText]}>......</Text>}
+            {!loading && total > validators.length && <Text style={[globalStyle.ltext, styles.moreText]}>......</Text>}
         </View>
     );
 }
 
 function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
-    const { total, participated, validators, onRefresh, loading } = props;
+    const { total, participated, validators, onRefresh, loading, proposal } = props;
     const themeContext = useContext(ThemeContext);
     const dispatch = useAppDispatch();
 
@@ -316,10 +327,10 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
                         <View style={styles.nameKeyRow}>
                             <PublicKeyIcon />
                             <Anchor style={styles.anchor} source={getAgoraScanUrl(publicKey)}>
-                                <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
+                                <Text style={[globalStyle.ltext, styles.anchorText]} numberOfLines={1}>
                                     {publicKey.slice(0, ELLIPSIS_TAIL_SIZE)}
                                 </Text>
-                                <Text style={[globalStyle.rtext, styles.anchorText]}>
+                                <Text style={[globalStyle.ltext, styles.anchorText]}>
                                     {publicKey.slice(ELLIPSIS_TAIL_SIZE)}
                                 </Text>
                             </Anchor>
@@ -338,10 +349,10 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
                         <View style={styles.nameGlobeRow}>
                             <AddressIcon />
                             <Anchor style={styles.anchor} source={getBoaScanUrl(address)}>
-                                <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
+                                <Text style={[globalStyle.ltext, styles.anchorText]} numberOfLines={1}>
                                     {address.slice(0, ELLIPSIS_TAIL_SIZE)}
                                 </Text>
-                                <Text style={[globalStyle.rtext, styles.anchorText]}>
+                                <Text style={[globalStyle.ltext, styles.anchorText]}>
                                     {address.slice(ELLIPSIS_TAIL_SIZE)}
                                 </Text>
                             </Anchor>
@@ -359,7 +370,7 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
                         </View>
                     </View>
                     <View style={styles.statusColumn}>
-                        <Text style={[globalStyle.rtext, styles.itemStatus]}>
+                        <Text style={[globalStyle.ltext, styles.itemStatus]}>
                             {item.ballotUpdate ? getString('투표완료') : getString('미투표')}
                         </Text>
                     </View>
@@ -396,7 +407,7 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
                 </View>
             </View>
             <LineComponent />
-            <VoteListHeaderComponent onRefresh={onRefresh} />
+            <VoteListHeaderComponent onRefresh={onRefresh} proposal={proposal} />
             {validators.map((validator) => (
                 <View key={`vote.${validator.id}`}>
                     {renderItem(validator)}
@@ -404,13 +415,13 @@ function VoteValidatorScreen(props: ValidatorProps): JSX.Element {
                 </View>
             ))}
             {loading && <ActivityIndicator />}
-            {!loading && total > validators.length && <Text style={[globalStyle.rtext, styles.moreText]}>......</Text>}
+            {!loading && total > validators.length && <Text style={[globalStyle.ltext, styles.moreText]}>......</Text>}
         </View>
     );
 }
 
 function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
-    const { total, participated, validators, onRefresh, loading } = props;
+    const { total, participated, validators, onRefresh, loading, proposal } = props;
     const themeContext = useContext(ThemeContext);
     const [assets] = useAssets(iconAssets);
     const dispatch = useAppDispatch();
@@ -421,7 +432,7 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                 return (
                     <View style={styles.itemBallotContainer}>
                         <View style={[styles.itemBallotAgree, { borderColor: themeContext.color.agree }]} />
-                        <Text style={[globalStyle.rtext, styles.itemStatus, { color: themeContext.color.agree }]}>
+                        <Text style={[globalStyle.ltext, styles.itemStatus, { color: themeContext.color.agree }]}>
                             {getString('찬성')}
                         </Text>
                     </View>
@@ -431,7 +442,7 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                 return (
                     <View style={styles.itemBallotContainer}>
                         <CloseIcon color={themeContext.color.disagree} />
-                        <Text style={[globalStyle.rtext, styles.itemStatus, { color: themeContext.color.disagree }]}>
+                        <Text style={[globalStyle.ltext, styles.itemStatus, { color: themeContext.color.disagree }]}>
                             {getString('반대')}
                         </Text>
                     </View>
@@ -440,7 +451,7 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
             return (
                 <View style={styles.itemBallotContainer}>
                     {assets && <Image source={assets[EnumIconAsset.Abstain] as ImageURISource} />}
-                    <Text style={[globalStyle.rtext, styles.itemStatus, { color: themeContext.color.abstain }]}>
+                    <Text style={[globalStyle.ltext, styles.itemStatus, { color: themeContext.color.abstain }]}>
                         {getString('기권')}
                     </Text>
                 </View>
@@ -459,10 +470,10 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                         <View style={styles.nameKeyRow}>
                             <PublicKeyIcon />
                             <Anchor style={styles.anchor} source={getAgoraScanUrl(publicKey)}>
-                                <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
+                                <Text style={[globalStyle.ltext, styles.anchorText]} numberOfLines={1}>
                                     {publicKey.slice(0, ELLIPSIS_TAIL_SIZE)}
                                 </Text>
-                                <Text style={[globalStyle.rtext, styles.anchorText]}>
+                                <Text style={[globalStyle.ltext, styles.anchorText]}>
                                     {publicKey.slice(ELLIPSIS_TAIL_SIZE)}
                                 </Text>
                             </Anchor>
@@ -481,10 +492,10 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                         <View style={styles.nameGlobeRow}>
                             <AddressIcon />
                             <Anchor style={styles.anchor} source={getBoaScanUrl(address)}>
-                                <Text style={[globalStyle.rtext, styles.anchorText]} numberOfLines={1}>
+                                <Text style={[globalStyle.ltext, styles.anchorText]} numberOfLines={1}>
                                     {address.slice(0, ELLIPSIS_TAIL_SIZE)}
                                 </Text>
-                                <Text style={[globalStyle.rtext, styles.anchorText]}>
+                                <Text style={[globalStyle.ltext, styles.anchorText]}>
                                     {address.slice(ELLIPSIS_TAIL_SIZE)}
                                 </Text>
                             </Anchor>
@@ -505,7 +516,7 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                         {item.ballotUpdate ? (
                             showBallotResult(item.choice)
                         ) : (
-                            <Text style={[globalStyle.rtext, styles.itemStatus]}>{getString('미투표')}</Text>
+                            <Text style={[globalStyle.ltext, styles.itemStatus]}>{getString('미투표')}</Text>
                         )}
                     </View>
                     {item.ballotUpdate && (
@@ -541,7 +552,7 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                 </View>
             </View>
             <LineComponent />
-            <ClosedListHeaderComponent />
+            <ClosedListHeaderComponent onRefresh={onRefresh} proposal={proposal} />
             {assets &&
                 validators.map((validator) => (
                     <View key={`closed.${validator.id}`}>
@@ -550,7 +561,7 @@ function ClosedValidatorScreen(props: ValidatorProps): JSX.Element {
                     </View>
                 ))}
             {loading && <ActivityIndicator />}
-            {!loading && total > validators.length && <Text style={[globalStyle.rtext, styles.moreText]}>......</Text>}
+            {!loading && total > validators.length && <Text style={[globalStyle.ltext, styles.moreText]}>......</Text>}
         </View>
     );
 }
@@ -582,6 +593,7 @@ function ValidatorScreen(props: Props): JSX.Element {
                     validators={validators}
                     onRefresh={onRefresh}
                     loading={loading}
+                    proposal={proposal}
                 />
             );
         case EnumProposalStatus.PendingVote:
@@ -593,6 +605,7 @@ function ValidatorScreen(props: Props): JSX.Element {
                         validators={validators}
                         onRefresh={onRefresh}
                         loading={loading}
+                        proposal={proposal}
                     />
                 );
             }
@@ -603,6 +616,7 @@ function ValidatorScreen(props: Props): JSX.Element {
                     validators={validators}
                     onRefresh={onRefresh}
                     loading={loading}
+                    proposal={proposal}
                 />
             );
         case EnumProposalStatus.Vote:
@@ -613,6 +627,7 @@ function ValidatorScreen(props: Props): JSX.Element {
                     validators={validators}
                     onRefresh={onRefresh}
                     loading={loading}
+                    proposal={proposal}
                 />
             );
         case EnumProposalStatus.Closed:
@@ -623,6 +638,7 @@ function ValidatorScreen(props: Props): JSX.Element {
                     validators={validators}
                     onRefresh={onRefresh}
                     loading={loading}
+                    proposal={proposal}
                 />
             );
         default:
@@ -633,6 +649,7 @@ function ValidatorScreen(props: Props): JSX.Element {
                     validators={validators}
                     onRefresh={onRefresh}
                     loading={loading}
+                    proposal={proposal}
                 />
             );
     }
