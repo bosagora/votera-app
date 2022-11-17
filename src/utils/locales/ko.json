@@ -402,5 +402,6 @@
     "조회수 #N": "Views #N",
     "제안ID": "Proposal ID",
     "제안자": "Proposer",
-    "거부권이 행사되어 자금인출 불가": "Not allowed to withdraw"
+    "거부권이 행사되어 자금인출 불가": "Not allowed to withdraw",
+    "내보내기": "Export"
 }
