@@ -7,11 +7,7 @@ mutation CreateProposal($input: createProposalInput) {
         }
     }
 }
-query getProposal($id: ID!) {
-    proposal(id: $id) {
-        ...ProposalItem
-    }
-}
+
 query getProposalById($proposalId: String!) {
     proposalById(proposalId: $proposalId) {
         ...ProposalItem
@@ -22,6 +18,7 @@ query getProposalById($proposalId: String!) {
         isJoined
     }
 }
+
 query getProposalByActivity($activityId: String!) {
     proposalByActivity(activityId: $activityId) {
         ...ProposalItem
