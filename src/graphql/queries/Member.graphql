@@ -62,35 +62,11 @@ mutation SignUpMember($input: signUpMemberInput!) {
     }
 }
 
-mutation CreateMember($input: createMemberInput) {
-    createMember(input: $input) {
-        member {
-            id
-        }
-    }
-}
-
 mutation UpdateMember($input: updateMemberInput) {
     updateMember(input: $input) {
         member {
             id
         }
-    }
-}
-
-mutation DeleteMember($input: deleteMemberInput) {
-    deleteMember(input: $input) {
-        member {
-            id
-        }
-    }
-}
-
-query MyMembers {
-    myMembers {
-        id
-        username
-        address
     }
 }
 

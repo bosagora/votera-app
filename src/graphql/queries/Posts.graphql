@@ -6,14 +6,6 @@ mutation createPost($input: createPostInput) {
     }
 }
 
-mutation updatePost($input: updatePostInput) {
-    updatePost(input: $input) {
-        post {
-            ...PostItem
-        }
-    }
-}
-
 query activityPosts($id: ID!, $type: String!, $sort: String, $limit: Int, $start: Int) {
     activityPosts(id: $id, type: $type, sort: $sort, limit: $limit, start: $start) {
         count
