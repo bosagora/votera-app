@@ -1,6 +1,5 @@
-import nacl from 'tweetnacl';
+import nacl from 'tweetnacl-bosagora';
 import { arrayify, keccak256 } from 'ethers/lib/utils';
-import { blake2bInit, blake2bFinal } from 'blakejs';
 
 const keySize = 32;
 const ivSize = 16;
@@ -82,26 +81,4 @@ export const generateHashPin = (pin: string, privateKey: string): string => {
 
 export const kdfKeygen = (): Uint8Array => {
     return nacl.randomBytes(keySize);
-};
-
-export const kdfDeriveFromKey = (
-    subkeyLen: number,
-    subkeyId: number | bigint,
-    ctx: string,
-    key: Uint8Array,
-): Uint8Array => {
-    if (key.length < keySize) {
-        throw new Error('insufficient key');
-    } else if (subkeyLen < 16 || subkeyLen > 64) {
-        throw new Error('invalid subkey length');
-    }
-    const ctxBuf = Buffer.from(ctx, 'utf8');
-
-    const ctxPadded = Buffer.alloc(16);
-    ctxBuf.copy(ctxPadded, 0, 0, ctxBuf.length > 8 ? 8 : ctxBuf.length);
-    const salt = Buffer.alloc(16);
-    salt.writeBigUint64LE(BigInt(subkeyId));
-
-    const context = blake2bInit(subkeyLen, key, salt, ctxPadded);
-    return blake2bFinal(context);
 };

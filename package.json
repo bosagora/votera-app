@@ -23,7 +23,7 @@
     "@react-navigation/stack": "^6.2.2",
     "@reduxjs/toolkit": "^1.8.3",
     "apollo-upload-client": "^17.0.0",
-    "blakejs": "https://github.com/jkkang-kosac/blakejs.git",
+    "commons-budget-contract": "https://github.com/bosagora/commons-budget-contract.git#v1.x.x",
     "ethers": "^5.6.9",
     "expo": "~45.0.0",
     "expo-clipboard": "~3.0.1",
@@ -63,7 +63,7 @@
     "reanimated-bottom-sheet": "^1.0.0-alpha.22",
     "scrypt-js": "^3.0.1",
     "styled-components": "^5.3.5",
-    "tweetnacl": "https://github.com/jkkang-kosac/tweetnacl-js.git",
+    "tweetnacl-bosagora": "^1.0.3",
     "tweetnacl-util": "^0.15.1"
   },
   "devDependencies": {

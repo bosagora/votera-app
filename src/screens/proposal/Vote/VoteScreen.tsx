@@ -1,5 +1,6 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { View, ActivityIndicator } from 'react-native';
+import { CommonsBudget__factory as CommonsBudgetFactory } from 'commons-budget-contract';
 import { convertWithdrawRevertMessage, getRevertMessage, VOTE_SELECT } from '~/utils/votera/voterautil';
 import {
     Proposal,
@@ -10,7 +11,6 @@ import {
 } from '~/graphql/generated/generated';
 import { AuthContext, MetamaskStatus } from '~/contexts/AuthContext';
 import getString from '~/utils/locales/STRINGS';
-import CommonsBudget from '~/utils/votera/CommonsBudget';
 import Voting from './voting';
 import VoteResult from './result';
 import PendingVote from './pendingVote';
@@ -93,7 +93,10 @@ function VoteScreen(props: Props): JSX.Element {
             }
 
             try {
-                const commonsBudget = new CommonsBudget(voteStatus.destination || '', metamaskProvider.getSigner());
+                const commonsBudget = CommonsBudgetFactory.connect(
+                    voteStatus.destination || '',
+                    metamaskProvider.getSigner(),
+                );
                 const tx = await commonsBudget.withdraw(proposalId, {});
                 const receipt = await tx.wait();
                 metamaskUpdateBalance(tx.hash);

@@ -4,6 +4,7 @@ import { Button, Text } from 'react-native-elements';
 import { TabView, SceneRendererProps } from 'react-native-tab-view';
 import { BigNumber } from 'ethers';
 import { useIsFocused } from '@react-navigation/native';
+import { VoteraVote__factory as VoteraVoteFactory } from 'commons-budget-contract';
 import TabBarContainer from '~/components/status/TabBar';
 import { MainScreenProps, replaceToHome } from '~/navigation/main/MainParams';
 import FocusAwareStatusBar from '~/components/statusbar/FocusAwareStatusBar';
@@ -36,7 +37,6 @@ import { OpinionFilterType } from '~/types/filterType';
 import { ProposalContext } from '~/contexts/ProposalContext';
 import getString from '~/utils/locales/STRINGS';
 import { isCloseToBottom } from '~/utils';
-import VoteraVote from '~/utils/votera/VoteraVote';
 import { VOTE_SELECT } from '~/utils/votera/voterautil';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
@@ -405,7 +405,10 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
             await setJoined();
 
             const values = data.map((d) => BigNumber.from(d.value));
-            const voteraVote = new VoteraVote(proposal?.voteraVoteAddress || '', metamaskProvider.getSigner());
+            const voteraVote = VoteraVoteFactory.connect(
+                proposal?.voteraVoteAddress || '',
+                metamaskProvider.getSigner(),
+            );
             const tx = await voteraVote.submitAssess(proposal.proposalId, values, {});
 
             const content = data.map((d) => ({
@@ -494,7 +497,10 @@ function ProposalDetailScreen({ navigation, route }: MainScreenProps<'ProposalDe
                 return false;
             }
 
-            const voteraVote = new VoteraVote(proposal?.voteraVoteAddress || '', metamaskProvider.getSigner());
+            const voteraVote = VoteraVoteFactory.connect(
+                proposal?.voteraVoteAddress || '',
+                metamaskProvider.getSigner(),
+            );
             const tx = await voteraVote.submitBallot(proposal.proposalId, commitment, signature, {});
 
             const recordResult = await recordBallot({

@@ -1,4 +1,4 @@
-import nacl from 'tweetnacl';
+import nacl from 'tweetnacl-bosagora';
 import { generateKey, encryptLocalData, decryptLocalData } from '@utils/crypto';
 import { scrypt } from 'scrypt-js';
 import { WorkerType, WorkerData } from './localWorkerTypes';

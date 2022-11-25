@@ -5,6 +5,7 @@ import { ThemeContext } from 'styled-components/native';
 import { setStringAsync } from 'expo-clipboard';
 import { proposalInfoURI } from '@config/ServerConfig';
 import { keccak256 } from 'ethers/lib/utils';
+import { CommonsBudget__factory as CommonsBudgetFactory } from 'commons-budget-contract';
 import { AuthContext, MetamaskStatus } from '~/contexts/AuthContext';
 import {
     AttachmentFile,
@@ -35,7 +36,6 @@ import { CopyIcon } from '~/components/icons';
 import { showSnackBar } from '~/state/features/snackBar';
 import { fetchJson } from '~/utils';
 import { getCommonsBudgetAddress } from '~/utils/votera/agoraconf';
-import CommonsBudget from '~/utils/votera/CommonsBudget';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const IMAGE_MAX_WIDTH = SCREEN_WIDTH - 46;
@@ -205,7 +205,7 @@ function Info(props: Props): JSX.Element {
         if (proposal?.status === EnumProposalStatus.Created || proposal?.status === EnumProposalStatus.Cancel) {
             return proposal?.doc_hash;
         }
-        const commonsBudget = new CommonsBudget(getCommonsBudgetAddress(), metamaskProvider);
+        const commonsBudget = CommonsBudgetFactory.connect(getCommonsBudgetAddress(), metamaskProvider);
         const proposalData = await commonsBudget.getProposalData(proposal?.proposalId, {});
         return proposalData.docHash;
     }, [metamaskProvider, metamaskStatus, proposal?.doc_hash, proposal?.proposalId, proposal?.status]);
