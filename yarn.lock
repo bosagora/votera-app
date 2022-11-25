@@ -2932,6 +2932,11 @@
     mkdirp "^1.0.4"
     rimraf "^3.0.2"
 
+"@openzeppelin/contracts@^4.5.0":
+  version "4.8.0"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-4.8.0.tgz#6854c37df205dd2c056bdfa1b853f5d732109109"
+  integrity sha512-AGuwhRRL+NaKx73WKRNzeCxOCOCxpaqF+kp8TJ89QzAipSwZy/NoflkWaL9bywXFRhIzXt8j38sfF7KBKCPWLw==
+
 "@peculiar/asn1-schema@^2.1.6":
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/@peculiar/asn1-schema/-/asn1-schema-2.2.0.tgz#d8a54527685c8dee518e6448137349444310ad64"
@@ -4837,10 +4842,6 @@ bl@^4.1.0:
     inherits "^2.0.4"
     readable-stream "^3.4.0"
 
-"blakejs@https://github.com/jkkang-kosac/blakejs.git":
-  version "1.2.1"
-  resolved "https://github.com/jkkang-kosac/blakejs.git#cec21ffb14c7695927e0a4820e98c67aadd7ecab"
-
 bluebird@^3.5.5:
   version "3.7.2"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.7.2.tgz#9f229c15be272454ffa973ace0dbee79a1b0c36f"
@@ -5800,6 +5801,12 @@ commondir@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/commondir/-/commondir-1.0.1.tgz#ddd800da0c66127393cca5950ea968a3aaf1253b"
   integrity sha512-W9pAhw0ja1Edb5GVdIF1mjZw/ASI0AlShXM83UUGe2DVr5TdAPEA1OA8m/g8zWp9x6On7gqufY+FatDbC3MDQg==
+
+"commons-budget-contract@https://github.com/bosagora/commons-budget-contract.git#v1.x.x":
+  version "1.0.0"
+  resolved "https://github.com/bosagora/commons-budget-contract.git#eb2b3bb83ba7cb3b56b6c068dd922087b401d52e"
+  dependencies:
+    "@openzeppelin/contracts" "^4.5.0"
 
 compare-versions@^3.4.0:
   version "3.6.0"
@@ -15727,14 +15734,15 @@ turndown@~7.0.0:
   dependencies:
     domino "^2.1.6"
 
+tweetnacl-bosagora@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/tweetnacl-bosagora/-/tweetnacl-bosagora-1.0.3.tgz#2402d16563f2217c2881afed7f3ccfd9c1c47fa6"
+  integrity sha512-3Mi4EXEZdpAVjwNp5B4QBvSwK/m7yEIQrSjGxLv6IDmqV7pEVc2wXX8YLQhWo6MFbp7OcCsoq2CiiRqvJ/iEtg==
+
 tweetnacl-util@^0.15.1:
   version "0.15.1"
   resolved "https://registry.yarnpkg.com/tweetnacl-util/-/tweetnacl-util-0.15.1.tgz#b80fcdb5c97bcc508be18c44a4be50f022eea00b"
   integrity sha512-RKJBIj8lySrShN4w6i/BonWp2Z/uxwC3h4y7xsRrpP59ZboCd0GpEVsOnMDYLMmKBpYhb5TgHzZXy7wTfYFBRw==
-
-"tweetnacl@https://github.com/jkkang-kosac/tweetnacl-js.git":
-  version "1.0.3"
-  resolved "https://github.com/jkkang-kosac/tweetnacl-js.git#bcff548e1a642f3cbb2567ce060e4ba8570d9fda"
 
 type-check@^0.4.0, type-check@~0.4.0:
   version "0.4.0"

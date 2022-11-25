@@ -2,6 +2,7 @@ import React, { useContext, useCallback, useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { BigNumber } from 'ethers';
 import { useIsFocused } from '@react-navigation/native';
+import { CommonsBudget__factory as CommonsBudgetFactory } from 'commons-budget-contract';
 import {
     useGetProposalFeeLazyQuery,
     useCheckProposalFeeLazyQuery,
@@ -15,7 +16,6 @@ import { AuthContext } from '~/contexts/AuthContext';
 import getString from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
-import CommonsBudget from '~/utils/votera/CommonsBudget';
 import PaymentInfo from '~/components/proposal/PaymentInfo';
 
 interface Props {
@@ -110,7 +110,10 @@ function CreateScreen(props: Props): JSX.Element {
                 setLoading(true);
 
                 let tx;
-                const commonsBudget = new CommonsBudget(proposalFee.destination || '', metamaskProvider.getSigner());
+                const commonsBudget = CommonsBudgetFactory.connect(
+                    proposalFee.destination || '',
+                    metamaskProvider.getSigner(),
+                );
                 if (proposalFee.type === EnumProposalType.Business) {
                     const fundInput = {
                         start: proposalFee?.start || 0,

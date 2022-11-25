@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAssets } from 'expo-asset';
 import { BigNumber } from 'ethers';
 import { useIsFocused } from '@react-navigation/native';
+import { CommonsBudget__factory as CommonsBudgetFactory } from 'commons-budget-contract';
 import globalStyle, { TOP_NAV_HEIGHT } from '~/styles/global';
 import {
     useGetProposalFeeLazyQuery,
@@ -22,7 +23,6 @@ import FocusAwareStatusBar from '~/components/statusbar/FocusAwareStatusBar';
 import getString from '~/utils/locales/STRINGS';
 import { useAppDispatch } from '~/state/hooks';
 import { showSnackBar } from '~/state/features/snackBar';
-import CommonsBudget from '~/utils/votera/CommonsBudget';
 import { MainScreenProps } from '~/navigation/main/MainParams';
 import { ChevronLeftIcon } from '~/components/icons';
 
@@ -194,7 +194,10 @@ function ProposalPayment({ navigation, route }: MainScreenProps<'ProposalPayment
                 setLoading(true);
 
                 let tx;
-                const commonsBudget = new CommonsBudget(proposalFee.destination || '', metamaskProvider.getSigner());
+                const commonsBudget = CommonsBudgetFactory.connect(
+                    proposalFee.destination || '',
+                    metamaskProvider.getSigner(),
+                );
                 if (proposalFee.type === EnumProposalType.Business) {
                     const fundInput = {
                         start: proposalFee?.start || 0,
