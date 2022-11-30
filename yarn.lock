@@ -5802,9 +5802,10 @@ commondir@^1.0.1:
   resolved "https://registry.yarnpkg.com/commondir/-/commondir-1.0.1.tgz#ddd800da0c66127393cca5950ea968a3aaf1253b"
   integrity sha512-W9pAhw0ja1Edb5GVdIF1mjZw/ASI0AlShXM83UUGe2DVr5TdAPEA1OA8m/g8zWp9x6On7gqufY+FatDbC3MDQg==
 
-"commons-budget-contract@https://github.com/bosagora/commons-budget-contract.git#v1.x.x":
+commons-budget-contract@^1.0.0:
   version "1.0.0"
-  resolved "https://github.com/bosagora/commons-budget-contract.git#eb2b3bb83ba7cb3b56b6c068dd922087b401d52e"
+  resolved "https://registry.yarnpkg.com/commons-budget-contract/-/commons-budget-contract-1.0.0.tgz#334bf2803ccac673628e30b354387bf7ce956f41"
+  integrity sha512-2tbhRuquzXtAE0yOmXo9wDifNaAKqEZwJ/0Nrh07aVSgLW88TQ9MbLpUCfI5yxgBwF53I7UwtMVy1S6kwBvFcQ==
   dependencies:
     "@openzeppelin/contracts" "^4.5.0"
 
